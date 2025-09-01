@@ -6,7 +6,7 @@ const jwt= require('jsonwebtoken')
 
 const userRoute=express.Router();
 
-userRoute.get('/',async(req,res)=>{
+userRoute.get('/',(req,res)=>{
     // const u=await prisma.users.findMany()
     return res.json({msg:"Hello from user"})
 })
@@ -52,7 +52,7 @@ userRoute.post('/login',async(req,res)=>{
         if(!match){
             return res.status(401).json({msg:"mismatch password",success:false})
         }
-        const token=jwt.sign({userid:user.user_id,iat: Math.floor(Date.now() / 1000)},process.env.JWT_SECRET,{expiresIn:"7d"})
+        const token=jwt.sign({user_id:user.user_id,iat: Math.floor(Date.now() / 1000)},process.env.JWT_SECRET,{expiresIn:"7d"})
         return res.json({msg:token,success:true})
     } catch (error) {
         

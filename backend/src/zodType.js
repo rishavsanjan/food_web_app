@@ -15,4 +15,12 @@ const loginUserSchema=z.object({
     password:z.string(6,"Password must be at least 6 characters")
 })
 
-module.exports={createUserSchema,loginUserSchema}
+const orderSchema=z.object({
+  id_restaurant:z.number().int(),
+  items:z.array(z.object({
+    menu_id:z.number().int(),
+    quantity:z.number().int().positive()
+  })).nonempty("Order must contain at least one item")
+})
+
+module.exports={createUserSchema,loginUserSchema,orderSchema}
