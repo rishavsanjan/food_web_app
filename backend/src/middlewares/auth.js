@@ -6,13 +6,20 @@ const authMid=(req,res,next)=>{
         return res.status(401).json({msg:"Authorization token missing",success:false})
     }
     const token=head.split(" ")[1]
-     try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    return res.status(403).json({msg:"Invalid or expired token",success:false});
-  }
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = decoded;
+      next();
+    } catch (error) {
+      return res.status(403).json({msg:"Invalid or expired token",success:false});
+    }
 }
 
-module.exports={authMid}
+const restAuthMid=(req,res,next)=>{
+  if(req.user.role!='RESTAURANT_OWNER'){
+    return res.status(401).json({msg:"Not a Restaurant Owner",success:false});
+  }
+  next()
+}
+
+module.exports={authMid,restAuthMid}

@@ -1,12 +1,14 @@
 const z=require('zod')
 
+const userRoles = ['CUSTOMER', 'RESTAURANT_OWNER', 'DELIVERY_AGENT', 'ADMIN']
+
 const createUserSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
   email: z.string().email("Invalid email format").optional(),
   phone_number: z.string().regex(/^\+?[0-9]{10,15}$/, "Phone number must be 10-12 digits"),
   address: z.string().min(5, "Address must be at least 5 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  is_admin: z.boolean().optional(),
+  role:z.enum(userRoles).default('CUSTOMER')
 });
 
 const loginUserSchema=z.object({
@@ -23,4 +25,20 @@ const orderSchema=z.object({
   })).nonempty("Order must contain at least one item")
 })
 
-module.exports={createUserSchema,loginUserSchema,orderSchema}
+
+const createMenuSchema = z.object({
+  menu_name: z.string().min(3),
+  description: z.string().optional(),
+  availability: z.boolean().optional(),
+  category: z.enum(["veg", "non-veg"]), 
+  price: z.number().int().min(0),
+  calories: z.number().min(0),
+  protein: z.number().min(0),
+  fat: z.number().min(0),
+  carbohydrates: z.number().min(0),
+  fiber: z.number().min(0),
+  cholesterol: z.number().min(0),
+  image:z.string().optional()
+});
+
+module.exports={createUserSchema,loginUserSchema,orderSchema,createMenuSchema}

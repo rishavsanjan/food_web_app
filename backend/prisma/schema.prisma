@@ -112,9 +112,11 @@ model restaurant {
   restaurant_name    String   @unique @db.VarChar(255)
   restaurant_address String   @db.VarChar(255)
   rating             Float?
+  user_id            Int      @unique
   menu               menu[]
   offers             offers[]
   orders             orders[]
+  users              users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_restaurant_user")
   review             review[]
 }
 
@@ -143,15 +145,16 @@ model support {
 }
 
 model users {
-  user_id      Int        @id @default(autoincrement())
-  name         String     @db.VarChar(100)
-  email        String?    @unique @db.VarChar(45)
-  phone_number String     @unique @db.VarChar(12)
-  address      String     @db.VarChar(255)
-  password     String     @db.VarChar(255)
-  is_admin     Boolean?   @default(false)
+  user_id      Int         @id @default(autoincrement())
+  name         String      @db.VarChar(100)
+  email        String?     @unique @db.VarChar(45)
+  phone_number String      @unique @db.VarChar(12)
+  address      String      @db.VarChar(255)
+  password     String      @db.VarChar(255)
+  role         user_role   @default(CUSTOMER)
   orders       orders[]
   payments     payments[]
+  restaurant   restaurant?
   review       review[]
   support      support[]
 }
@@ -222,4 +225,11 @@ enum vehicle_enum {
   bike
   car
   cycle
+}
+
+enum user_role {
+  CUSTOMER
+  RESTAURANT_OWNER
+  DELIVERY_AGENT
+  ADMIN
 }

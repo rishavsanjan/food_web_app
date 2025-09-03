@@ -24,7 +24,8 @@ userRoute.post('/signup',async(req,res)=>{
                 email:p.data.email,
                 phone_number:p.data.phone_number,
                 address:p.data.address,
-                password:hpass
+                password:hpass,
+                role:p.data.role
             }
         })
         return res.json({success:true,msg:user})
@@ -52,7 +53,7 @@ userRoute.post('/login',async(req,res)=>{
         if(!match){
             return res.status(401).json({msg:"mismatch password",success:false})
         }
-        const token=jwt.sign({user_id:user.user_id,iat: Math.floor(Date.now() / 1000)},process.env.JWT_SECRET,{expiresIn:"7d"})
+        const token=jwt.sign({user_id:user.user_id,role:user.role,iat: Math.floor(Date.now() / 1000)},process.env.JWT_SECRET,{expiresIn:"7d"})
         return res.json({msg:token,success:true})
     } catch (error) {
         
