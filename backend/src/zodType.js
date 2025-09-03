@@ -41,4 +41,20 @@ const createMenuSchema = z.object({
   image:z.string().optional()
 });
 
-module.exports={createUserSchema,loginUserSchema,orderSchema,createMenuSchema}
+const updateMenuSchema = z.object({
+  menu_id:z.number(),
+  menu_name: z.string().min(3).optional(),
+  description: z.string().optional(),
+  availability: z.boolean().optional(),
+  category: z.enum(["veg", "non-veg"]).optional(), 
+  price: z.number().int().min(0).optional(),
+  calories: z.number().min(0).optional(),
+  protein: z.number().min(0).optional(),
+  fat: z.number().min(0).optional(),
+  carbohydrates: z.number().min(0).optional(),
+  fiber: z.number().min(0).optional(),
+  cholesterol: z.number().min(0).optional(),
+  image:z.string().optional()
+});
+
+module.exports={createUserSchema,loginUserSchema,orderSchema,createMenuSchema,updateMenuSchema}

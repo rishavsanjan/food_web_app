@@ -1,7 +1,7 @@
 const express=require('express');
 const prisma = require('../config/db');
 const { authMid, restAuthMid } = require('../middlewares/auth');
-const { createMenuSchema } = require('../zodType');
+const { createMenuSchema, updateMenuSchema } = require('../zodType');
 
 const restRoute=express.Router();
 
@@ -46,7 +46,33 @@ restRoute.post("/addMenu",authMid,restAuthMid,async(req,res)=>{
                 availability:d.data.availability
             }
         })
-        return res.json({ success: true, msg: "Menu item added", menu });
+        return res.json({success:true,msg: "Menu item added",menu});
+    } catch (error) {
+        res.status(500).json({msg:"Internal server error",success:false});
+    }
+})
+
+restRoute.patch("/menuUpdate",authMid,restAuthMid,async(req,res)=>{
+    const d=updateMenuSchema.safeParse(req.body)
+    if(!d.success){
+        return res.status(400).json({"msg":"Invalid format or less info","success":false})
+    }
+    try {
+        const rest=await prisma.restaurant.findUnique({
+            where:{user_id:req.user.user_id},
+            select:{id_restaurant:true}
+        })
+        const menu=await prisma.menu.findFirst({
+            where:{menu_id:d.data.menu_id,id_restaurant:rest.id_restaurant}
+        })
+        if(!menu){
+            return res.status(404).json({success:false,msg:"Menu item not found or does not belong to your restaurant"});
+        }
+        const updateMenu=await prisma.menu.update({
+            where:{menu_id:d.data.menu_id},
+            data:d.data
+        })
+        return res.json({success:true,msg:"Menu updated",menu:updateMenu});
     } catch (error) {
         res.status(500).json({msg:"Internal server error",success:false});
     }
@@ -54,33 +80,32 @@ restRoute.post("/addMenu",authMid,restAuthMid,async(req,res)=>{
 
 restRoute.patch("/menu/avail/:id",authMid,restAuthMid,async(req,res)=>{
     try {
-        const menuId = parseInt(req.params.id);
-        const { availability } = req.body;
+        const menuId=parseInt(req.params.id);
+        const {availability}=req.body;
 
-        if (typeof availability !== 'boolean') {
-            return res.status(400).json({ success: false, msg: "Invalid availability value" });
+        if (typeof availability!=='boolean') {
+            return res.status(400).json({success:false,msg:"Invalid availability value"});
         }
-        const restaurant = await prisma.restaurant.findUnique({
-            where: { user_id: req.user.user_id },
-            select: { id_restaurant: true }
+        const restaurant=await prisma.restaurant.findUnique({
+            where: {user_id:req.user.user_id},
+            select: {id_restaurant: true}
         });
-        const menuItem = await prisma.menu.findFirst({
+        const menuItem=await prisma.menu.findFirst({
             where: {
                 menu_id: menuId,
                 id_restaurant: restaurant.id_restaurant
             }
         });
 
-        if (!menuItem) {
-        return res.status(404).json({ success: false, msg: "Menu item not found or does not belong to your restaurant" });
+        if(!menuItem){
+            return res.status(404).json({success:false,msg:"Menu item not found or does not belong to your restaurant" });
         }
 
-        // Update the availability
-        const updatedMenu = await prisma.menu.update({
-        where: { menu_id: menuId },
-        data: { availability }
+        const updatedMenu=await prisma.menu.update({
+            where:{menu_id:menuId},
+            data:{availability}
         });
-        return res.json({ success: true, msg: "Availability updated", menu: updatedMenu });
+        return res.json({success:true,msg:"Availability updated",menu:updatedMenu});
     } catch (error) {
         res.status(500).json({msg:"Internal server error",success:false});
     }
