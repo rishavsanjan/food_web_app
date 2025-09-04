@@ -1,15 +1,15 @@
 const express=require('express')
 
-const { authMid } = require('../middlewares/auth')
+const { authMid, userAuthMid } = require('../middlewares/auth')
 const prisma = require('../config/db')
 const { orderSchema } = require('../zodType')
 
 const orderRoute=express.Router()
 
-orderRoute.get("/:id",authMid,async(req,res)=>{
+orderRoute.get("/detail/:id",authMid,userAuthMid,async(req,res)=>{
     try {
         const order=await prisma.orders.findUnique({
-            where:{order_id:parseInt(req.params.id)},
+            where:{order_id:parseInt(req.params.id),user_id:req.user.user_id},
             include:{
                 restaurant:true,
                 order_details:{
@@ -26,7 +26,7 @@ orderRoute.get("/:id",authMid,async(req,res)=>{
 })
 
 
-orderRoute.get("/list",authMid,async (req,res)=>{
+orderRoute.get("/list",authMid,userAuthMid,async (req,res)=>{
     const user_id=req.user.user_id
     try {
         const orders=await prisma.orders.findMany({
@@ -42,12 +42,12 @@ orderRoute.get("/list",authMid,async (req,res)=>{
         })
         res.json(orders)
     } catch (error) {
-        res.status(500).json({msg:"Internal server error",success:false});
+        res.status(500).json({msg:error,success:false});
     }
 })
 
 
-orderRoute.post("/create",authMid,async(req,res)=>{
+orderRoute.post("/create",authMid,userAuthMid,async(req,res)=>{
     const p=orderSchema.safeParse(req.body)
     if(!p.success){
         return res.status(400).json({"msg":"Invalid format or less info","success":false})

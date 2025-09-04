@@ -8,7 +8,15 @@ const createUserSchema = z.object({
   phone_number: z.string().regex(/^\+?[0-9]{10,15}$/, "Phone number must be 10-12 digits"),
   address: z.string().min(5, "Address must be at least 5 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  role:z.enum(userRoles).default('CUSTOMER')
+  role:z.enum(userRoles).default('CUSTOMER'),
+  city:z.string().min(6).transform(val => val.toLowerCase()),
+  restaurant_name:z.string().optional(),
+  rating:z.number().optional()
+}).refine((data)=>{
+  if(data.role==='RESTAURANT_OWNER'){
+    return !!data.restaurant_name && !!data.city;
+  }
+  return true
 });
 
 const loginUserSchema=z.object({

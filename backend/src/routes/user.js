@@ -2,7 +2,8 @@ const express=require('express');
 const prisma = require('../config/db');
 const { createUserSchema, loginUserSchema } = require('../zodType');
 const bcrypt=require('bcryptjs');
-const jwt= require('jsonwebtoken')
+const jwt= require('jsonwebtoken');
+const { authMid, userAuthMid } = require('../middlewares/auth');
 
 const userRoute=express.Router();
 
@@ -28,6 +29,18 @@ userRoute.post('/signup',async(req,res)=>{
                 role:p.data.role
             }
         })
+        if(p.data.role=='RESTAURANT_OWNER'){
+            const rest=await prisma.restaurant.create({
+                data:{
+                    restaurant_name:p.data.restaurant_name,
+                    restaurant_address:p.data.address,
+                    city:p.data.city,
+                    user_id:user.user_id,
+                    rating:p.data.rating
+                }
+            })
+            return res.json({success:true,msg:rest})
+        }
         return res.json({success:true,msg:user})
     } catch (error) {
         return res.status(403).json({msg:"Either user alredy exist or there is a server problem",success:false})
@@ -57,6 +70,22 @@ userRoute.post('/login',async(req,res)=>{
         return res.json({msg:token,success:true})
     } catch (error) {
         
+    }
+})
+
+userRoute.get('/getMenu',authMid,userAuthMid,async(req,res)=>{
+    try {
+        const customerCity=await prisma.users.findFirst({
+            where:{user_id:req.user.user_id},
+            select:{city:true}
+        })
+        const menus=await prisma.restaurant.findMany({
+            where:{city:customerCity.city},
+            include:{menu:true}
+        })
+        return res.json({success:true,data:menus})
+    } catch (error) {
+        res.status(500).json({msg:"Internal server error",success:false});
     }
 })
 

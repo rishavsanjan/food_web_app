@@ -21,5 +21,12 @@ const restAuthMid=(req,res,next)=>{
   }
   next()
 }
+const userAuthMid=(req,res,next)=>{
+  if(req.user.role!='CUSTOMER'){
+    return res.status(401).json({msg:"Not a Customer",success:false});
+  }
+  next()
+}
 
-module.exports={authMid,restAuthMid}
+
+module.exports={authMid,restAuthMid,userAuthMid}
