@@ -4,7 +4,7 @@ const { createUserSchema, loginUserSchema } = require('../zodType');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { authMid, userAuthMid } = require('../middlewares/auth');
-const { success } = require('zod');
+
 
 const userRoute = express.Router();
 
@@ -15,12 +15,9 @@ userRoute.get('/', (req, res) => {
 
 userRoute.post('/signup', async (req, res) => {
     const p = createUserSchema.safeParse(req.body);
-
     if (!p.success) {
         return res.status(400).json({ "msg": "Invalid format or less info", "success": false })
     }
-
-
     const hpass = await bcrypt.hash(p.data.password, 10)
     try {
         const user = await prisma.users.create({
@@ -30,11 +27,10 @@ userRoute.post('/signup', async (req, res) => {
                 phone_number: p.data.phone_number,
                 address: p.data.address,
                 password: hpass,
-                role: p.data.role
+                role: p.data.role,
+                city:p.data.city
             }
         })
-
-        console.log(user)
         if (p.data.role == 'RESTAURANT_OWNER') {
             const rest = await prisma.restaurant.create({
                 data: {
@@ -45,19 +41,17 @@ userRoute.post('/signup', async (req, res) => {
                     rating: p.data.rating
                 }
             })
-            return res.json({ success: true, msg: rest })
+            return res.json({ success: true, msg: "restaurant created" })
         }
-        return res.json({ success: true, msg: user })
+        return res.json({ success: true, msg: "user created" })
     } catch (error) {
-        console.log(error)
+        // console.log(error)
         return res.status(403).json({ msg: "Either user alredy exist or there is a server problem", success: false })
     }
 })
 
 userRoute.post('/login', async (req, res) => {
-
     const p = loginUserSchema.safeParse(req.body)
-    console.log(p)
     if (!p.success) {
         return res.status(400).json({ "msg": "Invalid format or less info", "success": false })
     }
@@ -81,7 +75,8 @@ userRoute.post('/login', async (req, res) => {
         const token = jwt.sign({ user_id: user.user_id, role: user.role, iat: Math.floor(Date.now() / 1000) }, process.env.JWT_SECRET, { expiresIn: "7d" })
         return res.json({ msg: token, success: true })
     } catch (error) {
-        console.log(error)
+        // console.log(error)
+        return res.status(403).json({ msg: "there is a server problem", success: false })
     }
 })
 
@@ -90,11 +85,20 @@ userRoute.get('/profile', authMid, async (req, res) => {
         const currentUser = await prisma.users.findUnique({
             where: {
                 user_id: req.user.user_id
+            },
+            select:{
+                name:true,
+                address:true,
+                phone_number:true,
+                email:true,
+                address:true,
+                city:true
             }
         })
         return res.json({ success: true, user: currentUser })
     } catch (error) {
-        console.log(error);
+        // console.log(error);
+        return res.status(403).json({ msg: "there is a server problem", success: false })
     }
 
 
