@@ -26,7 +26,8 @@ userRoute.post('/signup',async(req,res)=>{
                 phone_number:p.data.phone_number,
                 address:p.data.address,
                 password:hpass,
-                role:p.data.role
+                role:p.data.role,
+                city:p.data.city
             }
         })
         if(p.data.role=='RESTAURANT_OWNER'){
