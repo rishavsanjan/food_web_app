@@ -14,10 +14,10 @@ export default function FoodDeliveryLanding() {
     }, []);
 
     const restaurants = [
-        { name: "Bella Italia", cuisine: "Italian", rating: 4.8, time: "25-30 min", image: "🍕" },
-        { name: "Sakura Sushi", cuisine: "Japanese", rating: 4.9, time: "20-25 min", image: "🍣" },
-        { name: "Taco Fiesta", cuisine: "Mexican", rating: 4.7, time: "15-20 min", image: "🌮" },
-        { name: "Burger Palace", cuisine: "American", rating: 4.6, time: "10-15 min", image: "🍔" }
+        { name: "Bella Italia", cuisine: "Italian", rating: 4.8, time: "25-30 min", image: "https://cdn.pixabay.com/photo/2021/07/20/06/04/restaurant-6479818_1280.jpg" },
+        { name: "Sakura Sushi", cuisine: "Japanese", rating: 4.9, time: "20-25 min", image: "https://cdn.pixabay.com/photo/2024/05/31/17/07/ai-generated-8800957_1280.png" },
+        { name: "Taco Fiesta", cuisine: "Mexican", rating: 4.7, time: "15-20 min", image: "https://cdn.pixabay.com/photo/2019/12/20/21/17/taco-4709325_1280.jpg" },
+        { name: "Burger Palace", cuisine: "American", rating: 4.6, time: "10-15 min", image: "https://cdn.pixabay.com/photo/2019/01/21/12/47/burger-3946012_1280.jpg" }
     ];
 
     const features = [
@@ -48,9 +48,9 @@ export default function FoodDeliveryLanding() {
                             <Link to={'/login'}>
                                 <h1 className="hover:text-orange-400 transition-colors">Login / Sign Up</h1>
                             </Link>
-                            <button className="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-2 rounded-full hover:shadow-lg hover:shadow-orange-500/25 transition-all transform hover:scale-105">
-                                Download App
-                            </button>
+                            <Link to={'/cart'}>
+                                <h1 className="hover:text-orange-400 transition-colors">Cart</h1>
+                            </Link>
                         </div>
 
                         <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
@@ -143,7 +143,7 @@ export default function FoodDeliveryLanding() {
                         {restaurants.map((restaurant, index) => (
                             <div key={index} className="group bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/20">
                                 <div className="text-6xl mb-4 text-center group-hover:scale-110 transition-transform duration-300">
-                                    {restaurant.image}
+                                    <img src={`${restaurant.image}`} alt="" />
                                 </div>
                                 <h3 className="text-2xl font-bold mb-2">{restaurant.name}</h3>
                                 <p className="text-gray-400 mb-4">{restaurant.cuisine}</p>
@@ -194,40 +194,7 @@ export default function FoodDeliveryLanding() {
                 </div>
             </section>
 
-            {/* App Download Section */}
-            <section className="py-20 px-4 bg-gradient-to-r from-orange-600/20 to-pink-600/20">
-                <div className="max-w-6xl mx-auto text-center">
-                    <div className="mb-12">
-                        <Smartphone className="w-20 h-20 mx-auto mb-6 text-orange-400" />
-                        <h2 className="text-5xl font-bold mb-6 bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
-                            Get the App
-                        </h2>
-                        <p className="text-xl text-gray-300 mb-8">Download QuickBite and start ordering in seconds</p>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                        <button className="bg-black hover:bg-gray-900 text-white px-8 py-4 rounded-2xl flex items-center gap-3 transition-all transform hover:scale-105">
-                            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-                                <span className="text-black font-bold text-xs">📱</span>
-                            </div>
-                            <div className="text-left">
-                                <div className="text-xs text-gray-400">Download on the</div>
-                                <div className="text-lg font-semibold">App Store</div>
-                            </div>
-                        </button>
-
-                        <button className="bg-black hover:bg-gray-900 text-white px-8 py-4 rounded-2xl flex items-center gap-3 transition-all transform hover:scale-105">
-                            <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg flex items-center justify-center">
-                                <span className="text-white font-bold text-xs">▶</span>
-                            </div>
-                            <div className="text-left">
-                                <div className="text-xs text-gray-400">Get it on</div>
-                                <div className="text-lg font-semibold">Google Play</div>
-                            </div>
-                        </button>
-                    </div>
-                </div>
-            </section>
+           
 
             {/* Footer */}
             <footer className="bg-black/40 backdrop-blur-lg py-12 px-4 border-t border-white/10">

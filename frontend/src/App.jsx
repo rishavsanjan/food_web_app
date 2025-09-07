@@ -6,6 +6,7 @@ import FoodDeliveryLanding from './pages/landingpage'
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import RestaurantLanding from './pages/restrauntlandingpage'
 import LogIn from './pages/login'
+import Cart from './pages/cart'
 
 
 function AppContent() {
@@ -14,6 +15,7 @@ function AppContent() {
       <Route path="/" element={<FoodDeliveryLanding />} />
       <Route path="/restraunt" element={<RestaurantLanding/>}/>
       <Route path='/login' element={<LogIn/>}/>
+      <Route path='/cart' element={<Cart/>}/>
     </Routes>
   )
 }
