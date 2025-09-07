@@ -9,7 +9,7 @@ const createUserSchema = z.object({
   address: z.string().min(5, "Address must be at least 5 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   role:z.enum(userRoles).default('CUSTOMER'),
-  city:z.string().min(6).transform(val => val.toLowerCase()),
+  city:z.string().min(6).transform(val => val.toLowerCase()).optional(),
   restaurant_name:z.string().optional(),
   rating:z.number().optional()
 }).refine((data)=>{

@@ -1,22 +1,29 @@
 import { useState } from 'react';
-import { ChefHat, Eye, EyeOff, Mail, Lock, User, Phone, Calendar, ArrowLeft, Star, Heart } from 'lucide-react';
+import { ChefHat, Eye, EyeOff, Mail, Lock, User, Phone, Calendar, ArrowLeft, Star, Heart, HouseIcon } from 'lucide-react';
+import axios from 'axios'
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function LogIn() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: '',
+    name: '',
     lastName: '',
     email: '',
     phone: '',
     password: '',
     confirmPassword: '',
     birthDate: '',
+    address: '',
     agreeToTerms: false,
     subscribeNewsletter: false
   });
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
+
+
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -24,7 +31,7 @@ export default function LogIn() {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
@@ -34,24 +41,24 @@ export default function LogIn() {
     }
   };
 
-  const validateForm = () => {
+  const validateForm = async () => {
     const newErrors = {};
-
+    console.log('hello')
     if (!isLogin) {
-      if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
-      if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
+      if (!formData.name.trim()) newErrors.name = 'First name is required';
+      //if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
       if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
-      if (!formData.birthDate) newErrors.birthDate = 'Birth date is required';
+      //if (!formData.birthDate) newErrors.birthDate = 'Birth date is required';
       if (formData.password !== formData.confirmPassword) {
         newErrors.confirmPassword = 'Passwords do not match';
       }
       if (!formData.agreeToTerms) newErrors.agreeToTerms = 'Please agree to terms and conditions';
     }
 
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+      newErrors.phone = 'Phone number is invalid';
     }
 
     if (!formData.password) {
@@ -60,8 +67,38 @@ export default function LogIn() {
       newErrors.password = 'Password must be at least 6 characters';
     }
 
+    if (isLogin) {
+      const response = await axios({
+        url: 'http://localhost:3000/api/users/login',
+        method: 'POST',
+        data: {
+          phone_number: formData.phone,
+          password: formData.password,
+        }
+      })
+      console.log(response.data)
+      localStorage.setItem('token', response.data.msg);
+      navigate('/');
+    } else {
+
+      const response = await axios({
+        url: 'http://localhost:3000/api/users/signup',
+        method: 'POST',
+        data: {
+          name: formData.name,
+          phone_number: formData.phone,
+          email: formData.email,
+          password: formData.password,
+          address: formData.address
+        }
+      })
+      setIsLogin(true);
+      console.log(response.data)
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+
   };
 
   const handleSubmit = (e) => {
@@ -76,13 +113,13 @@ export default function LogIn() {
   const toggleMode = () => {
     setIsLogin(!isLogin);
     setFormData({
-      firstName: '',
-      lastName: '',
+      name: '',
+      //lastName: '',
       email: '',
       phone: '',
       password: '',
       confirmPassword: '',
-      birthDate: '',
+      //birthDate: '',
       agreeToTerms: false,
       subscribeNewsletter: false
     });
@@ -96,7 +133,7 @@ export default function LogIn() {
       <div className="absolute top-40 right-20 text-3xl animate-float delay-1000 opacity-20">🍷</div>
       <div className="absolute bottom-40 left-20 text-4xl animate-float delay-500 opacity-20">🥘</div>
       <div className="absolute bottom-20 right-10 text-3xl animate-float delay-1500 opacity-20">🍾</div>
-      
+
       <div className="flex min-h-screen">
         {/* Left Side - Branding */}
         <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-12 relative">
@@ -111,14 +148,14 @@ export default function LogIn() {
                 <p className="text-sm text-gray-300">Fine Dining Experience</p>
               </div>
             </div>
-            
+
             <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 bg-clip-text text-transparent">
               Welcome to Culinary Excellence
             </h2>
             <p className="text-lg text-gray-300 mb-8 leading-relaxed">
               Join our exclusive community and enjoy personalized dining experiences, special offers, and priority reservations at Bella Vista.
             </p>
-            
+
             <div className="space-y-4 text-left">
               <div className="flex items-center gap-3 bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20">
                 <Star className="w-6 h-6 text-yellow-400 flex-shrink-0" />
@@ -127,7 +164,7 @@ export default function LogIn() {
                   <p className="text-sm text-gray-300">Priority booking for special occasions</p>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3 bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20">
                 <Heart className="w-6 h-6 text-pink-400 flex-shrink-0" />
                 <div>
@@ -135,7 +172,7 @@ export default function LogIn() {
                   <p className="text-sm text-gray-300">Tailored recommendations and preferences</p>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3 bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20">
                 <ChefHat className="w-6 h-6 text-orange-400 flex-shrink-0" />
                 <div>
@@ -177,26 +214,45 @@ export default function LogIn() {
                 {!isLogin && (
                   <>
                     {/* Name Fields */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          First Name *
-                        </label>
-                        <div className="relative">
-                          <User className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
-                          <input
-                            type="text"
-                            name="firstName"
-                            value={formData.firstName}
-                            onChange={handleInputChange}
-                            className={`w-full pl-12 pr-4 py-3 bg-white/5 border ${errors.firstName ? 'border-red-500' : 'border-white/20'} rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors`}
-                            placeholder="John"
-                          />
-                        </div>
-                        {errors.firstName && <p className="text-red-400 text-xs mt-1">{errors.firstName}</p>}
+                    {/* <div className="grid grid-cols-2 gap-4 "> */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Full Name *
+                      </label>
+                      <div className="relative">
+                        <User className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
+                        <input
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleInputChange}
+                          className={`w-full pl-12 pr-4 py-3 bg-white/5 border ${errors.name ? 'border-red-500' : 'border-white/20'} rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors`}
+                          placeholder="John"
+                        />
                       </div>
-                      
-                      <div>
+                      {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
+                    </div>
+
+                    {/* Email Field */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Email Address *
+                      </label>
+                      <div className="relative">
+                        <Mail className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          className={`w-full pl-12 pr-4 py-3 bg-white/5 border ${errors.email ? 'border-red-500' : 'border-white/20'} rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors`}
+                          placeholder="john@example.com"
+                        />
+                      </div>
+                      {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
+                    </div>
+
+                    {/* <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
                           Last Name *
                         </label>
@@ -209,30 +265,15 @@ export default function LogIn() {
                           placeholder="Doe"
                         />
                         {errors.lastName && <p className="text-red-400 text-xs mt-1">{errors.lastName}</p>}
-                      </div>
-                    </div>
+                      </div> */}
+                    {/* </div> */}
 
-                    {/* Phone Field */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Phone Number *
-                      </label>
-                      <div className="relative">
-                        <Phone className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
-                        <input
-                          type="tel"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handleInputChange}
-                          className={`w-full pl-12 pr-4 py-3 bg-white/5 border ${errors.phone ? 'border-red-500' : 'border-white/20'} rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors`}
-                          placeholder="+91 98765 43210"
-                        />
-                      </div>
-                      {errors.phone && <p className="text-red-400 text-xs mt-1">{errors.phone}</p>}
-                    </div>
+
+
+
 
                     {/* Birth Date */}
-                    <div>
+                    {/* <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
                         Birth Date *
                       </label>
@@ -247,28 +288,47 @@ export default function LogIn() {
                         />
                       </div>
                       {errors.birthDate && <p className="text-red-400 text-xs mt-1">{errors.birthDate}</p>}
+                    </div> */}
+                    {/* Address Field */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Address *
+                      </label>
+                      <div className="relative">
+                        <HouseIcon className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
+                        <input
+                          type="text"
+                          name="address"
+                          value={formData.address}
+                          onChange={handleInputChange}
+                          className={`w-full pl-12 pr-4 py-3 bg-white/5 border ${errors.phone ? 'border-red-500' : 'border-white/20'} rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors`}
+                          placeholder="e.g. Hostel-9, MANIT Bhopal"
+                        />
+                      </div>
+                      {errors.phone && <p className="text-red-400 text-xs mt-1">{errors.phone}</p>}
                     </div>
                   </>
                 )}
 
-                {/* Email Field */}
+                {/* Phone Field */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Email Address *
+                    Phone Number *
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
+                    <Phone className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
                     <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
                       onChange={handleInputChange}
-                      className={`w-full pl-12 pr-4 py-3 bg-white/5 border ${errors.email ? 'border-red-500' : 'border-white/20'} rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors`}
-                      placeholder="john@example.com"
+                      className={`w-full pl-12 pr-4 py-3 bg-white/5 border ${errors.phone ? 'border-red-500' : 'border-white/20'} rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors`}
+                      placeholder="+91 98765 43210"
                     />
                   </div>
-                  {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
+                  {errors.phone && <p className="text-red-400 text-xs mt-1">{errors.phone}</p>}
                 </div>
+
 
                 {/* Password Field */}
                 <div>
@@ -341,7 +401,7 @@ export default function LogIn() {
                       </label>
                     </div>
                     {errors.agreeToTerms && <p className="text-red-400 text-xs">{errors.agreeToTerms}</p>}
-                    
+
                     <div className="flex items-start gap-3">
                       <input
                         type="checkbox"

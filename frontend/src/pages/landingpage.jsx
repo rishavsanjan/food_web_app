@@ -1,11 +1,34 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown, Star, Clock, Shield, Smartphone, MapPin, Heart, ArrowRight, Menu, X } from 'lucide-react';
 import { Link } from "react-router-dom";
+import axios from 'axios';
 
 
 export default function FoodDeliveryLanding() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [scrollY, setScrollY] = useState(0);
+    const [isLogin, setIsLogin] = useState(false);
+    const [user, setUser] = useState([]);
+
+    const getProfile = async () => {
+        const token = localStorage.getItem('token');
+        const response = await axios({
+            url: 'http://localhost:3000/api/users/profile',
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        })
+        console.log(response.data.user)
+        setUser(response.data.user);
+        if (response) {
+            setIsLogin(true);
+        }
+    }
+
+    useEffect(() => {
+        getProfile();
+    }, [])
 
     useEffect(() => {
         const handleScroll = () => setScrollY(window.scrollY);
@@ -45,12 +68,22 @@ export default function FoodDeliveryLanding() {
                             <a href="#restaurants" className="hover:text-orange-400 transition-colors">Restaurants</a>
                             <a href="#features" className="hover:text-orange-400 transition-colors">Features</a>
                             <a href="#contact" className="hover:text-orange-400 transition-colors">Contact</a>
-                            <Link to={'/login'}>
-                                <h1 className="hover:text-orange-400 transition-colors">Login / Sign Up</h1>
-                            </Link>
-                            <Link to={'/cart'}>
-                                <h1 className="hover:text-orange-400 transition-colors">Cart</h1>
-                            </Link>
+                            {
+                                !isLogin ?
+                                <Link to={'/login'}>
+                                    <h1 className="hover:text-orange-400 transition-colors">Login / Sign Up</h1>
+                                </Link>
+                                :
+                                 <h1 className="hover:text-orange-400 transition-colors"> {user.name}</h1>
+                            }
+
+                            {
+                                isLogin &&
+                                <Link to={'/cart'}>
+                                    <h1 className="hover:text-orange-400 transition-colors">Cart</h1>
+                                </Link>
+                            }
+
                         </div>
 
                         <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
@@ -194,7 +227,7 @@ export default function FoodDeliveryLanding() {
                 </div>
             </section>
 
-           
+
 
             {/* Footer */}
             <footer className="bg-black/40 backdrop-blur-lg py-12 px-4 border-t border-white/10">
