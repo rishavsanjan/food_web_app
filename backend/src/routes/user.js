@@ -1,6 +1,6 @@
 const express = require('express');
 const prisma = require('../config/db');
-const { createUserSchema, loginUserSchema } = require('../zodType');
+const { createUserSchema, loginUserSchema, updateAddress } = require('../zodType');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { authMid, userAuthMid } = require('../middlewares/auth');
@@ -88,7 +88,8 @@ userRoute.get('/profile', authMid, async (req, res) => {
                 phone_number:true,
                 email:true,
                 address:true,
-                city:true
+                city:true,
+                role:true
             }
         })
         return res.json({ success: true, user: currentUser })
@@ -111,6 +112,50 @@ userRoute.get('/getRest', authMid, userAuthMid, async (req, res) => {
         })
         return res.json({ success: true, data: rest })
     } catch (error) {
+        res.status(500).json({ msg: "Internal server error", success: false });
+    }
+})
+
+userRoute.post('/updateAdd',authMid,userAuthMid,async(req,res)=>{
+    const p=updateAddress.safeParse(req.body)
+    if (!p.success) {
+        return res.status(400).json({ "msg": "Invalid format or less info", "success": false })
+    }
+    try {
+        await prisma.users.update({
+            where:{user_id:req.user.user_id},
+            data:p.data
+        })
+        return res.json({success:true,mag:"user address updated"})
+    } catch (error) {
+        res.status(500).json({ msg: "Internal server error", success: false });
+    }
+})
+
+
+userRoute.get('/rest/menus/:id',authMid,userAuthMid,async(req,res)=>{
+    try {
+        const menus=await prisma.menu.findMany({
+            where:{id_restaurant:parseInt(req.params.id)},
+            select:{
+                menu_id:true,
+                menu_name:true,
+                description:true,
+                category:true,
+                availability:true,
+                image:true,
+                price:true,
+                calories:true,
+                protein:true,
+                fat:true,
+                carbohydrates:true,
+                cholesterol:true,
+                fiber:true
+            }
+        })
+        return res.json({success:true,menus})
+    } catch (error) {
+        console.log(error)
         res.status(500).json({ msg: "Internal server error", success: false });
     }
 })

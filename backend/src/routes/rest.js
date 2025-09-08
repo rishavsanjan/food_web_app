@@ -12,7 +12,7 @@ restRoute.get("/menu",authMid,restAuthMid,async(req,res)=>{
             // include:{menu:true},
             select:{menu:true}
         });
-        return res.json({data:menu,success:true})
+        return res.json({menus:menu[0].menu,success:true})
     } catch (error) {
         res.status(500).json({msg:"Internal server error",success:false});
     }
@@ -46,7 +46,7 @@ restRoute.post("/addMenu",authMid,restAuthMid,async(req,res)=>{
                 availability:d.data.availability
             }
         })
-        return res.json({success:true,msg: "Menu item added",menu});
+        return res.json({success:true,msg: "Menu item added"});
     } catch (error) {
         res.status(500).json({msg:"Internal server error",success:false});
     }
@@ -110,5 +110,39 @@ restRoute.patch("/menu/avail/:id",authMid,restAuthMid,async(req,res)=>{
         res.status(500).json({msg:"Internal server error",success:false});
     }
 })
+
+restRoute.get('/orders',authMid,restAuthMid,async(req,res)=>{
+    try {
+        const restaurant=await prisma.restaurant.findUnique({
+            where: {user_id:req.user.user_id},
+            select: {id_restaurant: true}
+        });
+        const orders=await prisma.orders.findMany({
+            where:{id_restaurant:restaurant.id_restaurant},
+            select:{
+                order_details:{
+                    select:{
+                        menu:{
+                            select:{
+                                menu_name:true
+                            }
+                        },
+                        quantity:true,
+                        total_price:true
+                    }
+                },
+                order_id:true,
+                status:true,
+                order_time:true
+            },
+        })
+        return res.json({success:true,orders})
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({msg:"Internal server error",success:false});
+    }
+})
+
+
 
 module.exports=restRoute

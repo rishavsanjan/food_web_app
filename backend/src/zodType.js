@@ -1,6 +1,7 @@
 const z=require('zod')
 
 const userRoles = ['CUSTOMER', 'RESTAURANT_OWNER', 'DELIVERY_AGENT', 'ADMIN']
+const paymentMethods = ["Credit_Card","Debit_Card","Netbanking","UPI","Cash_on_Delivery"] 
 
 const createUserSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
@@ -30,7 +31,8 @@ const orderSchema=z.object({
   items:z.array(z.object({
     menu_id:z.number().int(),
     quantity:z.number().int().positive()
-  })).nonempty("Order must contain at least one item")
+  })).nonempty("Order must contain at least one item"),
+  payment_method:z.enum(paymentMethods).default("Cash_on_Delivery")
 })
 
 
@@ -65,4 +67,10 @@ const updateMenuSchema = z.object({
   image:z.string().optional()
 });
 
-module.exports={createUserSchema,loginUserSchema,orderSchema,createMenuSchema,updateMenuSchema}
+
+const updateAddress=z.object({
+  address:z.string().min(6),
+  city:z.string().min(6).transform(val => val.toLowerCase())
+})
+
+module.exports={createUserSchema,loginUserSchema,orderSchema,createMenuSchema,updateMenuSchema,updateAddress}

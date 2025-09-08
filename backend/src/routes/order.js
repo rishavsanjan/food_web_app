@@ -65,22 +65,41 @@ orderRoute.post("/create",authMid,userAuthMid,async(req,res)=>{
             const menu=menuItems.find(m=>m.menu_id===item.menu_id)
             totalprice+=menu.price*item.quantity
         })
-        const order=await prisma.orders.create({data:{
-            user_id:user_id,
-            id_restaurant:data.id_restaurant,
-        }})
-        const orderDetails=data.items.map(item=>{
-            const menu=menuItems.find(m=>m.menu_id===item.menu_id)
-            return{
-                order_id:order.order_id,
-                menu_id:item.menu_id,
-                quantity:item.quantity,
-                base_price:menu.price,
-                total_price:menu.price*item.quantity
-            }
-        })
-        await prisma.order_details.createMany({data:orderDetails})
-        return res.json({orderDetails})
+        // const order=await prisma.orders.create({data:{
+        //     user_id:user_id,
+        //     id_restaurant:data.id_restaurant,
+        // }})
+        const result = await prisma.$transaction(async (tx) => {
+            const order = await tx.orders.create({
+                data: {
+                    user_id: user_id,
+                    id_restaurant: data.id_restaurant,
+                }
+            });
+            const orderDetails=data.items.map(item=>{
+                const menu=menuItems.find(m=>m.menu_id===item.menu_id)
+                return{
+                    order_id:order.order_id,
+                    menu_id:item.menu_id,
+                    quantity:item.quantity,
+                    base_price:menu.price,
+                    total_price:menu.price*item.quantity
+                }
+            })
+            await tx.order_details.createMany({ data: orderDetails });
+            await tx.payments.create({
+                data: {
+                    user_id,
+                    order_id: order.order_id,
+                    method: data.payment_method,
+                    price: totalprice,
+                    payment_status: data.payment_method === 'Cash_on_Delivery' ? 'cod_pending' : 'pending'
+                }
+            });
+            return { order, orderDetails };
+        });
+        // await prisma.order_details.createMany({data:orderDetails})
+        return res.json({orderDetails:result.orderDetails,totalprice})
         
     } catch (error) {
         res.status(500).json({msg:"Internal server error",success:false});

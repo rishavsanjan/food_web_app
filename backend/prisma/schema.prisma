@@ -101,7 +101,8 @@ model payments {
   payment_status payment_status_enum? @default(pending)
   payment_time   DateTime?            @default(now()) @db.Timestamp(6)
   price          Int
-  transaction_id String               @id @db.VarChar(50)
+  transaction_id String?              @unique(map: "unique_transaction_id") @db.VarChar(50)
+  id             Int                  @id @default(autoincrement())
   orders         orders               @relation(fields: [order_id], references: [order_id], onDelete: Cascade, onUpdate: NoAction)
   users          users                @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
 }
