@@ -9,6 +9,7 @@ export default function FoodDeliveryLanding() {
     const [scrollY, setScrollY] = useState(0);
     const [isLogin, setIsLogin] = useState(false);
     const [user, setUser] = useState([]);
+    
 
     const getProfile = async () => {
         const token = localStorage.getItem('token');
@@ -26,8 +27,22 @@ export default function FoodDeliveryLanding() {
         }
     }
 
-    useEffect(() => {
-        getProfile();
+    const getRestraunts = async () => {
+        const token = localStorage.getItem('token');
+        const response = await axios({
+            url: 'http://localhost:3000/api/users/getMenu',
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        })
+    }
+
+    useEffect(async () => {
+        await getProfile();
+        if(isLogin){
+            getRestraunts();
+        }
     }, [])
 
     useEffect(() => {

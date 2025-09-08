@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChefHat, Eye, EyeOff, Mail, Lock, User, Phone, Calendar, ArrowLeft, Star, Heart, HouseIcon } from 'lucide-react';
+import { ChefHat, Eye, EyeOff, Mail, Lock, User, Phone, Calendar, ArrowLeft, Star, Heart, HouseIcon, ClipboardTypeIcon, Building2, LucideBuilding2 } from 'lucide-react';
 import axios from 'axios'
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +17,8 @@ export default function LogIn() {
     confirmPassword: '',
     birthDate: '',
     address: '',
+    city: '',
+    state: '',
     agreeToTerms: false,
     subscribeNewsletter: false
   });
@@ -49,6 +51,8 @@ export default function LogIn() {
       //if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
       if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
       //if (!formData.birthDate) newErrors.birthDate = 'Birth date is required';
+      if (!formData.state.trim()) newErrors.state = 'State is required';
+      if (!formData.city.trim()) newErrors.city = 'City is required';
       if (formData.password !== formData.confirmPassword) {
         newErrors.confirmPassword = 'Passwords do not match';
       }
@@ -89,7 +93,8 @@ export default function LogIn() {
           phone_number: formData.phone,
           email: formData.email,
           password: formData.password,
-          address: formData.address
+          address: formData.address + ',' + formData.city + ',' + formData.state,
+          city:formData.city + ',' + formData.state
         }
       })
       setIsLogin(true);
@@ -303,6 +308,42 @@ export default function LogIn() {
                           onChange={handleInputChange}
                           className={`w-full pl-12 pr-4 py-3 bg-white/5 border ${errors.phone ? 'border-red-500' : 'border-white/20'} rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors`}
                           placeholder="e.g. Hostel-9, MANIT Bhopal"
+                        />
+                      </div>
+                      {errors.phone && <p className="text-red-400 text-xs mt-1">{errors.phone}</p>}
+                    </div>
+                    {/* State Field */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        State *
+                      </label>
+                      <div className="relative">
+                        <LucideBuilding2 className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
+                        <input
+                          type="text"
+                          name="state"
+                          value={formData.state}
+                          onChange={handleInputChange}
+                          className={`w-full pl-12 pr-4 py-3 bg-white/5 border ${errors.phone ? 'border-red-500' : 'border-white/20'} rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors`}
+                          placeholder="e.g. Madhya Pardesh"
+                        />
+                      </div>
+                      {errors.phone && <p className="text-red-400 text-xs mt-1">{errors.phone}</p>}
+                    </div>
+                    {/* City Field */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        City *
+                      </label>
+                      <div className="relative">
+                        <Building2 className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
+                        <input
+                          type="text"
+                          name="city"
+                          value={formData.city}
+                          onChange={handleInputChange}
+                          className={`w-full pl-12 pr-4 py-3 bg-white/5 border ${errors.phone ? 'border-red-500' : 'border-white/20'} rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors`}
+                          placeholder="e.g. Bhopal"
                         />
                       </div>
                       {errors.phone && <p className="text-red-400 text-xs mt-1">{errors.phone}</p>}
