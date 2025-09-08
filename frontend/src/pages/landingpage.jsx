@@ -23,6 +23,7 @@ export default function FoodDeliveryLanding() {
         })
         console.log(response.data.user)
         setUser(response.data.user);
+        getRestraunts();
         if (response) {
             setIsLogin(true);
         }
@@ -31,19 +32,18 @@ export default function FoodDeliveryLanding() {
     const getRestraunts = async () => {
         const token = localStorage.getItem('token');
         const response = await axios({
-            url: 'http://localhost:3000/api/users/getMenu',
+            url: 'http://localhost:3000/api/users/getRest',
             method: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + token
             }
         })
+
+        console.log(response.data);
     }
 
     useEffect(() => {
         getProfile();
-        if (isLogin) {
-            getRestraunts();
-        }
     }, [])
 
     useEffect(() => {
@@ -90,7 +90,10 @@ export default function FoodDeliveryLanding() {
                                         <h1 className="hover:text-orange-400 transition-colors">Login / Sign Up</h1>
                                     </Link>
                                     :
-                                    <h1 className="hover:text-orange-400 transition-colors"> {user.name}</h1>
+                                    <Link  to={`${user.role === 'RESTAURANT_OWNER' ? '/restaurant-admin' : '/profile'} `}>
+                                        <h1 className="hover:text-orange-400 transition-colors"> {user.name}</h1>
+                                    </Link>
+
                             }
 
                             {
@@ -180,7 +183,7 @@ export default function FoodDeliveryLanding() {
             {
                 !isLogin &&
                 <>
-                    <OurInfo/>
+                    <OurInfo />
                 </>
             }
 
