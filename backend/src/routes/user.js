@@ -57,13 +57,8 @@ userRoute.post('/login', async (req, res) => {
     }
 
     try {
-        const user = await prisma.users.findFirst({
-            where: {
-                OR: [
-                    { email: p.data.email },
-                    { phone_number: p.data.phone_number }
-                ]
-            }
+        const user = await prisma.users.findUnique({
+            where: {phone_number: p.data.phone_number}
         })
         if (!user) {
             return res.status(401).json({ msg: "user not found", success: false })
@@ -75,7 +70,7 @@ userRoute.post('/login', async (req, res) => {
         const token = jwt.sign({ user_id: user.user_id, role: user.role, iat: Math.floor(Date.now() / 1000) }, process.env.JWT_SECRET, { expiresIn: "7d" })
         return res.json({ msg: token, success: true })
     } catch (error) {
-        // console.log(error)
+        console.log(error)
         return res.status(403).json({ msg: "there is a server problem", success: false })
     }
 })
@@ -87,6 +82,7 @@ userRoute.get('/profile', authMid, async (req, res) => {
                 user_id: req.user.user_id
             },
             select:{
+                user_id:true,
                 name:true,
                 address:true,
                 phone_number:true,
@@ -104,17 +100,16 @@ userRoute.get('/profile', authMid, async (req, res) => {
 
 })
 
-userRoute.get('/getMenu', authMid, userAuthMid, async (req, res) => {
+userRoute.get('/getRest', authMid, userAuthMid, async (req, res) => {
     try {
         const customerCity = await prisma.users.findFirst({
             where: { user_id: req.user.user_id },
             select: { city: true }
         })
-        const menus = await prisma.restaurant.findMany({
-            where: { city: customerCity.city },
-            include: { menu: true }
+        const rest = await prisma.restaurant.findMany({
+            where: { city: customerCity.city }
         })
-        return res.json({ success: true, data: menus })
+        return res.json({ success: true, data: rest })
     } catch (error) {
         res.status(500).json({ msg: "Internal server error", success: false });
     }
