@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ChevronDown, Star, Clock, Shield, Smartphone, MapPin, Heart, ArrowRight, Menu, X } from 'lucide-react';
 import { Link } from "react-router-dom";
 import axios from 'axios';
+import OurInfo from './usernotlogged';
 
 
 export default function FoodDeliveryLanding() {
@@ -9,7 +10,7 @@ export default function FoodDeliveryLanding() {
     const [scrollY, setScrollY] = useState(0);
     const [isLogin, setIsLogin] = useState(false);
     const [user, setUser] = useState([]);
-    
+
 
     const getProfile = async () => {
         const token = localStorage.getItem('token');
@@ -38,9 +39,9 @@ export default function FoodDeliveryLanding() {
         })
     }
 
-    useEffect(async () => {
-        await getProfile();
-        if(isLogin){
+    useEffect(() => {
+        getProfile();
+        if (isLogin) {
             getRestraunts();
         }
     }, [])
@@ -85,11 +86,11 @@ export default function FoodDeliveryLanding() {
                             <a href="#contact" className="hover:text-orange-400 transition-colors">Contact</a>
                             {
                                 !isLogin ?
-                                <Link to={'/login'}>
-                                    <h1 className="hover:text-orange-400 transition-colors">Login / Sign Up</h1>
-                                </Link>
-                                :
-                                 <h1 className="hover:text-orange-400 transition-colors"> {user.name}</h1>
+                                    <Link to={'/login'}>
+                                        <h1 className="hover:text-orange-400 transition-colors">Login / Sign Up</h1>
+                                    </Link>
+                                    :
+                                    <h1 className="hover:text-orange-400 transition-colors"> {user.name}</h1>
                             }
 
                             {
@@ -175,6 +176,13 @@ export default function FoodDeliveryLanding() {
                     <ChevronDown className="w-8 h-8 text-white/60" />
                 </div>
             </section>
+
+            {
+                !isLogin &&
+                <>
+                    <OurInfo/>
+                </>
+            }
 
             {/* Featured Restaurants */}
             <section id="restaurants" className="py-20 px-4 bg-black/20">
