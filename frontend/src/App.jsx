@@ -15,7 +15,7 @@ function AppContent() {
   return (
     <Routes>
       <Route path="/" element={<FoodDeliveryLanding />} />
-      <Route path="/restraunt" element={<RestaurantLanding/>}/>
+      <Route path="/restraunt/:id" element={<RestaurantLanding/>}/>
       <Route path='/login' element={<LogIn/>}/>
       <Route path='/cart' element={<Cart/>}/>
       <Route path='/profile' element={<UserProfile/>}/>

@@ -1,12 +1,35 @@
 import { useState, useEffect } from 'react';
 import { Star, Clock, MapPin, Phone, Heart, ChefHat, Utensils, Wine, Coffee, Menu, X, ArrowRight, Award } from 'lucide-react';
+import axios from 'axios';
+import { useParams } from 'react-router-dom';
 
 export default function RestaurantLanding() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState('appetizers');
   const [scrollY, setScrollY] = useState(0);
   const [favorites, setFavorites] = useState(new Set());
-  
+  const [menu, setMenu] = useState([]);
+  const {id} = useParams();
+
+  const getMenu = async () => {
+    const token = localStorage.getItem('token');
+    const response = await axios({
+      url: `http://localhost:3000/api/users/rest/menus/${id}`,
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
+    })
+    setMenu(response.data.menus);
+    console.log(response.data)
+
+  }
+
+  useEffect(() => {
+    getMenu();
+  }, [])
+
+
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', handleScroll);
@@ -24,12 +47,8 @@ export default function RestaurantLanding() {
   };
 
   const categories = [
-    { id: 'appetizers', name: 'Appetizers', icon: '🥗', color: 'from-green-400 to-emerald-500' },
-    { id: 'mains', name: 'Main Course', icon: '🍖', color: 'from-red-400 to-rose-500' },
-    { id: 'pasta', name: 'Pasta & Pizza', icon: '🍝', color: 'from-yellow-400 to-orange-500' },
-    { id: 'seafood', name: 'Seafood', icon: '🦐', color: 'from-blue-400 to-cyan-500' },
-    { id: 'desserts', name: 'Desserts', icon: '🍰', color: 'from-pink-400 to-purple-500' },
-    { id: 'beverages', name: 'Beverages', icon: '🍹', color: 'from-indigo-400 to-purple-500' }
+    { id: 'veg', name: 'Veg', icon: '🥗', color: 'from-green-400 to-emerald-500' },
+    { id: 'non-veg', name: 'Non-Veg', icon: '🍖', color: 'from-red-400 to-rose-500' },
   ];
 
   const dishes = {
@@ -86,7 +105,7 @@ export default function RestaurantLanding() {
                 <p className="text-xs text-gray-300">Fine Dining Experience</p>
               </div>
             </div>
-            
+
             <div className="hidden md:flex items-center space-x-8">
               <a href="#menu" className="hover:text-orange-400 transition-colors">Menu</a>
               <a href="#about" className="hover:text-orange-400 transition-colors">About</a>
@@ -107,13 +126,13 @@ export default function RestaurantLanding() {
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center px-4 pt-20">
         <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent"></div>
-        
+
         {/* Floating Food Elements */}
         <div className="absolute top-32 left-10 text-4xl animate-float">🍽️</div>
         <div className="absolute top-48 right-20 text-3xl animate-float delay-1000">🍷</div>
         <div className="absolute bottom-48 left-20 text-4xl animate-float delay-500">🥘</div>
         <div className="absolute bottom-32 right-16 text-3xl animate-float delay-1500">🍾</div>
-        
+
         <div className="relative z-10 text-center max-w-5xl mx-auto">
           <div className="flex items-center justify-center gap-2 mb-6">
             <Star className="w-6 h-6 text-yellow-400 fill-current" />
@@ -123,7 +142,7 @@ export default function RestaurantLanding() {
             <Star className="w-6 h-6 text-yellow-400 fill-current" />
             <span className="ml-2 text-yellow-400 font-semibold">Michelin Recommended</span>
           </div>
-          
+
           <h1 className="text-7xl md:text-9xl font-bold mb-6 bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 bg-clip-text text-transparent">
             Bella Vista
           </h1>
@@ -133,7 +152,7 @@ export default function RestaurantLanding() {
           <p className="text-lg md:text-xl mb-12 text-gray-300 max-w-3xl mx-auto leading-relaxed">
             Experience exquisite flavors crafted by our award-winning chefs in an atmosphere of elegance and sophistication. Every dish tells a story of passion and perfection.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
             <button className="bg-gradient-to-r from-orange-500 to-pink-500 px-10 py-4 rounded-full font-semibold text-lg hover:shadow-xl hover:shadow-orange-500/30 transition-all transform hover:scale-105 flex items-center gap-3">
               <Utensils className="w-5 h-5" />
@@ -144,7 +163,7 @@ export default function RestaurantLanding() {
               Reserve Table
             </button>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20">
               <Award className="w-12 h-12 text-orange-400 mx-auto mb-4" />
@@ -183,11 +202,10 @@ export default function RestaurantLanding() {
               <button
                 key={category.id}
                 onClick={() => setActiveCategory(category.id)}
-                className={`flex items-center gap-3 px-6 py-3 rounded-full transition-all transform hover:scale-105 ${
-                  activeCategory === category.id
-                    ? `bg-gradient-to-r ${category.color} shadow-lg shadow-orange-500/25 scale-105`
-                    : 'bg-white/10 backdrop-blur-lg border border-white/20 hover:bg-white/20'
-                }`}
+                className={`flex items-center gap-3 px-6 py-3 rounded-full transition-all transform hover:scale-105 ${activeCategory === category.id
+                  ? `bg-gradient-to-r ${category.color} shadow-lg shadow-orange-500/25 scale-105`
+                  : 'bg-white/10 backdrop-blur-lg border border-white/20 hover:bg-white/20'
+                  }`}
               >
                 <span className="text-2xl">{category.icon}</span>
                 <span className="font-semibold">{category.name}</span>
@@ -216,24 +234,23 @@ export default function RestaurantLanding() {
                     )}
                     <button
                       onClick={() => toggleFavorite(dish.id)}
-                      className={`p-1.5 rounded-full transition-colors ${
-                        favorites.has(dish.id) 
-                          ? 'bg-pink-500 text-white' 
-                          : 'bg-white/20 text-gray-300 hover:bg-pink-500 hover:text-white'
-                      }`}
+                      className={`p-1.5 rounded-full transition-colors ${favorites.has(dish.id)
+                        ? 'bg-pink-500 text-white'
+                        : 'bg-white/20 text-gray-300 hover:bg-pink-500 hover:text-white'
+                        }`}
                     >
                       <Heart className={`w-4 h-4 ${favorites.has(dish.id) ? 'fill-current' : ''}`} />
                     </button>
                   </div>
                 </div>
-                
+
                 <h3 className="text-2xl font-bold mb-2 group-hover:text-orange-400 transition-colors">
                   {dish.name}
                 </h3>
                 <p className="text-gray-300 mb-4 text-sm leading-relaxed">
                   {dish.description}
                 </p>
-                
+
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold text-orange-400">
                     {dish.price}
@@ -252,8 +269,8 @@ export default function RestaurantLanding() {
       <section className="py-20 px-4">
         <div className="max-w-7xl mx-auto mb-20">
           <div className="relative rounded-3xl overflow-hidden">
-            <img 
-              src="https://cdn.pixabay.com/photo/2017/01/26/02/06/platter-2009590_1280.jpg" 
+            <img
+              src="https://cdn.pixabay.com/photo/2017/01/26/02/06/platter-2009590_1280.jpg"
               alt="Elegant restaurant interior with fine dining setup"
               className="w-full h-96 md:h-[500px] object-cover"
             />
@@ -274,7 +291,7 @@ export default function RestaurantLanding() {
           </div>
         </div>
 
-      {/* Restaurant Info */}
+        {/* Restaurant Info */}
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
@@ -287,13 +304,13 @@ export default function RestaurantLanding() {
               <p className="text-lg text-gray-400 mb-8">
                 Every dish is crafted with passion, using only the finest locally-sourced ingredients and time-honored techniques passed down through generations of culinary masters.
               </p>
-              
+
               <div className="grid grid-cols-2 gap-6">
                 <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
                   <Clock className="w-8 h-8 text-orange-400 mb-3" />
                   <h4 className="font-bold mb-2">Opening Hours</h4>
                   <p className="text-sm text-gray-300">
-                    Mon-Sat: 6:00 PM - 11:00 PM<br/>
+                    Mon-Sat: 6:00 PM - 11:00 PM<br />
                     Sun: 6:00 PM - 10:00 PM
                   </p>
                 </div>
@@ -301,13 +318,13 @@ export default function RestaurantLanding() {
                   <MapPin className="w-8 h-8 text-pink-400 mb-3" />
                   <h4 className="font-bold mb-2">Location</h4>
                   <p className="text-sm text-gray-300">
-                    123 Fine Dining Street<br/>
+                    123 Fine Dining Street<br />
                     Bhopal, MP 462001
                   </p>
                 </div>
               </div>
             </div>
-            
+
             <div className="relative">
               <div className="bg-gradient-to-r from-orange-400/20 to-pink-500/20 rounded-3xl p-8 backdrop-blur-lg border border-white/20">
                 <div className="text-center">
@@ -345,7 +362,7 @@ export default function RestaurantLanding() {
               </div>
               <p className="text-gray-400">Creating memorable dining experiences since 2001.</p>
             </div>
-            
+
             <div>
               <h4 className="font-semibold mb-4 text-orange-400">Quick Links</h4>
               <div className="space-y-2 text-gray-400">
@@ -355,7 +372,7 @@ export default function RestaurantLanding() {
                 <div className="hover:text-white cursor-pointer transition-colors">Gift Cards</div>
               </div>
             </div>
-            
+
             <div>
               <h4 className="font-semibold mb-4 text-orange-400">Contact</h4>
               <div className="space-y-2 text-gray-400">
@@ -365,7 +382,7 @@ export default function RestaurantLanding() {
                 <div>info@bellavista.com</div>
               </div>
             </div>
-            
+
             <div>
               <h4 className="font-semibold mb-4 text-orange-400">Follow Us</h4>
               <div className="space-y-2 text-gray-400">
@@ -376,7 +393,7 @@ export default function RestaurantLanding() {
               </div>
             </div>
           </div>
-          
+
           <div className="border-t border-white/10 mt-12 pt-8 text-center text-gray-400">
             <p>&copy; 2025 Bella Vista Restaurant. All rights reserved. Crafted with <Heart className="w-4 h-4 inline text-red-500" /> for food lovers.</p>
           </div>
