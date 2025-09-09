@@ -135,29 +135,77 @@ userRoute.post('/updateAdd',authMid,userAuthMid,async(req,res)=>{
 
 userRoute.get('/rest/menus/:id',authMid,userAuthMid,async(req,res)=>{
     try {
-        const menus=await prisma.menu.findMany({
+        const rest=await prisma.restaurant.findUnique({
             where:{id_restaurant:parseInt(req.params.id)},
             select:{
-                menu_id:true,
-                menu_name:true,
-                description:true,
-                category:true,
-                availability:true,
+                id_restaurant:true,
+                restaurant_name:true,
+                rating:true,
                 image:true,
-                price:true,
-                calories:true,
-                protein:true,
-                fat:true,
-                carbohydrates:true,
-                cholesterol:true,
-                fiber:true
+                restaurant_address:true,
+                menu:true
             }
         })
-        return res.json({success:true,menus})
+        const restaurant={
+            id_restaurant:rest.id_restaurant,
+            restaurant_name:rest.restaurant_name,
+            rating:rest.rating,
+            image:rest.image,
+            restaurant_address:rest.restaurant_address,
+        }
+        const vegMenus = rest.menu.filter(menu => menu.category === 'veg');
+        const nonVegMenus =rest.menu.filter(menu => menu.category === 'non_veg');
+        // console.log(vegMenus)
+        return res.json({success:true,restaurant,vegMenus,nonVegMenus,menus:rest.menu})
     } catch (error) {
         console.log(error)
         res.status(500).json({ msg: "Internal server error", success: false });
     }
 })
+
+
+userRoute.patch('/update-transaction/:orderId', authMid,userAuthMid, async (req, res) => {
+  const { orderId } = req.params;
+  const { transaction_id, payment_status } = req.body;
+
+  if (!transaction_id || !payment_status) {
+    return res.status(400).json({
+      success: false,
+      msg: 'transaction_id and payment_status are required',
+    });
+  }
+
+  try {
+    // Update only the payment record for this order with status 'pending'
+    const payment = await prisma.payments.updateMany({
+      where: {
+        order_id: parseInt(orderId, 10),
+        payment_status: 'pending', // only update pending payments
+      },
+      data: {
+        transaction_id,
+        payment_status,
+        payment_time: new Date(),
+      },
+    });
+
+    if (payment.count === 0) {
+      return res.status(404).json({
+        success: false,
+        msg: 'No pending payment record found for this order',
+      });
+    }
+
+    return res.json({
+      success: true,
+      msg: 'Payment updated successfully',
+      updatedCount: payment.count,
+    });
+  } catch (error) {
+    console.error('Error updating payment:', error);
+    return res.status(500).json({ success: false, msg: 'Internal server error' });
+  }
+});
+
 
 module.exports = userRoute

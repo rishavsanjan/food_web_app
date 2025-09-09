@@ -7,12 +7,26 @@ const restRoute=express.Router();
 
 restRoute.get("/menu",authMid,restAuthMid,async(req,res)=>{
     try {
-        const menu=await prisma.restaurant.findMany({
+        const menu=await prisma.restaurant.findUnique({
             where:{user_id:req.user.user_id},
             // include:{menu:true},
-            select:{menu:true}
+            select:{
+                menu:true,
+                id_restaurant:true,
+                restaurant_name:true,
+                rating:true,
+                image:true,
+                restaurant_address:true
+            }
         });
-        return res.json({menus:menu[0].menu,success:true})
+        const restaurant={
+            id_restaurant:menu.id_restaurant,
+            restaurant_name:menu.restaurant_name,
+            rating:menu.rating,
+            image:menu.image,
+            restaurant_address:menu.restaurant_address,
+        }
+        return res.json({menus:menu.menu,restaurant,success:true})
     } catch (error) {
         res.status(500).json({msg:"Internal server error",success:false});
     }
