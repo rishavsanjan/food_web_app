@@ -62,6 +62,7 @@ restRoute.post("/addMenu",authMid,restAuthMid,async(req,res)=>{
         })
         return res.json({success:true,msg: "Menu item added"});
     } catch (error) {
+        console.log(error)
         res.status(500).json({msg:"Internal server error",success:false});
     }
 })

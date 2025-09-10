@@ -1,6 +1,6 @@
 const express = require('express');
 const prisma = require('../config/db');
-const { createUserSchema, loginUserSchema, updateAddress } = require('../zodType');
+const { createUserSchema, loginUserSchema, updateAddress, updateTransaction } = require('../zodType');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { authMid, userAuthMid } = require('../middlewares/auth');
@@ -166,25 +166,23 @@ userRoute.get('/rest/menus/:id',authMid,userAuthMid,async(req,res)=>{
 
 userRoute.patch('/update-transaction/:orderId', authMid,userAuthMid, async (req, res) => {
   const { orderId } = req.params;
-  const { transaction_id, payment_status } = req.body;
-
-  if (!transaction_id || !payment_status) {
-    return res.status(400).json({
-      success: false,
-      msg: 'transaction_id and payment_status are required',
-    });
-  }
+  const p=updateTransaction.safeParse(req.body)
+  console.log(req.body)
+  if (!p.success) {
+      return res.status(400).json({ "msg": "Invalid format or less info", "success": false })
+    }
+    // const { transaction_id, payment_status } = req.body;
 
   try {
     // Update only the payment record for this order with status 'pending'
     const payment = await prisma.payments.updateMany({
       where: {
         order_id: parseInt(orderId, 10),
-        payment_status: 'pending', // only update pending payments
+        payment_status: 'pending'||'cod_pending', // only update pending payments
       },
       data: {
-        transaction_id,
-        payment_status,
+        transaction_id:p.data.transaction_id,
+        payment_status:p.data.payment_status,
         payment_time: new Date(),
       },
     });

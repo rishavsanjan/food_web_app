@@ -2,6 +2,7 @@ const z=require('zod')
 
 const userRoles = ['CUSTOMER', 'RESTAURANT_OWNER', 'DELIVERY_AGENT', 'ADMIN']
 const paymentMethods = ["Credit_Card","Debit_Card","Netbanking","UPI","Cash_on_Delivery"] 
+const paymentStatus=['completed','failed','cod_collected','refunded']
 
 const createUserSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
@@ -73,4 +74,14 @@ const updateAddress=z.object({
   city:z.string().min(6).transform(val => val.toLowerCase())
 })
 
-module.exports={createUserSchema,loginUserSchema,orderSchema,createMenuSchema,updateMenuSchema,updateAddress}
+const updateTransaction=z.object({
+  transaction_id:z.string().min(4).optional(),
+  payment_status:z.enum(paymentStatus).default('completed')
+}).refine((data)=>{
+  if(data.payment_status!='cod_collected'){
+    return !!data.transaction_id
+  }
+  return true
+})
+
+module.exports={createUserSchema,loginUserSchema,orderSchema,createMenuSchema,updateMenuSchema,updateAddress,updateTransaction}
