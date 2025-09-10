@@ -41,7 +41,7 @@ const createMenuSchema = z.object({
   menu_name: z.string().min(3),
   description: z.string().optional(),
   availability: z.boolean().optional(),
-  category: z.enum(["veg", "non-veg"]), 
+  category: z.enum(["veg", "non_veg"]), 
   price: z.number().int().min(0),
   calories: z.number().min(0),
   protein: z.number().min(0),

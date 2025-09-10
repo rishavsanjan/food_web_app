@@ -10,6 +10,7 @@ export default function FoodDeliveryLanding() {
     const [scrollY, setScrollY] = useState(0);
     const [isLogin, setIsLogin] = useState(false);
     const [user, setUser] = useState([]);
+    const [restaurantss, setRestaurants] = useState();
 
 
     const getProfile = async () => {
@@ -21,7 +22,7 @@ export default function FoodDeliveryLanding() {
                 'Authorization': 'Bearer ' + token
             }
         })
-        console.log(response.data.user)
+        console.log(response.data.user);
         setUser(response.data.user);
         getRestraunts();
         if (response) {
@@ -37,9 +38,11 @@ export default function FoodDeliveryLanding() {
             headers: {
                 'Authorization': 'Bearer ' + token
             }
-        })
 
-        console.log(response.data);
+        })
+        setRestaurants(response.data.data);
+
+        console.log(response.data.data);
     }
 
     useEffect(() => {
@@ -199,24 +202,24 @@ export default function FoodDeliveryLanding() {
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
 
-                        {restaurants.map((restaurant, index) => (
+                        {restaurantss?.map((restaurant, index) => (
                             <div key={index} className="group bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/20">
                                 <div className="text-6xl mb-4 text-center group-hover:scale-110 transition-transform duration-300">
-                                    <img src={`${restaurant.image}`} alt="" />
+                                    <img src={`${restaurant?.image  || 'https://cdn.pixabay.com/photo/2015/02/23/21/10/restaurant-646687_1280.jpg'}`} alt="" />
                                 </div>
-                                <h3 className="text-2xl font-bold mb-2">{restaurant.name}</h3>
-                                <p className="text-gray-400 mb-4">{restaurant.cuisine}</p>
+                                <h3 className="text-2xl font-bold mb-2">{restaurant?.restaurant_name || 'N/A'}</h3>
+                                <p className="text-gray-400 mb-4">{restaurant?.cuisine || 'N/A'}</p>
                                 <div className="flex justify-between items-center">
                                     <div className="flex items-center gap-1">
                                         <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                                        <span className="text-sm font-semibold">{restaurant.rating}</span>
+                                        <span className="text-sm font-semibold">{restaurant?.rating || 'N/A'}</span>
                                     </div>
                                     <div className="flex items-center gap-1 text-sm text-gray-400">
                                         <Clock className="w-4 h-4" />
-                                        {restaurant.time}
+                                        {restaurant?.time || 'N/A'}
                                     </div>
                                 </div>
-                                <Link to='/restraunt'>
+                                <Link to={`/restraunt/${restaurant.id_restaurant}`}>
                                     <button className="w-full mt-4 bg-gradient-to-r from-orange-500 to-pink-500 py-3 rounded-full font-semibold hover:shadow-lg transition-all opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0">
                                         Order Now
                                     </button>
@@ -224,7 +227,7 @@ export default function FoodDeliveryLanding() {
 
 
                             </div>
-                        ))}
+                        )) || 'N/A'}
                     </div>
                 </div>
             </section>
