@@ -26,7 +26,7 @@ export default function RestaurantLanding() {
   }
 
   useEffect(() => {
-    getMenu();
+    getMenu();  
   }, [])
 
 

@@ -12,7 +12,8 @@ import {
   Eye,
   EyeOff,
   Camera,
-  Settings
+  Settings,
+  IndianRupee
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -34,6 +35,7 @@ export default function RestaurantAdminDashboard() {
     image: null,
     available: true
   });
+  const [restaurant, setRestaurant] = useState({});
 
   const getDetails = async () => {
     const token = localStorage.getItem('token');
@@ -47,6 +49,7 @@ export default function RestaurantAdminDashboard() {
     })
     console.log(response.data)
     setMenu(response.data.menus);
+    setRestaurant(response.data.restaurant);
   }
 
   useEffect(() => {
@@ -63,7 +66,7 @@ export default function RestaurantAdminDashboard() {
   });
 
 
-  const categories = ['VEG', 'NON_VEG'];
+  const categories = ['veg', 'non_veg'];
 
   const resetForm = () => {
     setNewDish({
@@ -97,7 +100,7 @@ export default function RestaurantAdminDashboard() {
         menu_name: newDish.name,
         description: newDish.description,
         price: parseFloat(newDish.price) || 0,
-        category: newDish.category,
+        category: newDish.category || 'veg',
         calories: parseInt(newDish.calories) || 0,
         protein: parseInt(newDish.protein) || 0,
         carbohydrates: parseInt(newDish.carbs) || 0,
@@ -205,7 +208,7 @@ export default function RestaurantAdminDashboard() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-white">Restaurant Dashboard</h1>
-                <p className="text-purple-200">{restaurantInfo.name}</p>
+                <p className="text-purple-200">{restaurant.restaurant_name}</p>
               </div>
             </div>
 
@@ -247,7 +250,7 @@ export default function RestaurantAdminDashboard() {
                   ₹{menu.length > 0 ? (menu.reduce((sum, dish) => sum + dish.price, 0) / menu.length).toFixed(2) : '0.00'}
                 </p>
               </div>
-              <DollarSign className="h-8 w-8 text-yellow-400" />
+              <IndianRupee className="h-8 w-8 text-yellow-400" />
             </div>
           </div>
 
@@ -256,7 +259,7 @@ export default function RestaurantAdminDashboard() {
               <div>
                 <p className="text-purple-200 text-sm">Rating</p>
                 <p className="text-2xl font-bold text-white flex items-center">
-                  4.8 <Star className="h-5 w-5 text-yellow-400 fill-current ml-1" />
+                  {restaurant.rating} <Star className="h-5 w-5 text-yellow-400 fill-current ml-1" />
                 </p>
               </div>
               <Star className="h-8 w-8 text-yellow-400" />
