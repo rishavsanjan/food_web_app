@@ -53,7 +53,7 @@ export default function OurInfo() {
                         <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-pink-500 rounded-2xl flex items-center justify-center mr-4">
                             <span className="text-2xl">🍽️</span>
                         </div>
-                        <h1 className="text-3xl font-bold text-white">QuickBite</h1>
+                        <h1 className="text-3xl font-bold text-white">FitEats</h1>
                     </div>
 
                     <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
@@ -123,7 +123,7 @@ export default function OurInfo() {
                 {/* Bottom CTA Section */}
                 <div className="bg-purple-600   backdrop-blur-lg rounded-3xl p-8 md:p-12 border border-purple-600 border-opacity-20 shadow-2xl text-center">
                     <h3 className="text-3xl font-bold text-white mb-4">
-                        Experience the <span className="text-orange-400">QuickBite Difference</span>
+                        Experience the <span className="text-orange-400">FitEats Difference</span>
                     </h3>
                     <p className="text-xl text-purple-200 mb-8 max-w-3xl mx-auto">
                         Make informed food choices with detailed nutritional insights, ingredient transparency,
@@ -133,7 +133,7 @@ export default function OurInfo() {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link to={'/login'}>
                             <button className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg">
-                                Try QuickBite Now
+                                Try FitEats Now
                             </button>
                         </Link>
 

@@ -79,7 +79,7 @@ export default function FoodDeliveryLanding() {
                             <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-xl flex items-center justify-center">
                                 <span className="text-xl font-bold">🍽️</span>
                             </div>
-                            <span className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">QuickBite</span>
+                            <span className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">FitEats</span>
                         </div>
 
                         <div className="hidden md:flex items-center space-x-8">
@@ -237,7 +237,7 @@ export default function FoodDeliveryLanding() {
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
                         <h2 className="text-5xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-blue-500 bg-clip-text text-transparent">
-                            Why Choose QuickBite?
+                            Why Choose FitEats?
                         </h2>
                         <p className="text-xl text-gray-300">Experience the future of food delivery</p>
                     </div>
@@ -267,7 +267,7 @@ export default function FoodDeliveryLanding() {
                                 <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-xl flex items-center justify-center">
                                     <span className="text-xl font-bold">🍽️</span>
                                 </div>
-                                <span className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">QuickBite</span>
+                                <span className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">FitEats</span>
                             </div>
                             <p className="text-gray-400">Delivering happiness, one meal at a time.</p>
                         </div>
@@ -304,7 +304,7 @@ export default function FoodDeliveryLanding() {
                     </div>
 
                     <div className="border-t border-white/10 mt-12 pt-8 text-center text-gray-400">
-                        <p>&copy; 2025 QuickBite. All rights reserved. Made with <Heart className="w-4 h-4 inline text-red-500" /> for food lovers.</p>
+                        <p>&copy; 2025 FitEats. All rights reserved. Made with <Heart className="w-4 h-4 inline text-red-500" /> for food lovers.</p>
                     </div>
                 </div>
             </footer>

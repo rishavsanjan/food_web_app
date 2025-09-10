@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { User, MapPin, Phone, Mail, Edit, Heart, Clock, Star } from 'lucide-react';
+import { User, MapPin, Phone, Mail, Edit, Heart, Clock, Star, LogOutIcon } from 'lucide-react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 export default function UserProfile() {
     const [isEditing, setIsEditing] = useState(false);
@@ -62,15 +63,28 @@ export default function UserProfile() {
                             SJ
                         </div>
 
-                        <div className="text-center">
+                        <div className="text-center ">
                             <h2 className="text-2xl font-bold text-white mb-2">{userData.name}</h2>
-                            <button
-                                onClick={() => setIsEditing(!isEditing)}
-                                className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium py-2 px-4 rounded-xl transition-all duration-300 flex items-center"
-                            >
-                                <Edit className="h-4 w-4 mr-2" />
-                                {isEditing ? 'Save Changes' : 'Edit Profile'}
-                            </button>
+                            <div className='flex flex-row gap-2'>
+                                <button
+                                    onClick={() => setIsEditing(!isEditing)}
+                                    className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium py-2 px-4 rounded-xl transition-all duration-300 flex items-center"
+                                >
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    {isEditing ? 'Save Changes' : 'Edit Profile'}
+                                </button>
+                                <Link to={'/login'}>
+                                    <button
+                                        onClick={() => { localStorage.clear('') }}
+                                        className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-2 px-4 rounded-xl transition-all duration-300 flex items-center"
+                                    >
+                                        <LogOutIcon className="h-4 w-4 mr-2" />
+                                        LogOut
+                                    </button>
+                                </Link>
+
+                            </div>
+
                         </div>
                     </div>
 
