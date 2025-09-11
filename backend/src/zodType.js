@@ -33,6 +33,7 @@ const orderSchema=z.object({
     menu_id:z.number().int(),
     quantity:z.number().int().positive()
   })).nonempty("Order must contain at least one item"),
+  instruction:z.string().optional(),
   payment_method:z.enum(paymentMethods).default("Cash_on_Delivery")
 })
 

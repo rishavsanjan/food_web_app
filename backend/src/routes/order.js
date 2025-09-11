@@ -74,6 +74,7 @@ orderRoute.post("/create",authMid,userAuthMid,async(req,res)=>{
                 data: {
                     user_id: user_id,
                     id_restaurant: data.id_restaurant,
+                    instruction:data.instruction
                 }
             });
             const orderDetails=data.items.map(item=>{

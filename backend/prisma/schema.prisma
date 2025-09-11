@@ -87,6 +87,7 @@ model orders {
   id_restaurant Int
   order_time    DateTime?          @default(now()) @db.Timestamp(6)
   status        order_status_enum? @default(Preparing)
+  instruction   String?            @db.VarChar(500)
   deliveries    deliveries?
   order_details order_details[]
   restaurant    restaurant         @relation(fields: [id_restaurant], references: [id_restaurant], onDelete: Cascade, onUpdate: NoAction)
