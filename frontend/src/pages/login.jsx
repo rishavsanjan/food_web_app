@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { ChefHat, Eye, EyeOff, Mail, Lock, User, Phone, Calendar, ArrowLeft, Star, Heart, HouseIcon, ClipboardTypeIcon, Building2, LucideBuilding2 } from 'lucide-react';
 import axios from 'axios'
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+
 
 export default function LogIn() {
   const [isLogin, setIsLogin] = useState(false);
@@ -46,11 +48,10 @@ export default function LogIn() {
   const validateForm = async () => {
     const newErrors = {};
     console.log('hello')
+
     if (!isLogin) {
       if (!formData.name.trim()) newErrors.name = 'First name is required';
-      //if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
       if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
-      //if (!formData.birthDate) newErrors.birthDate = 'Birth date is required';
       if (!formData.state.trim()) newErrors.state = 'State is required';
       if (!formData.city.trim()) newErrors.city = 'City is required';
       if (formData.password !== formData.confirmPassword) {
@@ -59,10 +60,16 @@ export default function LogIn() {
       if (!formData.agreeToTerms) newErrors.agreeToTerms = 'Please agree to terms and conditions';
     }
 
+    // Fixed email validation logic
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone number is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.phone = 'Phone number is invalid';
+    }
+
+    // Fixed email validation - was checking phone instead of email
+    if (!formData.email.trim() && !isLogin) {
+      newErrors.email = 'Email is required';
+    } else if (!isLogin && !/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Email is invalid';
     }
 
     if (!formData.password) {
@@ -71,48 +78,73 @@ export default function LogIn() {
       newErrors.password = 'Password must be at least 6 characters';
     }
 
-    if (isLogin) {
-      const response = await axios({
-        url: 'http://localhost:3000/api/users/login',
-        method: 'POST',
-        data: {
-          phone_number: formData.phone,
-          password: formData.password,
-        }
-      })
-      console.log(response.data)
-      localStorage.setItem('token', response.data.msg);
-      navigate('/');
-    } else {
+    // Set errors first
+    setErrors(newErrors);
 
-      const response = await axios({
-        url: 'http://localhost:3000/api/users/signup',
-        method: 'POST',
-        data: {
-          name: formData.name,
-          phone_number: formData.phone,
-          email: formData.email,
-          password: formData.password,
-          address: formData.address + ',' + formData.city + ',' + formData.state,
-          city:formData.city + ',' + formData.state
-        }
-      })
-      setIsLogin(true);
-      console.log(response.data)
+    // Return early if there are validation errors
+    if (Object.keys(newErrors).length > 0) {
+      return false;
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    try {
+      if (isLogin) {
+        const response = await axios({
+          url: 'http://localhost:3000/api/users/login',
+          method: 'POST',
+          data: {
+            phone_number: formData.phone,
+            password: formData.password,
+          }
+        });
 
+        if (response.status === 200 && response.data.success) {
+          toast.success('Logged in successfully!');
+          localStorage.setItem('token', response.data.msg);
+          // Add a small delay before navigation to show the toast
+          setTimeout(() => {
+            navigate('/');
+          }, 1000);
+        } else {
+          toast.error('Invalid Credentials!');
+        }
+      } else {
+        const response = await axios({
+          url: 'http://localhost:3000/api/users/signup',
+          method: 'POST',
+          data: {
+            name: formData.name,
+            phone_number: formData.phone,
+            email: formData.email,
+            password: formData.password,
+            address: formData.address + ',' + formData.city + ',' + formData.state,
+            city: formData.city + ',' + formData.state
+          }
+        });
+
+        if (response.status === 200 || response.status === 201) {
+          toast.success('Account created successfully! Please sign in.');
+          setIsLogin(true);
+        } else {
+          toast.error('Failed to create account. Please try again.');
+        }
+
+        console.log(response.data);
+      }
+    } catch (error) {
+      console.error('API Error:', error);
+      if (isLogin) {
+        toast.error('Login failed. Please check your credentials.');
+      } else {
+        toast.error('Signup failed. Please try again.');
+      }
+    }
+
+    return true;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      // Handle form submission
-      console.log('Form submitted:', formData);
-      alert(isLogin ? 'Login successful!' : 'Account created successfully!');
-    }
+    await validateForm();
   };
 
   const toggleMode = () => {
@@ -133,61 +165,26 @@ export default function LogIn() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white overflow-hidden relative">
+      <ToastContainer
+        position="top-center"
+        autoClose={500}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       {/* Background Elements */}
       <div className="absolute top-20 left-10 text-4xl animate-float opacity-20">🍽️</div>
       <div className="absolute top-40 right-20 text-3xl animate-float delay-1000 opacity-20">🍷</div>
       <div className="absolute bottom-40 left-20 text-4xl animate-float delay-500 opacity-20">🥘</div>
       <div className="absolute bottom-20 right-10 text-3xl animate-float delay-1500 opacity-20">🍾</div>
 
-      <div className="flex min-h-screen">
-        {/* Left Side - Branding */}
-        <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-12 relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent"></div>
-          <div className="relative z-10 text-center max-w-md">
-            <div className="flex items-center justify-center gap-3 mb-8">
-              <div className="w-16 h-16 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
-                <ChefHat className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">Bella Vista</h1>
-                <p className="text-sm text-gray-300">Fine Dining Experience</p>
-              </div>
-            </div>
+      <div className="flex min-h-screen items-center justify-center">
 
-            <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 bg-clip-text text-transparent">
-              Welcome to Culinary Excellence
-            </h2>
-            <p className="text-lg text-gray-300 mb-8 leading-relaxed">
-              Join our exclusive community and enjoy personalized dining experiences, special offers, and priority reservations at Bella Vista.
-            </p>
-
-            <div className="space-y-4 text-left">
-              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20">
-                <Star className="w-6 h-6 text-yellow-400 flex-shrink-0" />
-                <div>
-                  <h4 className="font-semibold text-white">VIP Reservations</h4>
-                  <p className="text-sm text-gray-300">Priority booking for special occasions</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20">
-                <Heart className="w-6 h-6 text-pink-400 flex-shrink-0" />
-                <div>
-                  <h4 className="font-semibold text-white">Personalized Experience</h4>
-                  <p className="text-sm text-gray-300">Tailored recommendations and preferences</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20">
-                <ChefHat className="w-6 h-6 text-orange-400 flex-shrink-0" />
-                <div>
-                  <h4 className="font-semibold text-white">Exclusive Events</h4>
-                  <p className="text-sm text-gray-300">Access to chef's table and wine tastings</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Right Side - Auth Form */}
         <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12">
@@ -199,7 +196,7 @@ export default function LogIn() {
                   <ChefHat className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">Bella Vista</h1>
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">FitEats</h1>
                 </div>
               </div>
             </div>
@@ -494,10 +491,13 @@ export default function LogIn() {
 
             {/* Back to Website */}
             <div className="text-center mt-6">
-              <button className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mx-auto">
-                <ArrowLeft className="w-4 h-4" />
-                Back to Bella Vista
-              </button>
+              <Link to={'/'}>
+                <button className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mx-auto">
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to FitEats
+                </button>
+              </Link>
+
             </div>
           </div>
         </div>

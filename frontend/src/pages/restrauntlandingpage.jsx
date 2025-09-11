@@ -3,6 +3,10 @@ import { Star, Clock, MapPin, Phone, Heart, ChefHat, Utensils, Wine, Coffee, Men
 import axios from 'axios';
 import { Link, useParams } from 'react-router-dom';
 import CartClearModel from '../models/replaceRestaurantInCart'
+import Lottie from "lottie-react";
+import loadingAnimation from '../../assets/loading-animation/pac_buffer.json'
+import { ToastContainer, toast } from 'react-toastify';
+
 
 export default function RestaurantLanding() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -15,6 +19,9 @@ export default function RestaurantLanding() {
   const [nonVegMenu, setNonVegMenu] = useState([]);
   const [cart, setCart] = useState([]);
   const [cartClearModel, setCartClearModel] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+
 
 
   const getMenu = async () => {
@@ -35,12 +42,15 @@ export default function RestaurantLanding() {
       localStorage.setItem("cart", "[]");
     }
     setCart(JSON.parse(localStorage.getItem("cart") || []));
+    setLoading(false);
 
   }
 
   useEffect(() => {
     getMenu();
   }, []);
+
+
 
 
   const addToCart = async (newItem) => {
@@ -79,6 +89,8 @@ export default function RestaurantLanding() {
 
       return updatedCart;
     });
+    toast('Added to cart!');
+
   };
 
 
@@ -102,12 +114,37 @@ export default function RestaurantLanding() {
     }
   }, [activeCategory])
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen backdrop-blur-md bg-purple-500/30 flex-col ">
+        <Lottie
+          animationData={loadingAnimation}
+          loop={true}
+          style={{ width: 200, height: 200 }}
+        />
+        <h1 className='text-xl font-semibold'>Loading Restaurant Details...</h1>
+      </div>
+    );
+  }
+
 
 
 
 
   return (
     <>
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white overflow-hidden">
         {/* Navigation */}
         <nav className={`fixed w-full z-50 transition-all duration-300 ${scrollY > 50 ? 'bg-black/20 backdrop-blur-lg' : 'bg-transparent'}`}>
@@ -202,11 +239,11 @@ export default function RestaurantLanding() {
 
             {/* Dishes Grid */}
             {
-                menu.length === 0 &&
-                <h1 className='text-xl text-center items-center flex justify-center'>There are no items available in this catogery!</h1>
-              }
+              menu.length === 0 &&
+              <h1 className='text-xl text-center items-center flex justify-center'>There are no items available in this catogery!</h1>
+            }
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              
+
               {menu?.map((dish) => (
                 <div key={dish.menu_id} className="group bg-white/10 backdrop-blur-lg rounded-3xl z-40 p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/20">
                   <div className="flex items-start justify-between mb-4">
@@ -381,12 +418,12 @@ export default function RestaurantLanding() {
                     </button>
                   </div>
                 </div>
-              )) }
+              ))}
             </div>
           </div>
         </section>
 
-        
+
 
         {/* Footer */}
         <footer className="bg-black/40 backdrop-blur-lg py-12 px-4 border-t border-white/10">

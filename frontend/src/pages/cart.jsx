@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ChefHat, Plus, Minus, Trash2, ArrowLeft, Clock, MapPin, CreditCard, ShoppingBag, Star, Heart, Gift, Percent, Activity, Zap, Leaf, Shield, BottleWine, Vegan, VeganIcon, LucideVegan, LeafyGreen, } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+
 
 export default function Cart() {
   const [cart, setCart] = useState([]);
@@ -10,7 +12,7 @@ export default function Cart() {
     if (!localStorage.getItem("cart")) {
       localStorage.setItem("cart", "[]");
     }
-    if(localStorage.getItem('cart_restaurant')){
+    if (localStorage.getItem('cart_restaurant')) {
       setRestaurant(JSON.parse(localStorage.getItem("cart_restaurant")));
       console.log(JSON.parse(localStorage.getItem("cart_restaurant")))
     }
@@ -30,18 +32,6 @@ export default function Cart() {
     'CHEF20': { discount: 20, type: 'percentage', description: "Chef's special - 20% off" }
   };
 
-  const updateQuantity = (id, change) => {
-    setCartItems(items =>
-      items.map(item => {
-        if (item.id === id) {
-          const newQuantity = Math.max(0, item.quantity + change);
-          return newQuantity === 0 ? null : { ...item, quantity: newQuantity };
-        }
-        return item;
-      }).filter(Boolean)
-    );
-  };
-
 
 
   const applyPromoCode = () => {
@@ -51,13 +41,15 @@ export default function Cart() {
         ...promoCodes[promoCode.toUpperCase()]
       });
       setPromoCode('');
+      toast.success(`Promo code applied successfully! ${promoCode.toUpperCase()}`)
     } else {
-      alert('Invalid promo code');
+      toast.error(`Invaid Code!`)
     }
   };
 
   const removePromoCode = () => {
     setAppliedPromo(null);
+    toast.success(`Promo code removed successfully!`)
   };
 
   const calculateSubtotal = () => {
@@ -98,6 +90,7 @@ export default function Cart() {
     if (!appliedPromo) return 0;
     const subtotal = calculateSubtotal();
     if (appliedPromo.type === 'percentage') {
+      
       return Math.floor(subtotal * (appliedPromo.discount / 100));
     } else {
       return Math.min(appliedPromo.discount, subtotal);
@@ -126,7 +119,7 @@ export default function Cart() {
         if (dish.menu_id === updateItem.menu_id) {
           return {
             ...dish,
-            quantity: dish.quantity + 1
+            quantity: dish.quantity - 1
           }
         }
         return dish;
@@ -134,6 +127,7 @@ export default function Cart() {
       localStorage.setItem("cart", JSON.stringify(updatedCart));
       return updatedCart;
     })
+    toast.success('Dish removed successfully!')
 
   }
   const addQuantity = (updateItem) => {
@@ -143,7 +137,7 @@ export default function Cart() {
         if (dish.menu_id === updateItem.menu_id) {
           return {
             ...dish,
-            quantity: dish.quantity - 1
+            quantity: dish.quantity + 1
           }
         }
         return dish;
@@ -151,6 +145,7 @@ export default function Cart() {
       localStorage.setItem("cart", JSON.stringify(updatedCart));
       return updatedCart;
     })
+    toast.success('Dish added successfully!')
 
   }
 
@@ -160,6 +155,7 @@ export default function Cart() {
       localStorage.setItem("cart", JSON.stringify(updatedCart));
       return updatedCart;
     })
+    toast.success('Dish deleted successfully!')
   }
 
 
@@ -171,7 +167,7 @@ export default function Cart() {
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
-              <button onClick={() => {navigate(-1)}} className="p-2 bg-white/10 backdrop-blur-lg rounded-full border border-white/20 hover:bg-white/20 transition-colors">
+              <button onClick={() => { navigate(-1) }} className="p-2 bg-white/10 backdrop-blur-lg rounded-full border border-white/20 hover:bg-white/20 transition-colors">
                 <ArrowLeft className="w-6 h-6" />
               </button>
               <div className="flex items-center gap-3">
@@ -205,6 +201,18 @@ export default function Cart() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
+      <ToastContainer
+        position="top-right"
+        autoClose={500}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       {/* Background Elements */}
       <div className="absolute top-20 left-10 text-3xl animate-float opacity-20">🍽️</div>
       <div className="absolute top-40 right-20 text-2xl animate-float delay-1000 opacity-20">🍷</div>
@@ -385,15 +393,15 @@ export default function Cart() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <button
-                            disabled={`${item.quantity === 1}`}
-                            onClick={() => addQuantity(item)}
+                            disabled={item.quantity === 1}
+                            onClick={() => removeQuantity(item)}
                             className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
                           >
                             <Minus className="w-4 h-4" />
                           </button>
                           <span className="font-semibold min-w-[2rem] text-center">{item.quantity}</span>
                           <button
-                            onClick={() => removeQuantity(item)}
+                            onClick={() => addQuantity(item)}
                             className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
                           >
                             <Plus className="w-4 h-4" />

@@ -3,6 +3,8 @@ import { ChevronDown, Star, Clock, Shield, Smartphone, MapPin, Heart, ArrowRight
 import { Link } from "react-router-dom";
 import axios from 'axios';
 import OurInfo from './usernotlogged';
+import Lottie from "lottie-react";
+import loadingAnimation from '../../assets/loading-animation/pac_buffer.json';
 
 
 export default function FoodDeliveryLanding() {
@@ -11,6 +13,7 @@ export default function FoodDeliveryLanding() {
     const [isLogin, setIsLogin] = useState(false);
     const [user, setUser] = useState([]);
     const [restaurantss, setRestaurants] = useState();
+    const [restaurantLoading, setRestaurantLoading] = useState(true);
 
 
     const getProfile = async () => {
@@ -41,7 +44,7 @@ export default function FoodDeliveryLanding() {
 
         })
         setRestaurants(response.data.data);
-
+        setRestaurantLoading(false);
         console.log(response.data.data);
     }
 
@@ -55,12 +58,7 @@ export default function FoodDeliveryLanding() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const restaurants = [
-        { name: "Bella Italia", cuisine: "Italian", rating: 4.8, time: "25-30 min", image: "https://cdn.pixabay.com/photo/2021/07/20/06/04/restaurant-6479818_1280.jpg" },
-        { name: "Sakura Sushi", cuisine: "Japanese", rating: 4.9, time: "20-25 min", image: "https://cdn.pixabay.com/photo/2024/05/31/17/07/ai-generated-8800957_1280.png" },
-        { name: "Taco Fiesta", cuisine: "Mexican", rating: 4.7, time: "15-20 min", image: "https://cdn.pixabay.com/photo/2019/12/20/21/17/taco-4709325_1280.jpg" },
-        { name: "Burger Palace", cuisine: "American", rating: 4.6, time: "10-15 min", image: "https://cdn.pixabay.com/photo/2019/01/21/12/47/burger-3946012_1280.jpg" }
-    ];
+
 
     const features = [
         { icon: <Clock className="w-8 h-8" />, title: "Lightning Fast", desc: "Average delivery in 30 minutes" },
@@ -93,7 +91,7 @@ export default function FoodDeliveryLanding() {
                                         <h1 className="hover:text-orange-400 transition-colors">Login / Sign Up</h1>
                                     </Link>
                                     :
-                                    <Link  to={`${user.role === 'RESTAURANT_OWNER' ? '/restaurant-admin' : '/profile'} `}>
+                                    <Link to={`${user.role === 'RESTAURANT_OWNER' ? '/restaurant-admin' : '/profile'} `}>
                                         <h1 className="hover:text-orange-400 transition-colors"> {user.name}</h1>
                                     </Link>
 
@@ -191,45 +189,70 @@ export default function FoodDeliveryLanding() {
             }
 
             {/* Featured Restaurants */}
-            <section id="restaurants" className="py-20 px-4 bg-black/20">
-                <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-16">
-                        <h2 className="text-5xl font-bold mb-6 bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
-                            Popular Near You
-                        </h2>
-                        <p className="text-xl text-gray-300">Discover amazing restaurants in your neighborhood</p>
-                    </div>
 
-                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-
-                        {restaurantss?.map((restaurant, index) => (
-                            <div key={index} className="group bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/20">
-                                <div className="text-6xl mb-4 text-center group-hover:scale-110 transition-transform duration-300">
-                                    <img src={`${restaurant?.image  || 'https://cdn.pixabay.com/photo/2015/02/23/21/10/restaurant-646687_1280.jpg'}`} alt="" />
-                                </div>
-                                <h3 className="text-2xl font-bold mb-2">{restaurant?.restaurant_name || 'N/A'}</h3>
-                                <p className="text-gray-400 mb-4">{restaurant?.cuisine || 'N/A'}</p>
-                                <div className="flex justify-between items-center">
-                                    <div className="flex items-center gap-1">
-                                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                                        <span className="text-sm font-semibold">{restaurant?.rating || 'N/A'}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1 text-sm text-gray-400">
-                                        <Clock className="w-4 h-4" />
-                                        {restaurant?.time || 'N/A'}
-                                    </div>
-                                </div>
-                                <Link to={`/restraunt/${restaurant.id_restaurant}`}>
-                                    <button className="w-full mt-4 bg-gradient-to-r from-orange-500 to-pink-500 py-3 rounded-full font-semibold hover:shadow-lg transition-all opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0">
-                                        Order Now
-                                    </button>
-                                </Link>
-
-
+            <section id="restaurants" className={`${isLogin && 'py-20 px-4 bg-black/20'} `}>
+                {
+                    restaurantLoading && isLogin ?
+                        <>
+                            <div className="flex items-center justify-center backdrop-blur-md bg-transparent flex-col ">
+                                <Lottie
+                                    animationData={loadingAnimation}
+                                    loop={true}
+                                    style={{ width: 200, height: 200 }}
+                                />
+                                <h1 className='text-xl font-semibold'>Loading Restaurants...</h1>
                             </div>
-                        )) || 'N/A'}
-                    </div>
-                </div>
+                        </>
+                        :
+                        <>
+                            {
+                                isLogin &&
+                                <>
+                                    <div className="max-w-7xl mx-auto">
+                                        <div className="text-center mb-16">
+                                            <h2 className="text-5xl font-bold mb-6 bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
+                                                Popular Near You
+                                            </h2>
+                                            <p className="text-xl text-gray-300">Discover amazing restaurants in your neighborhood</p>
+                                        </div>
+
+                                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+
+                                            {restaurantss?.map((restaurant, index) => (
+                                                <div key={index} className="group bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/20">
+                                                    <div className="text-6xl mb-4 text-center group-hover:scale-110 transition-transform duration-300">
+                                                        <img src={`${restaurant?.image || 'https://cdn.pixabay.com/photo/2015/02/23/21/10/restaurant-646687_1280.jpg'}`} alt="" />
+                                                    </div>
+                                                    <h3 className="text-2xl font-bold mb-2">{restaurant?.restaurant_name || 'N/A'}</h3>
+                                                    <p className="text-gray-400 mb-4">{restaurant?.cuisine || 'N/A'}</p>
+                                                    <div className="flex justify-between items-center">
+                                                        <div className="flex items-center gap-1">
+                                                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                                                            <span className="text-sm font-semibold">{restaurant?.rating || 'N/A'}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1 text-sm text-gray-400">
+                                                            <Clock className="w-4 h-4" />
+                                                            {restaurant?.time || 'N/A'}
+                                                        </div>
+                                                    </div>
+                                                    <Link to={`/restraunt/${restaurant.id_restaurant}`}>
+                                                        <button className="w-full mt-4 bg-gradient-to-r from-orange-500 to-pink-500 py-3 rounded-full font-semibold hover:shadow-lg transition-all opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0">
+                                                            Order Now
+                                                        </button>
+                                                    </Link>
+
+
+                                                </div>
+                                            )) || 'N/A'}
+                                        </div>
+                                    </div>
+                                </>
+                            }
+
+                        </>
+
+                }
+
             </section>
 
             {/* Features Section */}

@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { User, MapPin, Phone, Mail, Edit, Heart, Clock, Star, LogOutIcon } from 'lucide-react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+
 
 export default function UserProfile() {
     const [isEditing, setIsEditing] = useState(false);
+    const navigate = useNavigate();
 
     const [userData, setUserData] = useState({
         name: '',
@@ -12,6 +15,14 @@ export default function UserProfile() {
         phone_number: '',
         address: ''
     });
+    const handleLogout = () => {
+        localStorage.clear();
+        toast.success('Logged Out Successfully!');
+
+        setTimeout(() => {
+            navigate('/login');
+        }, 1000);  
+    };
 
     const getProfile = async () => {
         const token = localStorage.getItem('token');
@@ -43,6 +54,18 @@ export default function UserProfile() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-blue-900 py-8 px-4">
+            <ToastContainer
+                position="top-right"
+                autoClose={1000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick={false}
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+            />
             <div className="max-w-2xl mx-auto space-y-6">
 
                 {/* Header */}
@@ -73,15 +96,16 @@ export default function UserProfile() {
                                     <Edit className="h-4 w-4 mr-2" />
                                     {isEditing ? 'Save Changes' : 'Edit Profile'}
                                 </button>
-                                <Link to={'/login'}>
-                                    <button
-                                        onClick={() => { localStorage.clear('') }}
-                                        className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-2 px-4 rounded-xl transition-all duration-300 flex items-center"
-                                    >
-                                        <LogOutIcon className="h-4 w-4 mr-2" />
-                                        LogOut
-                                    </button>
-                                </Link>
+                                <button
+                                    onClick={() => {
+                                        handleLogout()
+                                    }
+                                    }
+                                    className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-2 px-4 rounded-xl transition-all duration-300 flex items-center"
+                                >
+                                    <LogOutIcon className="h-4 w-4 mr-2" />
+                                    LogOut
+                                </button>
 
                             </div>
 
