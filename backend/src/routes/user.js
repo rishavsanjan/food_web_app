@@ -20,29 +20,42 @@ userRoute.post('/signup', async (req, res) => {
     }
     const hpass = await bcrypt.hash(p.data.password, 10)
     try {
-        const user = await prisma.users.create({
-            data: {
-                name: p.data.name,
-                email: p.data.email,
-                phone_number: p.data.phone_number,
-                address: p.data.address,
-                password: hpass,
-                role: p.data.role,
-                city:p.data.city
-            }
-        })
-        if (p.data.role == 'RESTAURANT_OWNER') {
-            const rest = await prisma.restaurant.create({
+        const result=await prisma.$transaction(async(tx)=>{
+            const user = await tx.users.create({
                 data: {
-                    restaurant_name: p.data.restaurant_name,
-                    restaurant_address: p.data.address,
-                    city: p.data.city,
-                    user_id: user.user_id,
-                    rating: p.data.rating
+                    name: p.data.name,
+                    email: p.data.email,
+                    phone_number: p.data.phone_number,
+                    address: p.data.address,
+                    password: hpass,
+                    role: p.data.role,
+                    city:p.data.city
                 }
             })
-            return res.json({ success: true, msg: "restaurant created" })
-        }
+            if (p.data.role == 'RESTAURANT_OWNER') {
+                const rest = await tx.restaurant.create({
+                    data: {
+                        restaurant_name: p.data.restaurant_name,
+                        restaurant_address: p.data.address,
+                        city: p.data.city,
+                        user_id: user.user_id,
+                        rating: p.data.rating
+                    }
+                })
+                return { success: true, restaurantCreated: true }
+            }
+            if(p.data.role==='DELIVERY_AGENT'){
+                await tx.delivery_agent.create({
+                    data:{
+                        agent_name:p.data.name,
+                        vehicle:p.data.vehicle,
+                        rating:p.data.rating,
+                        user_id:user.user_id
+                    }
+                })
+            }
+            return { success: true, restaurantCreated: false }
+        })
         return res.json({ success: true, msg: "user created" })
     } catch (error) {
         // console.log(error)

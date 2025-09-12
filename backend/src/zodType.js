@@ -3,6 +3,7 @@ const z=require('zod')
 const userRoles = ['CUSTOMER', 'RESTAURANT_OWNER', 'DELIVERY_AGENT', 'ADMIN']
 const paymentMethods = ["Credit_Card","Debit_Card","Netbanking","UPI","Cash_on_Delivery"] 
 const paymentStatus=['completed','failed','cod_collected','refunded']
+const vehicletype=['bike','car','cycle']
 
 const createUserSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
@@ -13,10 +14,14 @@ const createUserSchema = z.object({
   role:z.enum(userRoles).default('CUSTOMER'),
   city:z.string().min(6).transform(val => val.toLowerCase()),
   restaurant_name:z.string().optional(),
-  rating:z.number().optional()
+  rating:z.number().optional(),
+  vehicle:z.enum(vehicletype).optional()
 }).refine((data)=>{
   if(data.role==='RESTAURANT_OWNER'){
     return !!data.restaurant_name && !!data.city;
+  }
+  if(data.role==='DELIVERY_AGENT'){
+    return !!data.vehicle
   }
   return true
 });

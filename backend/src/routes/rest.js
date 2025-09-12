@@ -134,7 +134,17 @@ restRoute.get('/orders',authMid,restAuthMid,async(req,res)=>{
             select: {id_restaurant: true}
         });
         const orders=await prisma.orders.findMany({
-            where:{id_restaurant:restaurant.id_restaurant},
+            where:{
+                id_restaurant:restaurant.id_restaurant,
+                status:'Preparing',
+                payments:{
+                    some:{
+                        payment_status:{
+                            in:['completed','cod_pending']
+                        }
+                    }
+                }
+            },
             select:{
                 order_details:{
                     select:{
