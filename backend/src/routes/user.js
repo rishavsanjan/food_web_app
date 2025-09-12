@@ -1,6 +1,6 @@
 const express = require('express');
 const prisma = require('../config/db');
-const { createUserSchema, loginUserSchema, updateAddress, updateTransaction } = require('../zodType');
+const { createUserSchema, loginUserSchema, updateAddress, updateTransaction, reviewSchema } = require('../zodType');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { authMid, userAuthMid } = require('../middlewares/auth');
@@ -218,5 +218,64 @@ userRoute.patch('/update-transaction/:orderId', authMid,userAuthMid, async (req,
   }
 });
 
+userRoute.post('/review',authMid,userAuthMid,async(req,res)=>{
+    const p=reviewSchema.safeParse(req.body)
+    if (!p.success) {
+        return res.status(400).json({ "msg": "Invalid format or less info", "success": false })
+    }
+    try {
+        const ratingup=await prisma.$transaction(async(tx)=>{
+            await tx.review.upsert({
+                where:{
+                    user_id_id_restaurant:{
+                        user_id:req.user.user_id,
+                        id_restaurant:p.data.id_restaurant
+                    }
+                },
+                create:{
+                    user_id:req.user.user_id,
+                    id_restaurant:p.data.id_restaurant,
+                    rating:p.data.rating,
+                    review_text:p.data.review
+                },
+                update:{
+                    rating:p.data.rating,
+                    review_text:p.data.review
+                }
+            })
+            const agg=await tx.review.aggregate({
+                where:{id_restaurant:p.data.id_restaurant},
+                _avg:{rating:true}
+            })
+            const avgRate=agg._avg.rating??0
+            await tx.restaurant.update({
+                where:{id_restaurant:p.data.id_restaurant},
+                data:{rating:avgRate}
+            })
+            return avgRate
+        })
+        res.json({success:true,msg:"Review submitted and restaurant rating updated",new_average_rating:ratingup})
+    } catch (error) {
+        res.status(500).json({ success: false, msg: 'Server error' });
+    }
+})
+
+
+userRoute.get('/getReview/:id',authMid,userAuthMid,async(req,res)=>{
+    try {
+        const review=await prisma.review.findUnique({
+            where:{
+                user_id_id_restaurant:{
+                    user_id:req.user.user_id,
+                    id_restaurant:parseInt(req.params.id)
+                }
+            }
+        })
+        return res.json({success:true,review})
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ success: false, msg: 'Server error' });
+    }
+})
 
 module.exports = userRoute

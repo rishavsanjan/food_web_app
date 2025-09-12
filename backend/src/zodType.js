@@ -90,4 +90,10 @@ const updateTransaction=z.object({
   return true
 })
 
-module.exports={createUserSchema,loginUserSchema,orderSchema,createMenuSchema,updateMenuSchema,updateAddress,updateTransaction}
+const reviewSchema=z.object({
+  id_restaurant:z.number().int(),
+  rating:z.number().min(1).max(5),
+  review:z.string().optional()
+})
+
+module.exports={createUserSchema,loginUserSchema,orderSchema,createMenuSchema,updateMenuSchema,updateAddress,updateTransaction,reviewSchema}

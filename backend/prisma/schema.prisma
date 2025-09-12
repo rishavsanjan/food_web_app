@@ -135,6 +135,8 @@ model review {
   review_id     Int        @id @default(autoincrement())
   restaurant    restaurant @relation(fields: [id_restaurant], references: [id_restaurant], onDelete: Cascade, onUpdate: NoAction)
   users         users      @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, id_restaurant], map: "user_id_id_restaurant_unique")
 }
 
 model support {
