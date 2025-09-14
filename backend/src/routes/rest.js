@@ -34,7 +34,7 @@ restRoute.get("/menu",authMid,restAuthMid,async(req,res)=>{
 
 restRoute.post("/addMenu",authMid,restAuthMid,async(req,res)=>{
     const d=createMenuSchema.safeParse(req.body)
-    console.log(d)
+    // console.log(d)
     if(!d.success){
         return res.status(400).json({"msg":"Invalid format or less info","success":false})
     }

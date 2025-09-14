@@ -27,6 +27,12 @@ const userAuthMid=(req,res,next)=>{
   }
   next()
 }
+const agentAuthMid=(req,res,next)=>{
+  if(req.user.role!='DELIVERY_AGENT'){
+    return res.status(401).json({msg:"Not a DELIVERY AGENT",success:false});
+  }
+  next()
+}
 
 
-module.exports={authMid,restAuthMid,userAuthMid}
+module.exports={authMid,restAuthMid,userAuthMid,agentAuthMid}

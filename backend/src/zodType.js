@@ -4,6 +4,7 @@ const userRoles = ['CUSTOMER', 'RESTAURANT_OWNER', 'DELIVERY_AGENT', 'ADMIN']
 const paymentMethods = ["Credit_Card","Debit_Card","Netbanking","UPI","Cash_on_Delivery"] 
 const paymentStatus=['completed','failed','cod_collected','refunded']
 const vehicletype=['bike','car','cycle']
+const agentStatus=['online','offline','on_delivery']
 
 const createUserSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
@@ -96,4 +97,8 @@ const reviewSchema=z.object({
   review:z.string().optional()
 })
 
-module.exports={createUserSchema,loginUserSchema,orderSchema,createMenuSchema,updateMenuSchema,updateAddress,updateTransaction,reviewSchema}
+const agentStatusSchema=z.object({
+  status:z.enum(agentStatus)
+})
+
+module.exports={createUserSchema,loginUserSchema,orderSchema,createMenuSchema,updateMenuSchema,updateAddress,updateTransaction,reviewSchema,agentStatusSchema}
