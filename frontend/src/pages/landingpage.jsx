@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ChevronDown, Star, Clock, Shield, Smartphone, MapPin, Heart, ArrowRight, Menu, X } from 'lucide-react';
 import { Link } from "react-router-dom";
 import axios from 'axios';
 import OurInfo from './usernotlogged';
 import Lottie from "lottie-react";
 import loadingAnimation from '../../assets/loading-animation/pac_buffer.json';
-
+import { io } from 'socket.io-client';
 
 export default function FoodDeliveryLanding() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,6 +14,9 @@ export default function FoodDeliveryLanding() {
     const [user, setUser] = useState([]);
     const [restaurantss, setRestaurants] = useState();
     const [restaurantLoading, setRestaurantLoading] = useState(true);
+
+    const socket = useMemo(() => io('http://localhost:3000'), []);
+
 
 
     const getProfile = async () => {
@@ -25,6 +28,8 @@ export default function FoodDeliveryLanding() {
                 'Authorization': 'Bearer ' + token
             }
         })
+        console.log(response.data)
+
         console.log(response.data.user);
         setUser(response.data.user);
         getRestraunts();
@@ -41,7 +46,6 @@ export default function FoodDeliveryLanding() {
             headers: {
                 'Authorization': 'Bearer ' + token
             }
-
         })
         setRestaurants(response.data.data);
         setRestaurantLoading(false);
@@ -51,6 +55,15 @@ export default function FoodDeliveryLanding() {
     useEffect(() => {
         getProfile();
     }, [])
+
+    useEffect(() => {
+        if (user?.role === "DELIVERY_AGENT") {
+            socket.emit('delivery_partner_online', {
+                driverId: user.user_id,
+                driverCity: user.city
+            });
+        }
+    }, [user])
 
     useEffect(() => {
         const handleScroll = () => setScrollY(window.scrollY);
@@ -192,7 +205,7 @@ export default function FoodDeliveryLanding() {
 
             <section id="restaurants" className={`${isLogin && 'py-20 px-4 bg-black/20'} `}>
                 {
-                    restaurantLoading && isLogin ?
+                    restaurantLoading && isLogin && user.role === 'CUSTOMER' ?
                         <>
                             <div className="flex items-center justify-center backdrop-blur-md bg-transparent flex-col ">
                                 <Lottie
@@ -206,7 +219,7 @@ export default function FoodDeliveryLanding() {
                         :
                         <>
                             {
-                                isLogin &&
+                                isLogin && user.role === 'CUSTOMER' &&
                                 <>
                                     <div className="max-w-7xl mx-auto">
                                         <div className="text-center mb-16">

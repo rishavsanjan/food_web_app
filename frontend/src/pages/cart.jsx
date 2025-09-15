@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ChefHat, Plus, Minus, Trash2, ArrowLeft, Clock, MapPin, CreditCard, ShoppingBag, Star, Heart, Gift, Percent, Activity, Zap, Leaf, Shield, BottleWine, Vegan, VeganIcon, LucideVegan, LeafyGreen, } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
+import axios from 'axios';
 
 
 export default function Cart() {
@@ -90,7 +91,7 @@ export default function Cart() {
     if (!appliedPromo) return 0;
     const subtotal = calculateSubtotal();
     if (appliedPromo.type === 'percentage') {
-      
+
       return Math.floor(subtotal * (appliedPromo.discount / 100));
     } else {
       return Math.min(appliedPromo.discount, subtotal);
@@ -156,6 +157,30 @@ export default function Cart() {
       return updatedCart;
     })
     toast.success('Dish deleted successfully!')
+  }
+
+  const placeOrder = async () => {
+    const items = cart.map((dish) => {
+      return {
+        menu_id: dish.menu_id,
+        quantity: dish.quantity
+      }
+    })
+    const token = localStorage.getItem('token');
+    const response = await axios({
+      url: 'http://localhost:3000/api/order/create',
+      method: 'post',
+      headers: {
+        'Authorization': 'Bearer ' + token
+      },
+      data: {
+        id_restaurant: restaurant.id_restaurant,
+        items: items,
+        instructions: specialInstructions,
+        payment_method: 'UPI'
+      }
+    });
+    console.log(response.data)
   }
 
 
@@ -570,7 +595,7 @@ export default function Cart() {
                   </span>
                 </div>
 
-                <button className="w-full bg-gradient-to-r from-orange-500 to-pink-500 py-4 rounded-xl font-semibold text-lg hover:shadow-xl hover:shadow-orange-500/30 transition-all transform hover:scale-105">
+                <button onClick={() => {placeOrder()}} className="w-full bg-gradient-to-r from-orange-500 to-pink-500 py-4 rounded-xl font-semibold text-lg hover:shadow-xl hover:shadow-orange-500/30 transition-all transform hover:scale-105">
                   Proceed to Checkout
                 </button>
 

@@ -81,13 +81,18 @@ export default function RestaurantAdminDashboard() {
       }
     })
 
+    console.log(response.data)
+
     setOrders(response.data.orders)
   }
+
+  
 
   useEffect(() => {
     getOrders();
     getDetails();
   }, [])
+
 
   const categories = ['veg', 'non_veg'];
 
