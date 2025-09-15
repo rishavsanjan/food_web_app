@@ -37,11 +37,22 @@ export default function RestaurantLanding() {
     setRestaurant(response.data.restaurant);
     setVegMenu(response.data.vegMenus);
     setNonVegMenu(response.data.nonVegMenus);
-    console.log(response.data);
     if (!localStorage.getItem("cart")) {
       localStorage.setItem("cart", "[]");
     }
+    const localCart = JSON.parse(localStorage.getItem("cart") || []);
     setCart(JSON.parse(localStorage.getItem("cart") || []));
+    const merged = response.data.menus.map((dish) => {
+      const cartItem = localCart.find(item => item.menu_id === dish.menu_id);
+      console.log(cartItem)
+      return {
+        ...dish,
+        quantity: cartItem?.quantity || 0
+      }
+    })
+
+    setMenu(merged);
+
     setLoading(false);
 
   }
@@ -49,6 +60,7 @@ export default function RestaurantLanding() {
   useEffect(() => {
     getMenu();
   }, []);
+
 
 
 
@@ -62,7 +74,9 @@ export default function RestaurantLanding() {
       const is_true = cart[0].id_restaurant !== newItem.id_restaurant;
       if (is_true) {
         setCartClearModel(true);
+        return;
       }
+
     }
 
     setCart(prev => {
@@ -89,15 +103,77 @@ export default function RestaurantLanding() {
 
       return updatedCart;
     });
+    setMenu(prev =>
+      prev.map((dish) => {
+        if (dish.menu_id === newItem.menu_id) {
+          return {
+            ...dish,
+            quantity: dish.quantity++
+          }
+        }
+        return dish;
+      })
+    )
     toast('Added to cart!');
 
   };
 
 
-  console.log(cart)
+  const removeQuantity = (updateItem) => {
+    setCart(prev => {
+      const existingDishIndex = prev.findIndex(item => item.menu_id === updateItem.menu_id);
+      const updatedCart = prev.map((dish) => {
+        if (dish.menu_id === updateItem.menu_id) {
+          return {
+            ...dish,
+            quantity: dish.quantity - 1
+          }
+        }
+        return dish;
+      })
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+      return updatedCart;
+    })
+    setMenu(prev =>
+      prev.map((dish) => {
+        if (dish.menu_id === updateItem.menu_id) {
+          return {
+            ...dish,
+            quantity: dish.quantity--
+          }
+        }
+        return dish;
+      })
+    )
+    toast.success('Dish removed successfully!')
+
+  }
 
 
+  console.log(cart);
+  console.log(menu);
 
+  const removeItem = (id) => {
+    console.log('removed')
+    setMenu(prev =>
+      prev.map((dish) => {
+        if (dish.menu_id === id) {
+          return {
+            ...dish,
+            quantity: 0
+          }
+        }
+        return dish;
+      })
+    )
+
+    setCart(prev => {
+      const updatedCart = prev.filter(item => item.menu_id !== id);
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+      return updatedCart;
+    })
+    toast.success('Dish deleted successfully!')
+  }
 
 
   const categories = [
@@ -410,12 +486,39 @@ export default function RestaurantLanding() {
                         </div>
                       )}
                     </div>
-                    <button
-                      onClick={() => { addToCart(dish) }}
-                      className="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-2 rounded-full font-semibold hover:shadow-lg transition-all opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 flex items-center gap-2 hover:from-orange-400 hover:to-pink-400"
-                    >
-                      Add to Cart <ArrowRight className="w-4 h-4" />
-                    </button>
+                    {
+                      dish.quantity === 0 &&
+                      <button
+                        onClick={() => { addToCart(dish) }}
+                        className="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-2 rounded-full font-semibold hover:shadow-lg transition-all opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 flex items-center gap-2 hover:from-orange-400 hover:to-pink-400"
+                      >
+                        Add to Cart <ArrowRight className="w-4 h-4" />
+                      </button>
+                    }
+
+                    {
+                      dish.quantity > 0 &&
+                      <div className='bg-gradient-to-r from-orange-500 to-pink-500 flex flex-row rounded-full px-6 py-1 justify-between gap-4 items-center'>
+                        <button className='text-4xl' onClick={() => { addToCart(dish) }}>
+                          +
+                        </button>
+                        <h1 className='text-3xl text-black'>
+                          {dish.quantity}
+                        </h1>
+                        {
+                          dish.quantity === 1 ?
+                            <button className='text-4xl' onClick={() => { removeItem(dish.menu_id) }}>
+                              -
+                            </button>
+                            :
+                            <button className='text-4xl' onClick={() => { removeQuantity(dish) }}>
+                              -
+                            </button>
+                        }
+
+                      </div>
+
+                    }
                   </div>
                 </div>
               ))}

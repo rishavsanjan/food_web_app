@@ -9,6 +9,7 @@ import LogIn from './pages/login'
 import Cart from './pages/cart'
 import UserProfile from './pages/profile'
 import RestaurantAdminDashboard from './pages/restaurantadmin'
+import DeliveryDriverPanel from './pages/deliverydriverpanel'
 
 
 function AppContent() {
@@ -20,6 +21,7 @@ function AppContent() {
       <Route path='/cart' element={<Cart/>}/>
       <Route path='/profile' element={<UserProfile/>}/>
       <Route path='/restaurant-admin' element={<RestaurantAdminDashboard/>}/>
+      <Route path='/delivery-pofile' element={<DeliveryDriverPanel/>}/>
     </Routes>
   )
 }

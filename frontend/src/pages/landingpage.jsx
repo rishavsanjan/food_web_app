@@ -91,7 +91,7 @@ export default function FoodDeliveryLanding() {
                                         <h1 className="hover:text-orange-400 transition-colors">Login / Sign Up</h1>
                                     </Link>
                                     :
-                                    <Link to={`${user.role === 'RESTAURANT_OWNER' ? '/restaurant-admin' : '/profile'} `}>
+                                    <Link to={`${user.role === 'RESTAURANT_OWNER' ? '/restaurant-admin' : `${user.role === 'CUSTOMER' ? '/profile' : '/delivery-pofile'}`} `}>
                                         <h1 className="hover:text-orange-400 transition-colors"> {user.name}</h1>
                                     </Link>
 
