@@ -5,6 +5,7 @@ const paymentMethods = ["Credit_Card","Debit_Card","Netbanking","UPI","Cash_on_D
 const paymentStatus=['completed','failed','cod_collected','refunded']
 const vehicletype=['bike','car','cycle']
 const agentStatus=['online','offline','on_delivery']
+const orderStatus=['assigned','picked_up','on_the_way','delivered']
 
 const createUserSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
@@ -26,6 +27,11 @@ const createUserSchema = z.object({
   }
   return true
 });
+
+const orderStatusSchema=z.object({
+  order_id:z.number(),
+  status:z.enum(orderStatus)
+})
 
 const loginUserSchema=z.object({
     phone_number:z.string().regex(/^\+?[0-9]{10,15}$/, "Phone number must be 10-12 digits"),
@@ -101,4 +107,4 @@ const agentStatusSchema=z.object({
   status:z.enum(agentStatus)
 })
 
-module.exports={createUserSchema,loginUserSchema,orderSchema,createMenuSchema,updateMenuSchema,updateAddress,updateTransaction,reviewSchema,agentStatusSchema}
+module.exports={createUserSchema,loginUserSchema,orderSchema,createMenuSchema,updateMenuSchema,updateAddress,updateTransaction,reviewSchema,agentStatusSchema,orderStatusSchema}
