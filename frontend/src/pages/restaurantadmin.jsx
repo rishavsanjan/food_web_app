@@ -86,7 +86,7 @@ export default function RestaurantAdminDashboard() {
     setOrders(response.data.orders)
   }
 
-  
+
 
   useEffect(() => {
     getOrders();
@@ -275,7 +275,7 @@ export default function RestaurantAdminDashboard() {
 
   // Order status functions
   const getStatusColor = (status) => {
-    switch(status) {
+    switch (status) {
       case 'pending': return 'bg-yellow-500';
       case 'preparing': return 'bg-blue-500';
       case 'ready': return 'bg-green-500';
@@ -285,7 +285,7 @@ export default function RestaurantAdminDashboard() {
   };
 
   const getStatusIcon = (status) => {
-    switch(status) {
+    switch (status) {
       case 'pending': return <Clock className="w-4 h-4" />;
       case 'preparing': return <AlertCircle className="w-4 h-4" />;
       case 'ready': return <CheckCircle className="w-4 h-4" />;
@@ -293,61 +293,73 @@ export default function RestaurantAdminDashboard() {
     }
   };
 
+  const getTotalCost = (order) => {
+    console.log(order)
+    let total = 0;
+    order.map((dish) => {
+      total += parseInt(dish.total_price);
+    })
+    return total;
+  }
+
+  const getDishName = (order) => {
+    console.log(order)
+    const name = menu.find(item => item.menu_id === order.menu_id);
+    return name.menu_name;
+  }
+
+  function formatDateTime(isoString) {
+    const date = new Date(isoString);
+
+    // Options for formatting
+    const options = {
+      year: "numeric",
+      month: "long",  // or "2-digit"
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    };
+
+    return date.toLocaleString("en-US", options);
+  }
+
   const OrderCard = ({ order }) => (
-    <div className="bg-transparent bg-opacity-5 rounded-2xl p-6 border border-white border-opacity-10">
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <h3 className="text-white text-lg font-semibold">#{order.id}</h3>
-            <span className={`px-3 py-1 rounded-full text-white text-xs font-medium flex items-center gap-1 ${getStatusColor(order.status)}`}>
-              {getStatusIcon(order.status)}
-              {order.status.toUpperCase()}
-            </span>
-          </div>
-          <div className="flex items-center gap-4 text-purple-200 text-sm">
-            <div className="flex items-center gap-1">
-              <User className="w-4 h-4" />
-              <span>{order.customerName}</span>
+    <>
+      {
+        order.map((dish) => (
+          <div className="bg-transparent bg-opacity-5 rounded-2xl p-6 border border-white border-opacity-10">
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex items-center gap-3 mb-2">
+                <h3 className="text-white text-lg font-semibold">#{dish.order_id}</h3>
+                <span className={`px-3 py-1 rounded-full text-white text-xs font-medium flex items-center gap-1 ${getStatusColor(dish.status)}`}>
+                  {getStatusIcon(dish.status)}
+                  {dish?.status?.toUpperCase()}
+                </span>
+              </div>
+              <div className="text-right">
+                <div className="text-green-400 text-xl font-bold">₹{getTotalCost(dish.order_details)}</div>
+                <div className="text-purple-200 text-sm">{formatDateTime(dish.order_details[0].created_at)}</div>
+              </div>
             </div>
-            <div className="flex items-center gap-1">
-              <Phone className="w-4 h-4" />
-              <span>{order.customerPhone}</span>
+
+            <div className="space-y-2 mb-4">
+              {dish.order_details.map((item, index) => (
+                <div key={index} className="flex justify-between items-center bg-transparent bg-opacity-10 rounded-lg p-3 border border-white border-opacity-10">
+                  <div className="flex items-center gap-2">
+                    <span className="bg-orange-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                      {item.quantity}
+                    </span>
+                    <span className="text-white">{item.menu.menu_name}</span>
+                  </div>
+                  <span className="text-green-400 font-medium">₹{item.total_price}</span>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-        <div className="text-right">
-          <div className="text-green-400 text-xl font-bold">₹{order.totalAmount}</div>
-          <div className="text-purple-200 text-sm">{order.orderTime}</div>
-          <div className="text-orange-400 text-sm font-medium">{order.estimatedTime}</div>
-        </div>
-      </div>
-      
-      <div className="space-y-2 mb-4">
-        {order.items.map((item, index) => (
-          <div key={index} className="flex justify-between items-center bg-transparent bg-opacity-10 rounded-lg p-3 border border-white border-opacity-10">
-            <div className="flex items-center gap-2">
-              <span className="bg-orange-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                {item.quantity}
-              </span>
-              <span className="text-white">{item.name}</span>
-            </div>
-            <span className="text-green-400 font-medium">₹{item.price * item.quantity}</span>
-          </div>
-        ))}
-      </div>
-      
-      <div className="flex gap-2">
-        <button className="flex-1 bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 text-green-400 py-2 px-4 rounded-lg font-medium transition-all duration-200">
-          Accept
-        </button>
-        <button className="flex-1 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-400 py-2 px-4 rounded-lg font-medium transition-all duration-200">
-          Mark Ready
-        </button>
-        <button className="bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 py-2 px-4 rounded-lg transition-all duration-200">
-          <Trash2 className="w-4 h-4" />
-        </button>
-      </div>
-    </div>
+        ))
+      }
+    </>
   );
 
   if (loading) {
@@ -449,27 +461,38 @@ export default function RestaurantAdminDashboard() {
 
           {/* Tab Navigation */}
           <div className="flex gap-4 mb-6">
-            <button 
+            <button
               onClick={() => setActiveTab('menu')}
-              className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
-                activeTab === 'menu' 
-                  ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white' 
-                  : 'bg-transparent bg-opacity-10 border border-white border-opacity-20 text-purple-200 hover:text-white'
-              }`}
+              className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${activeTab === 'menu'
+                ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white'
+                : 'bg-transparent bg-opacity-10 border border-white border-opacity-20 text-purple-200 hover:text-white'
+                }`}
             >
               <ChefHat className="w-5 h-5" />
               Menu Management
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('orders')}
-              className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
-                activeTab === 'orders' 
-                  ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white' 
-                  : 'bg-transparent bg-opacity-10 border border-white border-opacity-20 text-purple-200 hover:text-white'
-              }`}
+              className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${activeTab === 'orders'
+                ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white'
+                : 'bg-transparent bg-opacity-10 border border-white border-opacity-20 text-purple-200 hover:text-white'
+                }`}
             >
               <ShoppingBag className="w-5 h-5" />
               Current Orders
+              <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                {orders.filter(o => o.status !== 'completed').length}
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveTab('all')}
+              className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${activeTab === 'all'
+                ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white'
+                : 'bg-transparent bg-opacity-10 border border-white border-opacity-20 text-purple-200 hover:text-white'
+                }`}
+            >
+              <ShoppingBag className="w-5 h-5" />
+              All Orders
               <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                 {orders.filter(o => o.status !== 'completed').length}
               </span>
@@ -577,12 +600,10 @@ export default function RestaurantAdminDashboard() {
                   </span>
                 </div>
               </div>
-              
+
               <div className="grid gap-6">
                 {orders.length > 0 ? (
-                  orders.map(order => (
-                    <OrderCard key={order.id} order={order} />
-                  ))
+                  <OrderCard order={orders} />
                 ) : (
                   <div className="bg-transparent bg-opacity-5 rounded-2xl p-12 border border-white border-opacity-10 text-center">
                     <ShoppingBag className="h-16 w-16 text-purple-300 mx-auto mb-4" />
@@ -593,6 +614,41 @@ export default function RestaurantAdminDashboard() {
               </div>
             </div>
           )}
+          {/* All orders section */}
+          {activeTab === 'all' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-white flex items-center">
+                  <ShoppingBag className="h-6 w-6 mr-3" />
+                  Current Orders
+                </h2>
+                <div className="flex gap-2">
+                  <span className="px-3 py-1 bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 text-sm rounded-full">
+                    Pending: {orders.filter(o => o.status === 'pending').length}
+                  </span>
+                  <span className="px-3 py-1 bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm rounded-full">
+                    Preparing: {orders.filter(o => o.status === 'preparing').length}
+                  </span>
+                  <span className="px-3 py-1 bg-green-500/20 border border-green-500/30 text-green-400 text-sm rounded-full">
+                    Ready: {orders.filter(o => o.status === 'ready').length}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid gap-6">
+                {orders.length > 0 ? (
+                  <OrderCard order={orders} />
+                ) : (
+                  <div className="bg-transparent bg-opacity-5 rounded-2xl p-12 border border-white border-opacity-10 text-center">
+                    <ShoppingBag className="h-16 w-16 text-purple-300 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-white mb-2">No Orders Yet</h3>
+                    <p className="text-purple-200">New orders will appear here when customers place them.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
         </div>
 
         {/* Dish Modal */}

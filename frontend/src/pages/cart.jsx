@@ -1,14 +1,39 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ChefHat, Plus, Minus, Trash2, ArrowLeft, Clock, MapPin, CreditCard, ShoppingBag, Star, Heart, Gift, Percent, Activity, Zap, Leaf, Shield, BottleWine, Vegan, VeganIcon, LucideVegan, LeafyGreen, } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import axios from 'axios';
+import { io } from 'socket.io-client';
+
+
 
 
 export default function Cart() {
   const [cart, setCart] = useState([]);
   const [restaurant, setRestaurant] = useState({});
   const navigate = useNavigate();
+  const socket = useMemo(() => io('http://localhost:3000'), []);
+  const [user, setUser] = useState([]);
+
+
+
+  const getProfile = async () => {
+    const token = localStorage.getItem('token');
+    const response = await axios({
+      url: 'http://localhost:3000/api/users/profile',
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
+    })
+
+    setUser(response.data.user)
+  };
+
+  useEffect(() => {
+    getProfile();
+  }, []);
+
   useEffect(() => {
     if (!localStorage.getItem("cart")) {
       localStorage.setItem("cart", "[]");
@@ -180,8 +205,19 @@ export default function Cart() {
         payment_method: 'UPI'
       }
     });
+    socket.emit('emit_order_to_riders', {
+      orderDetails:response.data.orderDetails,
+      user: user,
+      restaurant: restaurant,
+      order: {
+        items: items,
+        totalPrice: calculateTotal()
+      }
+    })
     console.log(response.data)
   }
+
+  console.log(user)
 
 
 
@@ -595,7 +631,7 @@ export default function Cart() {
                   </span>
                 </div>
 
-                <button onClick={() => {placeOrder()}} className="w-full bg-gradient-to-r from-orange-500 to-pink-500 py-4 rounded-xl font-semibold text-lg hover:shadow-xl hover:shadow-orange-500/30 transition-all transform hover:scale-105">
+                <button onClick={() => { placeOrder() }} className="w-full bg-gradient-to-r from-orange-500 to-pink-500 py-4 rounded-xl font-semibold text-lg hover:shadow-xl hover:shadow-orange-500/30 transition-all transform hover:scale-105">
                   Proceed to Checkout
                 </button>
 

@@ -19,18 +19,44 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }))
 
-const io =  Server(server, {
+const io = Server(server, {
     cors: {
         origin: "http://localhost:5173",
         methods: ["GET", "POST"]
     }
 });
-
+let drivers = {};
 io.on("connection", (socket) => {
     console.log('User is online : ', socket.id);
     socket.on("delivery_partner_online", ({ driverId, driverCity }) => {
+        drivers[driverId] = socket.id;
         console.log(`Driver ${driverId} is online in city ${driverCity}`);
-        socket.join(`city:${driverCity}`);
+        // socket.join(`city:${driverCity}`);
+    });
+    socket.on("emit_order_to_riders", ({ orderDetails, order, user, restaurant }) => {
+        console.log(orderDetails);
+
+        for (const driverId in drivers) {
+            console.log('hello')
+            const driverSocketId = drivers[driverId];
+            console.log(driverId, driverSocketId)
+            io.to(driverSocketId).emit("new_order_request", {
+                orderDetails,
+                order,
+                user,
+                restaurant,
+            });
+        }
+
+    })
+    socket.on("disconnect", () => {
+        for (const driverId in drivers) {
+            if (drivers[driverId] === socket.id) {
+                console.log(`Driver ${driverId} went offline`);
+                delete drivers[driverId];
+                break;
+            }
+        }
     });
 })
 

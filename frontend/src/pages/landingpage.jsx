@@ -6,6 +6,7 @@ import OurInfo from './usernotlogged';
 import Lottie from "lottie-react";
 import loadingAnimation from '../../assets/loading-animation/pac_buffer.json';
 import { io } from 'socket.io-client';
+import OrderNotificationOverlay from './order-emit';
 
 export default function FoodDeliveryLanding() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,7 +15,8 @@ export default function FoodDeliveryLanding() {
     const [user, setUser] = useState([]);
     const [restaurantss, setRestaurants] = useState();
     const [restaurantLoading, setRestaurantLoading] = useState(true);
-
+    const [incomingOrder, setIncomingOrder] = useState(null);
+    const [riderOrderModal, setRiderOrderModal] = useState(false);
     const socket = useMemo(() => io('http://localhost:3000'), []);
 
 
@@ -63,7 +65,22 @@ export default function FoodDeliveryLanding() {
                 driverCity: user.city
             });
         }
-    }, [user])
+    }, [user]);
+
+    useEffect(() => {
+        socket.on('new_order_request', ({ orderDetails, order, user, restaurant }) => {
+            setIncomingOrder({ orderDetails, order, user, restaurant });
+            setRiderOrderModal(true);
+            console.log(orderDetails)
+        });
+
+        return () => {
+            socket.off("new_order_request");
+        };
+    }, []);
+
+
+
 
     useEffect(() => {
         const handleScroll = () => setScrollY(window.scrollY);
@@ -82,6 +99,15 @@ export default function FoodDeliveryLanding() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white overflow-hidden">
+            {riderOrderModal && incomingOrder && (
+                <OrderNotificationOverlay
+                    orderDetails={incomingOrder.orderDetails}
+                    order={incomingOrder.order}
+                    user={incomingOrder.user}
+                    restaurant={incomingOrder.restaurant}
+                    onClose={() => setRiderOrderModal(false)}
+                />
+            )}
             {/* Navigation */}
             <nav className={`fixed w-full z-50 transition-all duration-300 ${scrollY > 50 ? 'bg-black/20 backdrop-blur-lg' : 'bg-transparent'}`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
