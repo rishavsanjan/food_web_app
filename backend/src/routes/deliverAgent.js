@@ -88,5 +88,22 @@ agentRoute.patch('/change-order-status',authMid,agentAuthMid,async(req,res)=>{
     }
 })
 
+agentRoute.get('/getorders',authMid,agentAuthMid,async(req,res)=>{
+    try {
+        const agent=await prisma.delivery_agent.findUnique({
+            where:{user_id:req.user.user_id}
+        })
+        const orders=await prisma.deliveries.findMany({
+            where:{
+                delivery_agent_id:agent.agent_id,
+                delivery_status:{not:'delivered'}
+            }
+        })
+        return res.json({success:true,orders})
+    } catch (error) {
+        res.status(500).json({msg:"Internal server error",success:false});
+    }
+})
+
 
 module.exports={agentRoute}
