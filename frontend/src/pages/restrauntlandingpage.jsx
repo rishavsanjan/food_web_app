@@ -6,6 +6,7 @@ import CartClearModel from '../models/replaceRestaurantInCart'
 import Lottie from "lottie-react";
 import loadingAnimation from '../../assets/loading-animation/pac_buffer.json'
 import { ToastContainer, toast } from 'react-toastify';
+import RestaurantReviews from './restaurant_reviews';
 
 
 export default function RestaurantLanding() {
@@ -165,13 +166,13 @@ export default function RestaurantLanding() {
         if (dish.menu_id === updateItem.menu_id) {
           return {
             ...dish,
-            quantity: dish.quantity -1
+            quantity: dish.quantity - 1
           }
         }
         return dish;
       })
     )
-    
+
     toast.success('Dish removed successfully!')
 
   }
@@ -218,6 +219,7 @@ export default function RestaurantLanding() {
     { id: 'all', name: 'All', icon: '🥗+🍖', color: 'from-green-400 to-emerald-500' },
     { id: 'veg', name: 'Veg', icon: '🥗', color: 'from-green-400 to-emerald-500' },
     { id: 'non-veg', name: 'Non-Veg', icon: '🍖', color: 'from-red-400 to-rose-500' },
+    { id: 'reviews', name: 'Reviews', icon: '✍🏻', color: 'from-red-400 to-rose-500' },
   ];
 
   useEffect(() => {
@@ -231,6 +233,9 @@ export default function RestaurantLanding() {
     }
     if (activeCategory === 'all') {
       setActiveMenu(fullMenu);
+    }
+    if (activeCategory === 'reviews') {
+      setActiveMenu([]);
     }
   }, [activeCategory])
 
@@ -265,6 +270,7 @@ export default function RestaurantLanding() {
         pauseOnHover
         theme="light"
       />
+
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white overflow-hidden">
         {/* Navigation */}
         <nav className={`fixed w-full z-50 transition-all duration-300 ${scrollY > 50 ? 'bg-black/20 backdrop-blur-lg' : 'bg-transparent'}`}>
@@ -362,8 +368,14 @@ export default function RestaurantLanding() {
 
             {/* Dishes Grid */}
             {
-              activeMenu.length === 0 &&
+              activeMenu.length === 0 && activeCategory !== 'reviews' &&
               <h1 className='text-xl text-center items-center flex justify-center'>There are no items available in this catogery!</h1>
+            }
+            {
+              activeCategory === 'reviews' &&
+              <>
+                <RestaurantReviews />
+              </>
             }
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
 
@@ -373,7 +385,7 @@ export default function RestaurantLanding() {
                     <div className="text-5xl group-hover:scale-110 transition-transform duration-300">
                       <img src={`${dish?.image}`} alt="" />
                     </div>
-                    
+
                   </div>
 
                   <h3 className="text-2xl font-bold mb-2 group-hover:text-orange-400 transition-colors">

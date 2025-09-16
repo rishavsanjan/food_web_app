@@ -37,9 +37,7 @@ io.on("connection", (socket) => {
         console.log(orderDetails);
 
         for (const driverId in drivers) {
-            console.log('hello')
             const driverSocketId = drivers[driverId];
-            console.log(driverId, driverSocketId)
             io.to(driverSocketId).emit("new_order_request", {
                 orderDetails,
                 order,
@@ -48,6 +46,17 @@ io.on("connection", (socket) => {
             });
         }
 
+
+    })
+    socket.on('order_accepted', ({ driverAssignedId }) => {
+        console.log(driverAssignedId);
+        for (const driverId in drivers) {
+            if (driverAssignedId === driverId) {
+                continue;
+            }
+            const driverSocketId = drivers[driverId];
+            io.to(driverSocketId).emit("order_already_accepted");
+        }
     })
     socket.on("disconnect", () => {
         for (const driverId in drivers) {

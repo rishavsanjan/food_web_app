@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Package, MapPin, Clock, Navigation, AlertCircle, X, Check } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import axios from 'axios';
+import { io } from 'socket.io-client';
 
-const OrderNotificationOverlay = ({orderDetails, order, user, restaurant }) => {
+
+const OrderNotificationOverlay = ({ driver, orderDetails, order, user, restaurant, onClose }) => {
     const [showOrderNotification, setShowOrderNotification] = useState(true);
     const [acceptTimer, setAcceptTimer] = useState(15);
+    const socket = useMemo(() => io('http://localhost:3000'), []);
 
     // Sample order data
     const pendingOrder = {
@@ -46,13 +49,16 @@ const OrderNotificationOverlay = ({orderDetails, order, user, restaurant }) => {
                 'Authorization': 'Bearer ' + token
             },
             data: {
-               order_id:orderDetails[0].order_id,
-               delivery_address:user.address,
-               restaurant_address:restaurant.restaurant_address
+                order_id: orderDetails[0].order_id,
+                delivery_address: user.address,
+                restaurant_address: restaurant.restaurant_address
             }
-        })
-
-
+        });
+        console.log(response.data)
+        if (response.status === 200) {
+            socket.emit('order_accepted', { driverAssignedId: driver.user_id });
+        }
+        onClose();
     };
 
     const declineOrder = () => {

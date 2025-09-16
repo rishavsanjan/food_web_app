@@ -30,7 +30,7 @@ agentRoute.post('/assignorder',authMid,agentAuthMid,async(req,res)=>{
         const agent=await prisma.delivery_agent.findUnique({
             where:{user_id:req.user.user_id}
         })
-        await prisma.deliveries.create({
+        const delivery =await prisma.deliveries.create({
             data:{
                 order_id:req.body.order_id,
                 delivery_agent:agent.agent_id,
@@ -40,6 +40,7 @@ agentRoute.post('/assignorder',authMid,agentAuthMid,async(req,res)=>{
         })
         return res.json({msg:"agent assigned",success:true})
     } catch (error) {
+        console.log(error)
         res.status(500).json({msg:"Internal server error",success:false});
     }
 })

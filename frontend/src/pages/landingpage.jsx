@@ -7,6 +7,7 @@ import Lottie from "lottie-react";
 import loadingAnimation from '../../assets/loading-animation/pac_buffer.json';
 import { io } from 'socket.io-client';
 import OrderNotificationOverlay from './order-emit';
+import { toast } from 'react-toastify';
 
 export default function FoodDeliveryLanding() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -74,8 +75,14 @@ export default function FoodDeliveryLanding() {
             console.log(orderDetails)
         });
 
+        socket.on('order_already_accepted', () => {
+            setRiderOrderModal(false);
+            toast.warn('Order already accepted');
+        })
+
         return () => {
             socket.off("new_order_request");
+            socket.off('order_already_accepted');
         };
     }, []);
 
@@ -101,6 +108,7 @@ export default function FoodDeliveryLanding() {
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white overflow-hidden">
             {riderOrderModal && incomingOrder && (
                 <OrderNotificationOverlay
+                    driver = {user}
                     orderDetails={incomingOrder.orderDetails}
                     order={incomingOrder.order}
                     user={incomingOrder.user}
