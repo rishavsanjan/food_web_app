@@ -33,7 +33,7 @@ agentRoute.post('/assignorder',authMid,agentAuthMid,async(req,res)=>{
         const delivery =await prisma.deliveries.create({
             data:{
                 order_id:req.body.order_id,
-                delivery_agent:agent.agent_id,
+                delivery_agent_id:agent.agent_id,
                 delivery_address:req.body.delivery_address,
                 restaurant_address:req.body.restaurant_address
             }
