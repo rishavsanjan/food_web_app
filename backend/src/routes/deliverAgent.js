@@ -23,7 +23,7 @@ agentRoute.patch('/change-status',authMid,agentAuthMid,async(req,res)=>{
 
 
 agentRoute.post('/assignorder',authMid,agentAuthMid,async(req,res)=>{
-    if(!req.body.order_id||!req.body.delivery_address){
+    if(!req.body.order_id||!req.body.delivery_address||!req.body.restaurant_address){
         return res.status(400).json({"msg":"Invalid format or less info","success":false})
     }
     try {
@@ -34,7 +34,8 @@ agentRoute.post('/assignorder',authMid,agentAuthMid,async(req,res)=>{
             data:{
                 order_id:req.body.order_id,
                 delivery_agent:agent.agent_id,
-                delivery_address:req.body.delivery_address
+                delivery_address:req.body.delivery_address,
+                restaurant_address:req.body.restaurant_address
             }
         })
         return res.json({msg:"agent assigned",success:true})

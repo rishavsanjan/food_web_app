@@ -9,16 +9,17 @@ datasource db {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model deliveries {
-  order_id          Int                   @unique
-  delivery_agent_id Int
-  delivery_status   delivery_status_enum? @default(assigned)
-  assigned_at       DateTime?             @default(now()) @db.Timestamp(6)
-  picked_up_at      DateTime?             @db.Timestamp(6)
-  delivered_at      DateTime?             @db.Timestamp(6)
-  delivery_rating   Decimal?              @db.Decimal(2, 1)
-  delivery_address  String                @db.VarChar(255)
-  delivery_agent    delivery_agent        @relation(fields: [delivery_agent_id], references: [agent_id], onDelete: Cascade, onUpdate: NoAction)
-  orders            orders                @relation(fields: [order_id], references: [order_id], onDelete: Cascade, onUpdate: NoAction)
+  order_id           Int                   @unique
+  delivery_agent_id  Int
+  delivery_status    delivery_status_enum? @default(assigned)
+  assigned_at        DateTime?             @default(now()) @db.Timestamp(6)
+  picked_up_at       DateTime?             @db.Timestamp(6)
+  delivered_at       DateTime?             @db.Timestamp(6)
+  delivery_rating    Decimal?              @db.Decimal(2, 1)
+  delivery_address   String                @db.VarChar(255)
+  restaurant_address String?               @db.VarChar(255)
+  delivery_agent     delivery_agent        @relation(fields: [delivery_agent_id], references: [agent_id], onDelete: Cascade, onUpdate: NoAction)
+  orders             orders                @relation(fields: [order_id], references: [order_id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
