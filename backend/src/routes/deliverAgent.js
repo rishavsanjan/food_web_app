@@ -30,6 +30,29 @@ agentRoute.post('/assignorder',authMid,agentAuthMid,async(req,res)=>{
         const agent=await prisma.delivery_agent.findUnique({
             where:{user_id:req.user.user_id}
         })
+        if (!agent) {
+            return res.status(404).json({ msg:"Delivery agent not found",success:false});
+        }
+        // const check=await prisma.deliveries.findFirst({
+        //     where:{
+        //         order_id:req.body.order_id,
+        //         delivery_status:{not:'delivered'}
+        //     }
+        // })
+        // if(check){
+        //     return res.json({success:false,msg:"Order is already assigned to another agent"})
+        // }
+
+        const order = await prisma.orders.findUnique({
+            where: {order_id:req.body.order_id,status:'Preparing'},
+        });
+
+        if (!order) {
+            return res.status(404).json({
+                msg: "Order not found",
+                success: false
+            });
+        }
         const delivery =await prisma.deliveries.create({
             data:{
                 order_id:req.body.order_id,
