@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Package, MapPin, Clock, DollarSign, Star, Navigation, Phone, MessageCircle, CheckCircle, AlertCircle } from 'lucide-react';
+import axios from 'axios';
 
 const DeliveryDriverPanel = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -10,64 +11,51 @@ const DeliveryDriverPanel = () => {
     rating: 4.8,
     completedDeliveries: 47
   });
+  const [orders, setOrders] = useState([]);
 
-  
 
-  const [activeOrders, setActiveOrders] = useState([
-    {
-      id: '#FE2023',
-      restaurant: 'Spicy Dragon',
-      customer: 'John Smith',
-      address: '123 Oak Street, Downtown',
-      phone: '+1 (555) 123-4567',
-      items: 3,
-      value: 24.50,
-      tip: 3.50,
-      distance: '2.3 km',
-      estimatedTime: '15 min',
-      status: 'pickup',
-      priority: 'normal'
-    },
-    {
-      id: '#FE2024',
-      restaurant: 'Healthy Bowl Co',
-      customer: 'Sarah Johnson',
-      address: '456 Pine Avenue, Midtown',
-      phone: '+1 (555) 987-6543',
-      items: 2,
-      value: 18.75,
-      tip: 2.25,
-      distance: '1.8 km',
-      estimatedTime: '12 min',
-      status: 'ready',
-      priority: 'urgent'
-    },
-    {
-      id: '#FE2025',
-      restaurant: 'Burger Palace',
-      customer: 'Mike Wilson',
-      address: '789 Elm Drive, Uptown',
-      phone: '+1 (555) 456-7890',
-      items: 4,
-      value: 32.25,
-      tip: 5.00,
-      distance: '3.1 km',
-      estimatedTime: '20 min',
-      status: 'preparing',
-      priority: 'normal'
-    }
-  ]);
+  const getDriverProfile = async () => {
+    const token = localStorage.getItem('token');
+    const response = await axios({
+      url: 'http://localhost:3000/api/users/profile',
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
+    })
+    console.log(response.data);
+  }
+
+  const getOrders = async () => {
+    const token = localStorage.getItem('token');
+    const response = await axios({
+      url: 'http://localhost:3000/api/agent/getorders',
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
+    })
+    setOrders(response.data.orders);
+
+    console.log(response.data)
+  }
+
+  useEffect(() => {
+    getOrders();
+    getDriverProfile();
+  }, [])
+
 
   const updateOrderStatus = (orderId, newStatus) => {
-    setActiveOrders(prev => 
-      prev.map(order => 
+    setActiveOrders(prev =>
+      prev.map(order =>
         order.id === orderId ? { ...order, status: newStatus } : order
       )
     );
   };
 
   const getStatusColor = (status) => {
-    switch(status) {
+    switch (status) {
       case 'preparing': return 'bg-yellow-500';
       case 'ready': return 'bg-blue-500';
       case 'pickup': return 'bg-orange-500';
@@ -82,6 +70,15 @@ const DeliveryDriverPanel = () => {
       <AlertCircle className="w-4 h-4 text-red-400" />
     ) : null;
   };
+
+  const totalPrice = (order) => {
+    let total = 0;
+    order.map((dish) => {
+      total += parseInt(dish.total_price)
+    })
+
+    return total;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900">
@@ -119,11 +116,10 @@ const DeliveryDriverPanel = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 py-4 px-2 border-b-2 transition-colors ${
-                    activeTab === tab.id
-                      ? 'border-orange-400 text-orange-400'
-                      : 'border-transparent text-purple-200 hover:text-white'
-                  }`}
+                  className={`flex items-center space-x-2 py-4 px-2 border-b-2 transition-colors ${activeTab === tab.id
+                    ? 'border-orange-400 text-orange-400'
+                    : 'border-transparent text-purple-200 hover:text-white'
+                    }`}
                 >
                   <Icon className="w-5 h-5" />
                   <span className="font-medium">{tab.label}</span>
@@ -138,7 +134,7 @@ const DeliveryDriverPanel = () => {
         {activeTab === 'dashboard' && (
           <div className="space-y-6">
             {/* Earnings Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
                 <div className="flex items-center justify-between">
                   <div>
@@ -189,10 +185,10 @@ const DeliveryDriverPanel = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Quick Stats */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+            {/* <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
               <h3 className="text-xl font-bold text-white mb-4">Today's Performance</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="text-center">
@@ -217,7 +213,7 @@ const DeliveryDriverPanel = () => {
                   <p className="text-purple-200">Distance Traveled</p>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         )}
 
@@ -227,61 +223,60 @@ const DeliveryDriverPanel = () => {
               <h2 className="text-2xl font-bold text-white">Active Orders</h2>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
                 <span className="text-purple-200 text-sm">
-                  {activeOrders.filter(order => order.status !== 'delivered').length} active orders
+                  {orders.filter(order => order.delivery_status !== 'delivered').length} active orders
                 </span>
               </div>
             </div>
 
             <div className="space-y-4">
-              {activeOrders.map((order) => (
-                <div key={order.id} className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all">
+              {orders.map((order) => (
+                <div key={order.order_id} className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-4 h-4 rounded-full ${getStatusColor(order.status)}`}></div>
+                      <div className={`w-4 h-4 rounded-full ${getStatusColor(order?.order?.status)}`}></div>
                       <div>
                         <div className="flex items-center space-x-2">
-                          <h3 className="text-lg font-bold text-white">{order.id}</h3>
+                          <h3 className="text-lg font-bold text-white">{order.order_id}</h3>
                           {getPriorityIcon(order.priority)}
                         </div>
-                        <p className="text-purple-200 text-sm capitalize">{order.status}</p>
+                        <p className="text-purple-200 text-sm capitalize">{order?.order?.status}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-xl font-bold text-white">${(order.value + order.tip).toFixed(2)}</p>
-                      <p className="text-green-400 text-sm">+${order.tip} tip</p>
+                      <p className="text-xl font-bold text-white">₹{totalPrice(order.orders.order_details)}</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                       <p className="text-purple-200 text-sm font-medium mb-1">Restaurant</p>
-                      <p className="text-white">{order.restaurant}</p>
+                      <p className="text-white">{order?.orders.restaurant?.restaurant_name}</p>
                     </div>
                     <div>
                       <p className="text-purple-200 text-sm font-medium mb-1">Customer</p>
-                      <p className="text-white">{order.customer}</p>
+                      <p className="text-white">{order?.orders?.users?.name}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center space-x-2 mb-4">
                     <MapPin className="w-4 h-4 text-purple-400" />
-                    <p className="text-purple-200 text-sm">{order.address}</p>
+                    <p className="text-purple-200 text-sm">{order?.orders?.users?.address}</p>
                   </div>
 
                   <div className="grid grid-cols-3 gap-4 mb-6">
                     <div className="bg-black/20 rounded-lg p-3 text-center">
                       <Package className="w-5 h-5 text-purple-400 mx-auto mb-1" />
-                      <p className="text-white font-medium">{order.items}</p>
+                      <p className="text-white font-medium">{order?.orders?.order_details.length}</p>
                       <p className="text-purple-200 text-xs">Items</p>
                     </div>
                     <div className="bg-black/20 rounded-lg p-3 text-center">
                       <Navigation className="w-5 h-5 text-blue-400 mx-auto mb-1" />
-                      <p className="text-white font-medium">{order.distance}</p>
+                      <p className="text-white font-medium">{order?.distance || '5KM'}</p>
                       <p className="text-purple-200 text-xs">Distance</p>
                     </div>
                     <div className="bg-black/20 rounded-lg p-3 text-center">
                       <Clock className="w-5 h-5 text-orange-400 mx-auto mb-1" />
-                      <p className="text-white font-medium">{order.estimatedTime}</p>
+                      <p className="text-white font-medium">{order?.estimatedTime || '25 Mins'}</p>
                       <p className="text-purple-200 text-xs">ETA</p>
                     </div>
                   </div>
@@ -299,9 +294,9 @@ const DeliveryDriverPanel = () => {
                       <MessageCircle className="w-4 h-4" />
                       <span>Message</span>
                     </button>
-                    
-                    {order.status === 'ready' && (
-                      <button 
+
+                    {order.orders.status === 'Preparing' && (
+                      <button
                         onClick={() => updateOrderStatus(order.id, 'pickup')}
                         className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
                       >
@@ -309,9 +304,9 @@ const DeliveryDriverPanel = () => {
                         <span>Mark Picked Up</span>
                       </button>
                     )}
-                    
-                    {order.status === 'pickup' && (
-                      <button 
+
+                    {order.orders.status === 'Out_for_Delivery' && (
+                      <button
                         onClick={() => updateOrderStatus(order.id, 'delivered')}
                         className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
                       >

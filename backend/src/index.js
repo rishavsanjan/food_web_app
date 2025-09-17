@@ -49,13 +49,14 @@ io.on("connection", (socket) => {
 
     })
     socket.on('order_accepted', ({ driverAssignedId }) => {
-        console.log(driverAssignedId);
+        console.log('driver assigned : ', driverAssignedId);
+
         for (const driverId in drivers) {
-            if (driverAssignedId === driverId) {
-                continue;
+            if (driverAssignedId !== Number(driverId)) {
+                console.log("drivers ID :", driverId);
+                const driverSocketId = drivers[driverId];
+                io.to(driverSocketId).emit("order_already_accepted");
             }
-            const driverSocketId = drivers[driverId];
-            io.to(driverSocketId).emit("order_already_accepted");
         }
     })
     socket.on("disconnect", () => {
