@@ -100,7 +100,6 @@ userRoute.get('/profile', authMid, async (req, res) => {
                 address:true,
                 phone_number:true,
                 email:true,
-                address:true,
                 city:true,
                 role:true
             }

@@ -40,7 +40,7 @@ orderRoute.get("/list",authMid,userAuthMid,async (req,res)=>{
                 }
             }
         })
-        res.json(orders)
+        res.json({orders,success:true})
     } catch (error) {
         res.status(500).json({msg:error,success:false});
     }
