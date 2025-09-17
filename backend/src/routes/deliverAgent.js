@@ -82,7 +82,7 @@ agentRoute.patch('/change-order-status', authMid, agentAuthMid, async (req, res)
         };
 
         if (p.data.status === 'picked_up') {
-            updateData['picked_up'] = new Date();
+            updateData['picked_up_at'] = new Date();
         }
         if (p.data.status === 'delivered') {
             updateData['delivered_at'] = new Date();
