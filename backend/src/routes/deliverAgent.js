@@ -89,7 +89,7 @@ agentRoute.patch('/change-order-status', authMid, agentAuthMid, async (req, res)
         }
         await prisma.$transaction(async (tx) => {
             const deliveryst = await tx.deliveries.update({
-                where: { order_id: p.data.order_id, delivery_agent: agent.agent_id },
+                where: { order_id: p.data.order_id, delivery_agent_id: agent.agent_id },
                 data: updateData
             })
             if (p.data.status === 'picked_up') {
