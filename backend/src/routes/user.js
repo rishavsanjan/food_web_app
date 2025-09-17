@@ -165,10 +165,10 @@ userRoute.get('/rest/menus/:id',authMid,userAuthMid,async(req,res)=>{
             image:rest.image,
             restaurant_address:rest.restaurant_address,
         }
-        const vegMenus = rest.menu.filter(menu => menu.category === 'veg');
-        const nonVegMenus =rest.menu.filter(menu => menu.category === 'non_veg');
+        // const vegMenus = rest.menu.filter(menu => menu.category === 'veg');
+        // const nonVegMenus =rest.menu.filter(menu => menu.category === 'non_veg');
         // console.log(vegMenus)
-        return res.json({success:true,restaurant,vegMenus,nonVegMenus,menus:rest.menu})
+        return res.json({success:true,restaurant,menus:rest.menu})
     } catch (error) {
         console.log(error)
         res.status(500).json({ msg: "Internal server error", success: false });
