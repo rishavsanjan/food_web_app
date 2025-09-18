@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { CheckCircle, ArrowLeft, Clock, MapPin } from 'lucide-react';
+import config from '../config/config';
 
 export default function OrderSuccess() {
   const [showAnimation, setShowAnimation] = useState(true);

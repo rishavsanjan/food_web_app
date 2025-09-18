@@ -5,6 +5,7 @@ import axios from 'axios';
 import OurInfo from './usernotlogged';
 import Lottie from "lottie-react";
 import loadingAnimation from '../../assets/loading-animation/pac_buffer.json';
+import config from '../config/config';
 
 export default function FoodDeliveryLanding() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);

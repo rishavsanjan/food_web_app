@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import Lottie from "lottie-react";
 import loadingAnimation from '../../assets/loading-animation/purple_loading.json'
+import config from '../config/config';
 
 
 export default function LogIn() {

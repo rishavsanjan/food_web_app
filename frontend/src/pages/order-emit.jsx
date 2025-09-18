@@ -3,6 +3,7 @@ import { Package, MapPin, Clock, Navigation, AlertCircle, X, Check } from 'lucid
 import { ToastContainer, toast } from 'react-toastify';
 import axios from 'axios';
 import { io } from 'socket.io-client';
+import config from '../config/config';
 
 
 const OrderNotificationOverlay = ({ driver, orderDetails, order, user, restaurant, onClose }) => {

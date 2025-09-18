@@ -3,6 +3,7 @@ import { User, MapPin, Phone, Mail, Edit, Heart, Clock, Star, LogOutIcon } from 
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
+import config from '../config/config';
 
 
 export default function UserProfile() {

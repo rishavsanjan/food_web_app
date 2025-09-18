@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Star, ThumbsUp, ThumbsDown, Filter, Plus, X, User, Calendar, MapPin, CheckCircle, AlertCircle, Clock, Search, TrendingUp, Award, Heart } from 'lucide-react';
 import axios from 'axios';
+import config from '../config/config';
 
 // Mock reviews data
 const mockReviews = [

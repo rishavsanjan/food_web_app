@@ -5,6 +5,7 @@ import { io } from 'socket.io-client';
 import OrderNotificationOverlay from './order-emit';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Make sure this CSS is imported
+import config from '../config/config';
 
 
 const DeliveryDriverPanel = () => {
