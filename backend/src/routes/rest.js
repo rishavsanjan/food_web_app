@@ -2,6 +2,7 @@ const express = require('express');
 const prisma = require('../config/db');
 const { authMid, restAuthMid } = require('../middlewares/auth');
 const { createMenuSchema, updateMenuSchema } = require('../zodType');
+const { success } = require('zod');
 
 const restRoute = express.Router();
 
@@ -128,35 +129,35 @@ restRoute.patch("/menu/avail/:id", authMid, restAuthMid, async (req, res) => {
 })
 
 
-restRoute.get('/history',authMid,restAuthMid,async(req,res)=>{
+restRoute.get('/history', authMid, restAuthMid, async (req, res) => {
     try {
         const restaurant = await prisma.restaurant.findUnique({
             where: { user_id: req.user.user_id },
             select: { id_restaurant: true }
         });
-        const orders=await prisma.orders.findMany({
-            where:{
-                id_restaurant:restaurant.id_restaurant,
-                status:{
-                    in:['Out_for_Delivery','Delivered']
+        const orders = await prisma.orders.findMany({
+            where: {
+                id_restaurant: restaurant.id_restaurant,
+                status: {
+                    in: ['Out_for_Delivery', 'Delivered']
                 }
             },
-            select:{
-               order_details:{
-                   select:{
-                       menu:{
-                           select:{
-                               menu_name:true
-                           }
-                       },
-                       quantity:true,
-                       total_price:true
-                   }
-               },
-               order_id:true,
-               status:true,
-               order_time:true
-           },
+            select: {
+                order_details: {
+                    select: {
+                        menu: {
+                            select: {
+                                menu_name: true
+                            }
+                        },
+                        quantity: true,
+                        total_price: true
+                    }
+                },
+                order_id: true,
+                status: true,
+                order_time: true
+            },
         })
         return res.json({ success: true, orders })
     } catch (error) {
@@ -175,40 +176,61 @@ restRoute.get('/orders', authMid, restAuthMid, async (req, res) => {
         //         id_restaurant: restaurant.id_restaurant
         //     }
         // })
-        const orders=await prisma.orders.findMany({
-           where:{
-               id_restaurant:restaurant.id_restaurant,
-               status:'Preparing',
-            //    payments:{
-            //        some:{
-            //            payment_status:{
-            //                in:['completed','cod_pending']
-            //            }
-            //        }
-            //    }
-           },
-           select:{
-               order_details:{
-                   select:{
-                       menu:{
-                           select:{
-                               menu_name:true
-                           }
-                       },
-                       quantity:true,
-                       total_price:true
-                   }
-               },
-               order_id:true,
-               status:true,
-               order_time:true
-           },
+        const orders = await prisma.orders.findMany({
+            where: {
+                id_restaurant: restaurant.id_restaurant,
+                status: 'Preparing',
+                //    payments:{
+                //        some:{
+                //            payment_status:{
+                //                in:['completed','cod_pending']
+                //            }
+                //        }
+                //    }
+            },
+            select: {
+                order_details: {
+                    select: {
+                        menu: {
+                            select: {
+                                menu_name: true
+                            }
+                        },
+                        quantity: true,
+                        total_price: true
+                    }
+                },
+                order_id: true,
+                status: true,
+                order_time: true
+            },
         })
         return res.json({ success: true, orders })
     } catch (error) {
         console.log(error)
         res.status(500).json({ msg: "Internal server error", success: false });
     }
+})
+
+restRoute.get('/search', async (req, res) => {
+    const { search } = req.query;
+    try {
+        const restaurants = await prisma.restaurant.findMany({
+            where: {
+                OR: [
+                    {
+                        restaurant_name: { contains: search, mode: 'insensitive' }
+                    },
+                    { restaurant_address: { contains: search, mode: 'insensitive' } }
+                ]
+            }
+        });
+
+        return res.json({ success: true, restaurants })
+    } catch (error) {
+        res.status(500).json({ msg: "Internal server error", success: false });
+    }
+
 })
 
 

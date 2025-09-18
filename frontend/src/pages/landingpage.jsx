@@ -15,7 +15,7 @@ export default function FoodDeliveryLanding() {
     const [restaurantLoading, setRestaurantLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResult, setSearchResult] = useState([]);
-
+    const [searchResultModal, setSearchResultModal] = useState(true);
 
     const getProfile = async () => {
         const token = localStorage.getItem('token');
@@ -51,15 +51,16 @@ export default function FoodDeliveryLanding() {
     };
 
     useEffect(() => {
-        const delayDebounce = setTimeout(async() => {
+        const delayDebounce = setTimeout(async () => {
             const response = await axios({
-                url:'http://localhost:3000/api/rest/search',
+                url: 'http://localhost:3000/api/rest/search',
                 method: 'get',
                 params: {
-                    search:searchQuery
+                    search: searchQuery
                 }
             })
             console.log(response.data)
+            setSearchResult(response.data.restaurants);
         }, 500);
 
         return () => {
@@ -170,22 +171,37 @@ export default function FoodDeliveryLanding() {
                     <p className="text-xl md:text-2xl mb-8 text-gray-200 max-w-2xl mx-auto leading-relaxed">
                         Get your favorite meals delivered hot and fresh in 30 minutes or less. From local gems to popular chains.
                     </p>
+                    <div className=''>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 ">
+                            <div className="relative">
+                                <input
+                                    onChange={(e) => { setSearchQuery(e.target.value) }}
+                                    value={searchQuery}
+                                    type="text"
+                                    placeholder="Search any restaurant..."
+                                    className="w-80 px-6 py-4 rounded-full bg-white/10 backdrop-blur-lg border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                />
+                                <MapPin className="absolute right-4 top-4 w-6 h-6 text-orange-400" />
+                            </div>
+                            <button className="bg-gradient-to-r from-orange-500 to-pink-500 px-8 py-4 rounded-full font-semibold hover:shadow-xl hover:shadow-orange-500/30 transition-all transform hover:scale-105 flex items-center gap-2">
+                                Find Restaurants <ArrowRight className="w-5 h-5" />
+                            </button>
 
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-                        <div className="relative">
-                            <input
-                                onChange={(e) => {setSearchQuery(e.target.value)}}
-                                value={searchQuery}
-                                type="text"
-                                placeholder="Enter your address..."
-                                className="w-80 px-6 py-4 rounded-full bg-white/10 backdrop-blur-lg border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                            />
-                            <MapPin className="absolute right-4 top-4 w-6 h-6 text-orange-400" />
                         </div>
-                        <button className="bg-gradient-to-r from-orange-500 to-pink-500 px-8 py-4 rounded-full font-semibold hover:shadow-xl hover:shadow-orange-500/30 transition-all transform hover:scale-105 flex items-center gap-2">
-                            Find Restaurants <ArrowRight className="w-5 h-5" />
-                        </button>
+                        <div  className='bg-white h-64'>
+                            {
+                                searchResultModal &&
+                                <>
+                                    {searchResult.map((rest) => (
+                                        
+                                        <p className='text-black'>{rest.restaurant_name}</p>
+                                    ))}
+                                </>
+                            }
+                        </div>
+
                     </div>
+
 
                     <div className="flex justify-center gap-8 text-center">
                         <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20">
