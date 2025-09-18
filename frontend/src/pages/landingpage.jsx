@@ -15,12 +15,12 @@ export default function FoodDeliveryLanding() {
     const [restaurantLoading, setRestaurantLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResult, setSearchResult] = useState([]);
-    const [searchResultModal, setSearchResultModal] = useState(true);
+    const [searchResultModal, setSearchResultModal] = useState(false);
 
     const getProfile = async () => {
         const token = localStorage.getItem('token');
         const response = await axios({
-            url: 'http://localhost:3000/api/users/profile',
+            url: `${config.apiUrl}/api/users/profile`,
             method: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + token
@@ -39,7 +39,7 @@ export default function FoodDeliveryLanding() {
     const getRestraunts = async () => {
         const token = localStorage.getItem('token');
         const response = await axios({
-            url: 'http://localhost:3000/api/users/getRest',
+            url: `${config.apiUrl}/api/users/getRest`,
             method: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + token
@@ -53,7 +53,7 @@ export default function FoodDeliveryLanding() {
     useEffect(() => {
         const delayDebounce = setTimeout(async () => {
             const response = await axios({
-                url: 'http://localhost:3000/api/rest/search',
+                url: `${config.apiUrl}/api/rest/search`,
                 method: 'get',
                 params: {
                     search: searchQuery
@@ -171,11 +171,14 @@ export default function FoodDeliveryLanding() {
                     <p className="text-xl md:text-2xl mb-8 text-gray-200 max-w-2xl mx-auto leading-relaxed">
                         Get your favorite meals delivered hot and fresh in 30 minutes or less. From local gems to popular chains.
                     </p>
-                    <div className=''>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 ">
+                    <div className="relative w-full max-w-4xl mx-auto">
+                        {/* Search Section */}
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
                             <div className="relative">
                                 <input
-                                    onChange={(e) => { setSearchQuery(e.target.value) }}
+                                    onFocus={() => setSearchResultModal(true)}
+                                    onBlur={() => setSearchResultModal(false)}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
                                     value={searchQuery}
                                     type="text"
                                     placeholder="Search any restaurant..."
@@ -183,23 +186,62 @@ export default function FoodDeliveryLanding() {
                                 />
                                 <MapPin className="absolute right-4 top-4 w-6 h-6 text-orange-400" />
                             </div>
-                            <button className="bg-gradient-to-r from-orange-500 to-pink-500 px-8 py-4 rounded-full font-semibold hover:shadow-xl hover:shadow-orange-500/30 transition-all transform hover:scale-105 flex items-center gap-2">
+                            <button
+                                onClick={() => setSearchResultModal(!searchResultModal)}
+                                className="bg-gradient-to-r from-orange-500 to-pink-500 px-8 py-4 rounded-full font-semibold hover:shadow-xl hover:shadow-orange-500/30 transition-all transform hover:scale-105 flex items-center gap-2"
+                            >
                                 Find Restaurants <ArrowRight className="w-5 h-5" />
                             </button>
-
-                        </div>
-                        <div  className='bg-white h-64'>
-                            {
-                                searchResultModal &&
-                                <>
-                                    {searchResult.map((rest) => (
-                                        
-                                        <p className='text-black'>{rest.restaurant_name}</p>
-                                    ))}
-                                </>
-                            }
                         </div>
 
+                        {/* Search Results Modal */}
+                        {searchResultModal && (
+                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-full max-w-md z-50 ">
+                                <div className="bg-purple-400/75 rounded-lg shadow-xl border border-gray-200 overflow-hidden">
+                                    {/* Header */}
+                                    <div className="px-4 py-3 bg-purple-400/75 border-b border-gray-200">
+                                        <h3 className="text-sm font-semibold text-gray-800">
+                                            Search Results ({searchResult.length})
+                                        </h3>
+                                    </div>
+
+                                    {/* Results List */}
+                                    <div className="max-h-64 overflow-y-auto">
+                                        {searchResult.map((rest) => (
+                                            <div
+                                                key={rest.id}
+                                                className="flex items-center gap-3 p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
+                                            >
+                                                <img
+                                                    className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                                                    src={rest.image}
+                                                    alt={rest.restaurant_name}
+                                                />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium text-gray-900 truncate">
+                                                        {rest.restaurant_name}
+                                                    </p>
+                                                    <p className="text-xs text-gray-600 truncate">
+                                                        {rest.restaurant_address}
+                                                    </p>
+                                                </div>
+                                                <ArrowRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Footer */}
+                                    <div className="px-4 py-3 bg-purple-400/75 border-t border-gray-200">
+                                        <button
+                                            onClick={() => setSearchResultModal(false)}
+                                            className="text-xs text-white hover:text-gray-800 transition-colors"
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
 

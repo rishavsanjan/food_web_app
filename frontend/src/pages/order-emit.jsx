@@ -8,7 +8,7 @@ import { io } from 'socket.io-client';
 const OrderNotificationOverlay = ({ driver, orderDetails, order, user, restaurant, onClose }) => {
     const [showOrderNotification, setShowOrderNotification] = useState(true);
     const [acceptTimer, setAcceptTimer] = useState(15);
-    const socket = useMemo(() => io('http://localhost:3000'), []);
+    const socket = useMemo(() => io(`${config.apiUrl}`), []);
 
     // Sample order data
     const pendingOrder = {
@@ -43,7 +43,7 @@ const OrderNotificationOverlay = ({ driver, orderDetails, order, user, restauran
         setAcceptTimer(15);
         const token = localStorage.getItem('token');
         const response = await axios({
-            url: 'http://localhost:3000/api/agent/assignorder',
+            url: `${config.apiUrl}/api/agent/assignorder`,
             method: 'post',
             headers: {
                 'Authorization': 'Bearer ' + token

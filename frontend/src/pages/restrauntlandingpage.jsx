@@ -7,7 +7,7 @@ import Lottie from "lottie-react";
 import loadingAnimation from '../../assets/loading-animation/pac_buffer.json'
 import { ToastContainer, toast } from 'react-toastify';
 import RestaurantReviews from './restaurant_reviews';
-
+import config from '../config/config';
 
 export default function RestaurantLanding() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -25,11 +25,11 @@ export default function RestaurantLanding() {
   const [activeMenu, setActiveMenu] = useState([]);
 
 
-
+  console.log(config.apiUrl)
   const getMenu = async () => {
     const token = localStorage.getItem('token');
     const response = await axios({
-      url: `http://localhost:3000/api/users/rest/menus/${id}`,
+      url: `${config.apiUrl}/api/users/rest/menus/${id}`,
       method: 'GET',
       headers: {
         'Authorization': 'Bearer ' + token

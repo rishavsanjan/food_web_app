@@ -91,7 +91,7 @@ export default function LogIn() {
     try {
       if (isLogin) {
         const response = await axios({
-          url: 'http://localhost:3000/api/users/login',
+          url: `${config.apiUrl}/api/users/login`,
           method: 'POST',
           data: {
             phone_number: formData.phone,
@@ -109,7 +109,7 @@ export default function LogIn() {
               navigate('/');
             }
             if (response.data.user.role === 'RESTAURANT_OWNER') {
-              navigate('/delivery-pofile');
+              navigate('/');
             }
             if (response.data.user.role === 'DELIVERY_AGENT') {
               navigate('/delivery-pofile');
@@ -122,7 +122,7 @@ export default function LogIn() {
         }
       } else {
         const response = await axios({
-          url: 'http://localhost:3000/api/users/signup',
+          url: `${config.apiUrl}/api/users/signup`,
           method: 'POST',
           data: {
             name: formData.name,

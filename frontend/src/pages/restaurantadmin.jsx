@@ -26,6 +26,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import DeleteConfirmationModal from '../models/deleteConfirmationRestAdmin';
 import loadingAnimation from '../../assets/loading-animation/pac_buffer.json';
 import Lottie from "lottie-react";
+import config from '../config/config';
 
 
 export default function RestaurantAdminDashboard() {
@@ -58,7 +59,7 @@ export default function RestaurantAdminDashboard() {
     const token = localStorage.getItem('token');
 
     const response = await axios({
-      url: `http://localhost:3000/api/rest/menu`,
+      url: `${config.apiUrl}/api/rest/menu`,
       method: 'get',
       headers: {
         'Authorization': 'Bearer ' + token
@@ -74,7 +75,7 @@ export default function RestaurantAdminDashboard() {
     const token = localStorage.getItem('token');
 
     const response = await axios({
-      url: `http://localhost:3000/api/rest/orders`,
+      url: `${config.apiUrl}/api/rest/orders`,
       method: 'get',
       headers: {
         'Authorization': 'Bearer ' + token
@@ -120,7 +121,7 @@ export default function RestaurantAdminDashboard() {
 
     const token = localStorage.getItem('token');
     const response = await axios({
-      url: `http://localhost:3000/api/rest/addMenu`,
+      url: `${config.apiUrl}/api/rest/addMenu`,
       method: 'post',
       headers: {
         'Authorization': 'Bearer ' + token
@@ -186,7 +187,7 @@ export default function RestaurantAdminDashboard() {
   const handleUpdateDish = async () => {
     const token = localStorage.getItem('token');
     const response = await axios({
-      url: `http://localhost:3000/api/rest/menuUpdate`,
+      url: `${config.apiUrl}/api/rest/menuUpdate`,
       method: 'patch',
       headers: {
         'Authorization': 'Bearer ' + token
@@ -237,7 +238,7 @@ export default function RestaurantAdminDashboard() {
   const toggleDishAvailability = async (dishId, availability) => {
     const token = localStorage.getItem('token');
     const response = await axios({
-      url: `http://localhost:3000/api/rest/menuUpdate`,
+      url: `${config.apiUrl}/api/rest/menuUpdate`,
       method: 'patch',
       headers: {
         'Authorization': 'Bearer ' + token
