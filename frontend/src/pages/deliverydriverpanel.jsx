@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Package, MapPin, Clock, DollarSign, Star, Navigation, Phone, MessageCircle, CheckCircle, AlertCircle, History, Clock1 } from 'lucide-react';
+import { Package, MapPin, Clock, DollarSign, Star, Navigation, Phone, MessageCircle, CheckCircle, AlertCircle, History, Clock1, IndianRupee } from 'lucide-react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import OrderNotificationOverlay from './order-emit';
@@ -272,7 +272,7 @@ const DeliveryDriverPanel = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8">
             {[
-              { id: 'dashboard', label: 'Dashboard', icon: DollarSign },
+              { id: 'dashboard', label: 'Dashboard', icon: IndianRupee },
               { id: 'orders', label: 'Active Orders', icon: Package },
               { id: 'history', label: 'History', icon: History },
             ].map(tab => {
