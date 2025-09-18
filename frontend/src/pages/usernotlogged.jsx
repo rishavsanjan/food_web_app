@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CheckCircle, Info, Heart, Target, Zap, ChevronDown, ChevronUp } from 'lucide-react';
 import { Link } from "react-router-dom";
+import config from '../config/config';
 
 export default function OurInfo() {
     const [expandedCard, setExpandedCard] = useState(null);

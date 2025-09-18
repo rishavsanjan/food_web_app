@@ -5,10 +5,11 @@ import { io } from 'socket.io-client';
 import OrderNotificationOverlay from './order-emit';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Make sure this CSS is imported
+import config from '../config/config';
 
 
 const DeliveryDriverPanel = () => {
-  const socket = useMemo(() => io('http://localhost:3000'), []);
+  const socket = useMemo(() => io(`${config.apiUrl}`), []);
   const [user, setUser] = useState([]);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [earnings, setEarnings] = useState({
@@ -48,7 +49,7 @@ const DeliveryDriverPanel = () => {
   const getDriverProfile = async () => {
     const token = localStorage.getItem('token');
     const response = await axios({
-      url: 'http://localhost:3000/api/users/profile',
+      url: `${config.apiUrl}/api/users/profile`,
       method: 'GET',
       headers: {
         'Authorization': 'Bearer ' + token
@@ -61,7 +62,7 @@ const DeliveryDriverPanel = () => {
   const getOrders = async () => {
     const token = localStorage.getItem('token');
     const response = await axios({
-      url: 'http://localhost:3000/api/agent/getorders',
+      url: `${config.apiUrl}/api/agent/getorders`,
       method: 'GET',
       headers: {
         'Authorization': 'Bearer ' + token
@@ -69,7 +70,7 @@ const DeliveryDriverPanel = () => {
     })
     setOrders(response.data.orders);
     const res = await axios({
-      url: 'http://localhost:3000/api/agent/getorderHistory',
+      url: `${config.apiUrl}/api/agent/getorderHistory`,
       method: 'GET',
       headers: {
         'Authorization': 'Bearer ' + token
@@ -128,7 +129,7 @@ const DeliveryDriverPanel = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios({
-        url: 'http://localhost:3000/api/agent/change-order-status',
+        url: `${config.apiUrl}/api/agent/change-order-status`,
         method: 'patch',
         headers: {
           'Authorization': 'Bearer ' + token

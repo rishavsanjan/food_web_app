@@ -5,7 +5,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import OrderSuccess from './order_confirm_model';
-
+import config from '../config/config';
 
 
 
@@ -13,7 +13,7 @@ export default function Cart() {
   const [cart, setCart] = useState([]);
   const [restaurant, setRestaurant] = useState({});
   const navigate = useNavigate();
-  const socket = useMemo(() => io('http://localhost:3000'), []);
+  const socket = useMemo(() => io(`${config.apiUrl}`), []);
   const [user, setUser] = useState([]);
   const [orderSucessModel, setOrderSuccessModel] = useState(false);
 
@@ -21,7 +21,7 @@ export default function Cart() {
   const getProfile = async () => {
     const token = localStorage.getItem('token');
     const response = await axios({
-      url: 'http://localhost:3000/api/users/profile',
+      url: `${config.apiUrl}/api/users/profile`,
       method: 'GET',
       headers: {
         'Authorization': 'Bearer ' + token
@@ -194,7 +194,7 @@ export default function Cart() {
     })
     const token = localStorage.getItem('token');
     const response = await axios({
-      url: 'http://localhost:3000/api/order/create',
+      url: `${config.apiUrl}/api/order/create`,
       method: 'post',
       headers: {
         'Authorization': 'Bearer ' + token

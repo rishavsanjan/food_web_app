@@ -3,6 +3,7 @@ import { User, MapPin, Phone, Mail, Edit, Heart, Clock, Star, LogOutIcon } from 
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
+import config from '../config/config';
 
 
 export default function UserProfile() {
@@ -27,7 +28,7 @@ export default function UserProfile() {
     const getProfile = async () => {
         const token = localStorage.getItem('token');
         const response = await axios({
-            url: 'http://localhost:3000/api/users/profile',
+            url: `${config.apiUrl}/api/users/profile`,
             method: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + token
@@ -40,7 +41,7 @@ export default function UserProfile() {
     const getOrder = async () => {
         const token = localStorage.getItem('token');
         const response = await axios({
-            url: 'http://localhost:3000/api/order/list',
+            url: `${config.apiUrl}/api/order/list`,
             method: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + token
@@ -236,7 +237,7 @@ export default function UserProfile() {
                                 <div className="flex items-center justify-between mb-3">
                                     <div>
                                         <div className='flex flex-row gap-2'>
-                                            <div className="text-white font-medium"># {index+1}</div>
+                                            <div className="text-white font-medium"># {index + 1}</div>
                                             <div className="text-white font-medium">{order.restaurant.restaurant_name}</div>
                                         </div>
 
