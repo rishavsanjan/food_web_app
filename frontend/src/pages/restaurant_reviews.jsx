@@ -295,22 +295,6 @@ export default function RestaurantReviews() {
                                     </div>
                                 ))}
                             </div>
-
-                            {/* Category Ratings */}
-                            <div className="border-t border-white/20 pt-6">
-                                <h3 className="font-semibold mb-4 text-orange-400">Rating by Category</h3>
-                                <div className="space-y-3">
-                                    {Object.entries(restaurantStats.categories).map(([category, rating]) => (
-                                        <div key={category} className="flex justify-between items-center">
-                                            <span className="text-sm text-gray-300">{category}</span>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-sm font-semibold">{rating}</span>
-                                                {renderStars(Math.round(rating))}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
                         </div>
 
                         {/* Add Review Button */}
@@ -325,61 +309,7 @@ export default function RestaurantReviews() {
 
                     {/* Main Content - Reviews */}
                     <div className="lg:col-span-2">
-                        {/* Filters and Search */}
-                        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 mb-6">
-                            {/* Search Bar */}
-                            <div className="relative mb-4">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                <input
-                                    type="text"
-                                    placeholder="Search reviews..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-black/20 rounded-xl border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-orange-400 transition-colors"
-                                />
-                            </div>
-
-                            {/* Filters */}
-                            <div className="grid md:grid-cols-3 gap-4">
-                                <select
-                                    value={filterRating}
-                                    onChange={(e) => setFilterRating(e.target.value)}
-                                    className="bg-black/20 rounded-xl border border-white/20 text-white py-2 px-3 focus:outline-none focus:border-orange-400"
-                                >
-                                    <option value="all">All Ratings</option>
-                                    <option value="5">5 Stars</option>
-                                    <option value="4">4 Stars</option>
-                                    <option value="3">3 Stars</option>
-                                    <option value="2">2 Stars</option>
-                                    <option value="1">1 Star</option>
-                                </select>
-
-                                <select
-                                    value={filterCategory}
-                                    onChange={(e) => setFilterCategory(e.target.value)}
-                                    className="bg-black/20 rounded-xl border border-white/20 text-white py-2 px-3 focus:outline-none focus:border-orange-400"
-                                >
-                                    <option value="all">All Categories</option>
-                                    <option value="Food Quality">Food Quality</option>
-                                    <option value="Service">Service</option>
-                                    <option value="Ambiance">Ambiance</option>
-                                    <option value="Value">Value</option>
-                                    <option value="Family Friendly">Family Friendly</option>
-                                </select>
-
-                                <select
-                                    value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value)}
-                                    className="bg-black/20 rounded-xl border border-white/20 text-white py-2 px-3 focus:outline-none focus:border-orange-400"
-                                >
-                                    <option value="newest">Newest First</option>
-                                    <option value="oldest">Oldest First</option>
-                                    <option value="highest">Highest Rated</option>
-                                    <option value="lowest">Lowest Rated</option>
-                                    <option value="helpful">Most Helpful</option>
-                                </select>
-                            </div>
-                        </div>
+                        
 
                         {/* Reviews List */}
                         <div className="space-y-6">
@@ -406,16 +336,11 @@ export default function RestaurantReviews() {
                                                             <CheckCircle className="w-4 h-4 text-green-400" title="Verified Customer" />
                                                         )}
                                                     </div>
-                                                    <div className="flex items-center gap-4 text-sm text-gray-400">
-                                                        <div className="flex items-center gap-1">
-                                                            <Calendar className="w-4 h-4" />
-                                                            {new Date(review.date).toLocaleDateString()}
-                                                        </div>
-                                                        <div className="flex items-center gap-1">
-                                                            <MapPin className="w-4 h-4" />
-                                                            {review.visitType}
-                                                        </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <Calendar className="w-4 h-4" />
+                                                        {new Date(review.date).toLocaleDateString()}
                                                     </div>
+
                                                 </div>
                                             </div>
 
@@ -435,46 +360,8 @@ export default function RestaurantReviews() {
                                             </p>
                                         </div>
 
-                                        {/* Photos */}
-                                        {review.photos.length > 0 && (
-                                            <div className="flex gap-2 mb-4">
-                                                {review.photos.map((photo, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="w-16 h-16 bg-black/20 rounded-lg flex items-center justify-center text-2xl border border-white/20"
-                                                    >
-                                                        {photo}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
 
-                                        {/* Review Actions */}
-                                        <div className="flex items-center justify-between pt-4 border-t border-white/20">
-                                            <div className="flex items-center gap-4">
-                                                <button
-                                                    onClick={() => handleHelpful(review.id, true)}
-                                                    className="flex items-center gap-2 text-sm text-gray-400 hover:text-green-400 transition-colors"
-                                                >
-                                                    <ThumbsUp className="w-4 h-4" />
-                                                    Helpful ({review.helpful})
-                                                </button>
-                                                <button
-                                                    onClick={() => handleHelpful(review.id, false)}
-                                                    className="flex items-center gap-2 text-sm text-gray-400 hover:text-red-400 transition-colors"
-                                                >
-                                                    <ThumbsDown className="w-4 h-4" />
-                                                    Not Helpful ({review.notHelpful})
-                                                </button>
-                                            </div>
 
-                                            {review.helpful > 15 && (
-                                                <div className="flex items-center gap-1 text-sm text-yellow-400">
-                                                    <TrendingUp className="w-4 h-4" />
-                                                    Popular Review
-                                                </div>
-                                            )}
-                                        </div>
                                     </div>
                                 ))
                             )}

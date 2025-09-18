@@ -1,8 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Package, MapPin, Clock, DollarSign, Star, Navigation, Phone, MessageCircle, CheckCircle, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Package, MapPin, Clock, DollarSign, Star, Navigation, Phone, MessageCircle, CheckCircle, AlertCircle, History, Clock1 } from 'lucide-react';
 import axios from 'axios';
+import { io } from 'socket.io-client';
+import OrderNotificationOverlay from './order-emit';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // Make sure this CSS is imported
+
 
 const DeliveryDriverPanel = () => {
+  const socket = useMemo(() => io('http://localhost:3000'), []);
+  const [user, setUser] = useState([]);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [earnings, setEarnings] = useState({
     today: 128.50,
@@ -11,8 +18,32 @@ const DeliveryDriverPanel = () => {
     rating: 4.8,
     completedDeliveries: 47
   });
-  const [orders, setOrders] = useState([]);
+  const [activeOrders, setOrders] = useState([]);
+  const [incomingOrder, setIncomingOrder] = useState(null);
+  const [history, setHistory] = useState([]);
+  const [riderOrderModal, setRiderOrderModal] = useState(false);
 
+  const showOrderAlreadyAccepted = useCallback(() => {
+    toast.warn('Order already accepted', {
+      position: "top-center",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
+  }, []);
+
+  const showNewOrderToast = useCallback(() => {
+    toast.info('New order request received!', {
+      position: "top-center",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+    });
+  }, []);
 
   const getDriverProfile = async () => {
     const token = localStorage.getItem('token');
@@ -23,6 +54,7 @@ const DeliveryDriverPanel = () => {
         'Authorization': 'Bearer ' + token
       }
     })
+    setUser(response.data.user);
     console.log(response.data);
   }
 
@@ -36,6 +68,14 @@ const DeliveryDriverPanel = () => {
       }
     })
     setOrders(response.data.orders);
+    const res = await axios({
+      url: 'http://localhost:3000/api/agent/getorderHistory',
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
+    })
+    setHistory(res.data.orders);
 
     console.log(response.data)
   }
@@ -43,15 +83,91 @@ const DeliveryDriverPanel = () => {
   useEffect(() => {
     getOrders();
     getDriverProfile();
-  }, [])
+  }, []);
 
+  useEffect(() => {
+    if (user?.role === "DELIVERY_AGENT") {
+      socket.emit('delivery_partner_online', {
+        driverId: user.user_id,
+        driverCity: user.city
+      });
+    }
+  }, [user, socket]);
 
-  const updateOrderStatus = (orderId, newStatus) => {
-    setActiveOrders(prev =>
-      prev.map(order =>
-        order.id === orderId ? { ...order, status: newStatus } : order
-      )
-    );
+  useEffect(() => {
+    const handleNewOrderRequest = ({ orderDetails, order, user, restaurant }) => {
+      console.log('New order received:', orderDetails);
+
+      // Show toast immediately
+      showNewOrderToast();
+
+      setIncomingOrder({ orderDetails, order, user, restaurant });
+      setRiderOrderModal(true);
+    };
+
+    const handleOrderAlreadyAccepted = () => {
+      console.log('Order already accepted');
+      setRiderOrderModal(false);
+
+      // Show toast immediately without setTimeout
+      showOrderAlreadyAccepted();
+    };
+
+    // Add event listeners
+    socket.on('new_order_request', handleNewOrderRequest);
+    socket.on('order_already_accepted', handleOrderAlreadyAccepted);
+
+    // Cleanup function
+    return () => {
+      socket.off('new_order_request', handleNewOrderRequest);
+      socket.off('order_already_accepted', handleOrderAlreadyAccepted);
+    };
+  }, [socket, showNewOrderToast, showOrderAlreadyAccepted]);
+
+  const updateOrderStatus = async (orderId, newStatus) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios({
+        url: 'http://localhost:3000/api/agent/change-order-status',
+        method: 'patch',
+        headers: {
+          'Authorization': 'Bearer ' + token
+        },
+        data: {
+          order_id: orderId,
+          status: newStatus
+        }
+      });
+
+      console.log(response.data);
+
+      // Show success toast
+      toast.success(`Order status updated to ${newStatus}`, {
+        position: "top-center",
+        autoClose: 2000,
+      });
+
+      setOrders(prev =>
+        prev.map((item) => {
+          if (item.order_id === orderId) {
+            return {
+              ...item,
+              orders: {
+                ...item.orders,
+                status: newStatus
+              }
+            }
+          }
+          return item;
+        })
+      );
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      toast.error('Failed to update order status', {
+        position: "top-center",
+        autoClose: 3000,
+      });
+    }
   };
 
   const getStatusColor = (status) => {
@@ -80,8 +196,55 @@ const DeliveryDriverPanel = () => {
     return total;
   }
 
+  function convertToCustomDateTime(isoString) {
+    const date = new Date(isoString);
+
+    // Get the date components
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    // Array of month names
+    const months = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+
+    // Get the month name
+    const monthName = months[date.getMonth()];
+
+    // Return the formatted string: "15 August 2025, 13:52:13"
+    return `${day} ${monthName} ${year}, ${hours}:${minutes}:${seconds}`;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900">
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        limit={3}
+      />
+
+      {riderOrderModal && incomingOrder && (
+        <OrderNotificationOverlay
+          driver={user}
+          orderDetails={incomingOrder.orderDetails}
+          order={incomingOrder.order}
+          user={incomingOrder.user}
+          restaurant={incomingOrder.restaurant}
+          onClose={() => setRiderOrderModal(false)}
+        />
+      )}
       {/* Header */}
       <div className="bg-black/20 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -92,7 +255,7 @@ const DeliveryDriverPanel = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-white">FitEats Driver</h1>
-                <p className="text-sm text-purple-200">Welcome back, Alex!</p>
+                <p className="text-sm text-purple-200">Welcome back, {user.name}</p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
@@ -110,6 +273,7 @@ const DeliveryDriverPanel = () => {
             {[
               { id: 'dashboard', label: 'Dashboard', icon: DollarSign },
               { id: 'orders', label: 'Active Orders', icon: Package },
+              { id: 'history', label: 'History', icon: History },
             ].map(tab => {
               const Icon = tab.icon;
               return (
@@ -133,87 +297,7 @@ const DeliveryDriverPanel = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === 'dashboard' && (
           <div className="space-y-6">
-            {/* Earnings Overview */}
-            {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-purple-200 text-sm font-medium">Today's Earnings</p>
-                    <p className="text-3xl font-bold text-white">${earnings.today}</p>
-                  </div>
-                  <div className="bg-green-500/20 p-3 rounded-xl">
-                    <DollarSign className="w-6 h-6 text-green-400" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-purple-200 text-sm font-medium">Weekly Earnings</p>
-                    <p className="text-3xl font-bold text-white">${earnings.week}</p>
-                  </div>
-                  <div className="bg-blue-500/20 p-3 rounded-xl">
-                    <DollarSign className="w-6 h-6 text-blue-400" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-purple-200 text-sm font-medium">Monthly Earnings</p>
-                    <p className="text-3xl font-bold text-white">${earnings.month}</p>
-                  </div>
-                  <div className="bg-purple-500/20 p-3 rounded-xl">
-                    <DollarSign className="w-6 h-6 text-purple-400" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-purple-200 text-sm font-medium">Rating</p>
-                    <div className="flex items-center space-x-2">
-                      <p className="text-3xl font-bold text-white">{earnings.rating}</p>
-                      <Star className="w-6 h-6 text-yellow-400 fill-current" />
-                    </div>
-                  </div>
-                  <div className="bg-yellow-500/20 p-3 rounded-xl">
-                    <Star className="w-6 h-6 text-yellow-400" />
-                  </div>
-                </div>
-              </div>
-            </div> */}
-
-            {/* Quick Stats */}
-            {/* <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-              <h3 className="text-xl font-bold text-white mb-4">Today's Performance</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <div className="bg-orange-500/20 p-4 rounded-xl mb-3 mx-auto w-fit">
-                    <Package className="w-8 h-8 text-orange-400" />
-                  </div>
-                  <p className="text-2xl font-bold text-white">{earnings.completedDeliveries}</p>
-                  <p className="text-purple-200">Completed Deliveries</p>
-                </div>
-                <div className="text-center">
-                  <div className="bg-green-500/20 p-4 rounded-xl mb-3 mx-auto w-fit">
-                    <Clock className="w-8 h-8 text-green-400" />
-                  </div>
-                  <p className="text-2xl font-bold text-white">8.5h</p>
-                  <p className="text-purple-200">Hours Online</p>
-                </div>
-                <div className="text-center">
-                  <div className="bg-blue-500/20 p-4 rounded-xl mb-3 mx-auto w-fit">
-                    <Navigation className="w-8 h-8 text-blue-400" />
-                  </div>
-                  <p className="text-2xl font-bold text-white">127 km</p>
-                  <p className="text-purple-200">Distance Traveled</p>
-                </div>
-              </div>
-            </div> */}
+            {/* Dashboard content commented out as in original */}
           </div>
         )}
 
@@ -223,13 +307,19 @@ const DeliveryDriverPanel = () => {
               <h2 className="text-2xl font-bold text-white">Active Orders</h2>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
                 <span className="text-purple-200 text-sm">
-                  {orders.filter(order => order.delivery_status !== 'delivered').length} active orders
+                  {activeOrders.filter(order => order.delivery_status !== 'delivered').length} active orders
                 </span>
               </div>
             </div>
 
             <div className="space-y-4">
-              {orders.map((order) => (
+              {
+                activeOrders.length === 0 &&
+                <div className='items-center flex justify-center mt-48'>
+                  <h1 className='text-4xl text-purple-400'>There are no active orders!</h1>
+                </div>
+              }
+              {activeOrders.map((order) => (
                 <div key={order.order_id} className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-3">
@@ -247,6 +337,7 @@ const DeliveryDriverPanel = () => {
                     </div>
                   </div>
 
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                       <p className="text-purple-200 text-sm font-medium mb-1">Restaurant</p>
@@ -261,6 +352,10 @@ const DeliveryDriverPanel = () => {
                   <div className="flex items-center space-x-2 mb-4">
                     <MapPin className="w-4 h-4 text-purple-400" />
                     <p className="text-purple-200 text-sm">{order?.orders?.users?.address}</p>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-4">
+                    <Clock1 className="w-4 h-4 text-purple-400" />
+                    <p className="text-md  text-white">{convertToCustomDateTime(order.orders.order_time)}</p>
                   </div>
 
                   <div className="grid grid-cols-3 gap-4 mb-6">
@@ -297,7 +392,7 @@ const DeliveryDriverPanel = () => {
 
                     {order.orders.status === 'Preparing' && (
                       <button
-                        onClick={() => updateOrderStatus(order.id, 'pickup')}
+                        onClick={() => updateOrderStatus(order.order_id, 'picked_up')}
                         className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
                       >
                         <Package className="w-4 h-4" />
@@ -305,9 +400,9 @@ const DeliveryDriverPanel = () => {
                       </button>
                     )}
 
-                    {order.orders.status === 'Out_for_Delivery' && (
+                    {(order.orders.status === 'Out_for_Delivery' || order.orders.status === 'picked_up') && (
                       <button
-                        onClick={() => updateOrderStatus(order.id, 'delivered')}
+                        onClick={() => updateOrderStatus(order.order_id, 'delivered')}
                         className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
                       >
                         <CheckCircle className="w-4 h-4" />
@@ -315,6 +410,81 @@ const DeliveryDriverPanel = () => {
                       </button>
                     )}
                   </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {activeTab === 'history' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-white">Past Orders</h2>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
+                <span className="text-purple-200 text-sm">
+                  {history.length} total orders
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {
+                history.length === 0 &&
+                <div className='items-center flex justify-center mt-48'>
+                  <h1 className='text-4xl text-purple-400'>There are no past orders!</h1>
+                </div>
+              }
+              {history.map((order) => (
+                <div key={order.order_id} className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-4 h-4 rounded-full ${getStatusColor(order?.order?.status)}`}></div>
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <h3 className="text-lg font-bold text-white">{order.order_id}</h3>
+                          {getPriorityIcon(order.priority)}
+                        </div>
+                        <p className="text-purple-200 text-sm capitalize">{order?.order?.status}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xl font-bold text-white">₹{totalPrice(order.orders.order_details)}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <p className="text-purple-200 text-sm font-medium mb-1">Restaurant</p>
+                      <p className="text-white">{order?.orders.restaurant?.restaurant_name}</p>
+                    </div>
+                    <div>
+                      <p className="text-purple-200 text-sm font-medium mb-1">Customer</p>
+                      <p className="text-white">{order?.orders?.users?.name}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2 mb-4">
+                    <MapPin className="w-4 h-4 text-purple-400" />
+                    <p className="text-purple-200 text-sm">{order?.orders?.users?.address}</p>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-4">
+                    <Clock1 className="w-4 h-4 text-purple-400" />
+                    <p className="text-md  text-white">{convertToCustomDateTime(order.orders.order_time)}</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mb-6 ">
+                    <div className="bg-black/20 rounded-lg p-3 text-center">
+                      <Package className="w-5 h-5 text-purple-400 mx-auto mb-1" />
+                      <p className="text-white font-medium">{order?.orders?.order_details.length}</p>
+                      <p className="text-purple-200 text-xs">Items</p>
+                    </div>
+                    <div className="bg-black/20 rounded-lg p-3 text-center">
+                      <Navigation className="w-5 h-5 text-blue-400 mx-auto mb-1" />
+                      <p className="text-white font-medium">{order?.distance || '5KM'}</p>
+                      <p className="text-purple-200 text-xs">Distance</p>
+                    </div>
+                  </div>
+
+
                 </div>
               ))}
             </div>

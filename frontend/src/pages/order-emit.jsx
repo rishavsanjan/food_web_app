@@ -58,33 +58,26 @@ const OrderNotificationOverlay = ({ driver, orderDetails, order, user, restauran
         if (response.status === 200) {
             socket.emit('order_accepted', { driverAssignedId: driver.user_id });
         }
-        onClose();
+        setTimeout(() => {
+            onClose();
+
+        }, 1500);
+        toast.success('Order is accepted!');
     };
 
     const declineOrder = () => {
         console.log('Order declined:', pendingOrder.id);
         setShowOrderNotification(false);
         setAcceptTimer(15);
-        toast.warn('Order is rejected!')
+        setTimeout(() => {
+            onClose();
+
+        }, 1500);
+        toast.warn('Order is rejected!');
+
     };
 
-    const resetDemo = () => {
-        setShowOrderNotification(true);
-        setAcceptTimer(15);
-    };
 
-    if (!showOrderNotification) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900 flex items-center justify-center">
-                <button
-                    onClick={resetDemo}
-                    className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-                >
-                    Show Order Notification
-                </button>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900">

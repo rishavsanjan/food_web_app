@@ -8,7 +8,7 @@ import { ToastContainer, toast } from 'react-toastify';
 export default function UserProfile() {
     const [isEditing, setIsEditing] = useState(false);
     const navigate = useNavigate();
-
+    const [orders, setOrders] = useState([]);
     const [userData, setUserData] = useState({
         name: '',
         email: '',
@@ -21,7 +21,7 @@ export default function UserProfile() {
 
         setTimeout(() => {
             navigate('/login');
-        }, 1000);  
+        }, 1000);
     };
 
     const getProfile = async () => {
@@ -37,8 +37,22 @@ export default function UserProfile() {
         console.log(response.data.user)
     }
 
+    const getOrder = async () => {
+        const token = localStorage.getItem('token');
+        const response = await axios({
+            url: 'http://localhost:3000/api/order/list',
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        })
+        setOrders(response.data.orders);
+        console.log(response.data)
+    }
+
     useEffect(() => {
         getProfile();
+        getOrder();
     }, [])
 
     const handleSave = () => {
@@ -46,11 +60,30 @@ export default function UserProfile() {
         alert('Profile updated successfully!');
     };
 
-    const recentOrders = [
-        { restaurant: 'Burger Palace', date: '2 days ago', status: 'Delivered' },
-        { restaurant: 'Sushi Zen', date: '1 week ago', status: 'Delivered' },
-        { restaurant: 'Pizza Corner', date: '2 weeks ago', status: 'Delivered' }
-    ];
+    function convertToCustomDateTime(isoString) {
+        const date = new Date(isoString);
+
+        // Get the date components
+        const day = String(date.getDate()).padStart(2, '0');
+        const year = date.getFullYear();
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+
+        // Array of month names
+        const months = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        // Get the month name
+        const monthName = months[date.getMonth()];
+
+        // Return the formatted string: "15 August 2025, 13:52:13"
+        return `${day} ${monthName} ${year}, ${hours}:${minutes}:${seconds}`;
+    }
+
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-blue-900 py-8 px-4">
@@ -170,7 +203,7 @@ export default function UserProfile() {
                 </div>
 
                 {/* Quick Stats */}
-                <div className="grid grid-cols-3 gap-4">
+                {/* <div className="grid grid-cols-3 gap-4">
                     <div className="bg-transparent bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 text-center border border-white border-opacity-20">
                         <div className="text-2xl font-bold text-white mb-1">42</div>
                         <div className="text-sm text-purple-200">Orders</div>
@@ -187,7 +220,7 @@ export default function UserProfile() {
                         </div>
                         <div className="text-sm text-purple-200">Rating</div>
                     </div>
-                </div>
+                </div> */}
 
                 {/* Recent Orders */}
                 <div className="bg-transparent bg-opacity-10 backdrop-blur-lg rounded-3xl p-6 border border-white border-opacity-20">
@@ -196,14 +229,46 @@ export default function UserProfile() {
                         Recent Orders
                     </h3>
 
-                    <div className="space-y-3">
-                        {recentOrders.map((order, index) => (
-                            <div key={index} className="flex items-center justify-between py-3 border-b border-white border-opacity-10 last:border-b-0">
-                                <div>
-                                    <div className="text-white font-medium">{order.restaurant}</div>
-                                    <div className="text-purple-300 text-sm">{order.date}</div>
+                    <div className="space-y-4">
+                        {orders.map((order, index) => (
+                            <div key={index} className="border-b border-white border-opacity-10 last:border-b-0 pb-4 last:pb-0">
+                                {/* Order Header */}
+                                <div className="flex items-center justify-between mb-3">
+                                    <div>
+                                        <div className='flex flex-row gap-2'>
+                                            <div className="text-white font-medium"># {index+1}</div>
+                                            <div className="text-white font-medium">{order.restaurant.restaurant_name}</div>
+                                        </div>
+
+                                        <div className="text-purple-300 text-sm">{convertToCustomDateTime(order.order_time)}</div>
+                                    </div>
+                                    <div className="text-green-400 text-sm font-medium">{order.status}</div>
                                 </div>
-                                <div className="text-green-400 text-sm font-medium">{order.status}</div>
+
+                                {/* Order Items */}
+                                <div className="space-y-2 mb-3">
+                                    {order.order_details?.map((item, itemIndex) => (
+                                        <div key={itemIndex} className="flex items-center justify-between text-sm">
+                                            <div className="flex items-center">
+                                                <span className="text-white opacity-80 mr-2">
+                                                    {item.quantity}x
+                                                </span>
+                                                <span className="text-white">Menu Item #{item.menu_id}</span>
+                                            </div>
+                                            <span className="text-orange-400 font-medium">
+                                                ₹{(item.base_price * item.quantity).toFixed(2)}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Order Total */}
+                                <div className="flex items-center justify-between pt-2 border-t border-white border-opacity-10">
+                                    <span className="text-white font-medium">Total</span>
+                                    <span className="text-green-400 font-bold">
+                                        ₹{order.order_details?.reduce((sum, item) => sum + (item.base_price * item.quantity), 0).toFixed(2)}
+                                    </span>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -211,10 +276,11 @@ export default function UserProfile() {
                     <button className="w-full mt-4 text-orange-400 hover:text-orange-300 font-medium text-center transition-colors duration-200">
                         View All Orders
                     </button>
+
                 </div>
 
                 {/* Action Buttons */}
-                <div className="grid grid-cols-2 gap-4">
+                {/* <div className="grid grid-cols-2 gap-4">
                     <button className="bg-transparent bg-opacity-10 backdrop-blur-lg rounded-2xl p-4 border border-white border-opacity-20 text-white font-medium hover:bg-opacity-15 transition-all duration-300 flex items-center justify-center">
                         <Heart className="h-5 w-5 mr-2" />
                         My Favorites
@@ -224,8 +290,8 @@ export default function UserProfile() {
                         <User className="h-5 w-5 mr-2" />
                         Account Settings
                     </button>
-                </div>
+                </div> */}
             </div>
-        </div>
+        </div >
     );
 }

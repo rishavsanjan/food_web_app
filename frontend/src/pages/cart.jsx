@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import axios from 'axios';
 import { io } from 'socket.io-client';
+import OrderSuccess from './order_confirm_model';
 
 
 
@@ -14,7 +15,7 @@ export default function Cart() {
   const navigate = useNavigate();
   const socket = useMemo(() => io('http://localhost:3000'), []);
   const [user, setUser] = useState([]);
-
+  const [orderSucessModel, setOrderSuccessModel] = useState(false);
 
 
   const getProfile = async () => {
@@ -205,8 +206,9 @@ export default function Cart() {
         payment_method: 'UPI'
       }
     });
+    localStorage.removeItem('cart');
     socket.emit('emit_order_to_riders', {
-      orderDetails:response.data.orderDetails,
+      orderDetails: response.data.orderDetails,
       user: user,
       restaurant: restaurant,
       order: {
@@ -214,16 +216,20 @@ export default function Cart() {
         totalPrice: calculateTotal()
       }
     })
+    setOrderSuccessModel(true);
     console.log(response.data)
   }
 
-  console.log(user)
-
+  console.log(orderSucessModel)
 
 
   if (cart?.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
+        {
+          orderSucessModel && (
+            <OrderSuccess />
+          )}
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
@@ -333,8 +339,6 @@ export default function Cart() {
               {cart?.map((item) => (
                 <div key={item.menu_id} className="bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20 hover:bg-white/15 transition-colors">
                   <div className="flex items-start gap-4">
-                    <div className="text-4xl">{item.image}</div>
-
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-3">
                         <div>
@@ -401,7 +405,7 @@ export default function Cart() {
                           {/* Fiber */}
                           <div className="bg-green-500/15 rounded-xl p-2 border border-green-400/30">
                             <div className="text-center">
-                              <div className="text-sm font-bold text-green-400">{item.fiber * item.quantity}g</div>
+                              <div className="text-sm font-bold text-green-400">{(item.fiber * item.quantity).toFixed(2)}g</div>
                               <div className="text-xs text-green-300">Fiber</div>
                             </div>
                           </div>

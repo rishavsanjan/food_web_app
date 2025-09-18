@@ -395,7 +395,7 @@ export default function RestaurantLanding() {
                     {dish?.description}
                   </p>
 
-                  {/* Enhanced Nutritional Stats Section */}
+                  {/*  Nutritional Stats Section */}
                   <div className="mb-4 z-50 p-4 bg-gradient-to-r from-black/20 to-black/30 rounded-2xl border border-white/10 backdrop-blur-sm opacity-70 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="flex items-center gap-2 mb-3">
                       <Activity className="w-4 h-4 text-green-400" />

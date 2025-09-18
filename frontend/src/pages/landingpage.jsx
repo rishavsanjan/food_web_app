@@ -5,9 +5,6 @@ import axios from 'axios';
 import OurInfo from './usernotlogged';
 import Lottie from "lottie-react";
 import loadingAnimation from '../../assets/loading-animation/pac_buffer.json';
-import { io } from 'socket.io-client';
-import OrderNotificationOverlay from './order-emit';
-import { ToastContainer, toast } from 'react-toastify';
 
 export default function FoodDeliveryLanding() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,10 +13,8 @@ export default function FoodDeliveryLanding() {
     const [user, setUser] = useState([]);
     const [restaurantss, setRestaurants] = useState();
     const [restaurantLoading, setRestaurantLoading] = useState(true);
-    const [incomingOrder, setIncomingOrder] = useState(null);
-    const [riderOrderModal, setRiderOrderModal] = useState(false);
-    const socket = useMemo(() => io('http://localhost:3000'), []);
-
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResult, setSearchResult] = useState([]);
 
 
     const getProfile = async () => {
@@ -53,39 +48,31 @@ export default function FoodDeliveryLanding() {
         setRestaurants(response.data.data);
         setRestaurantLoading(false);
         console.log(response.data.data);
-    }
+    };
+
+    useEffect(() => {
+        const delayDebounce = setTimeout(async() => {
+            const response = await axios({
+                url:'http://localhost:3000/api/rest/search',
+                method: 'get',
+                params: {
+                    search:searchQuery
+                }
+            })
+            console.log(response.data)
+        }, 500);
+
+        return () => {
+            clearTimeout(delayDebounce);
+        }
+
+    }, [searchQuery])
 
     useEffect(() => {
         getProfile();
     }, [])
 
-    useEffect(() => {
-        if (user?.role === "DELIVERY_AGENT") {
-            socket.emit('delivery_partner_online', {
-                driverId: user.user_id,
-                driverCity: user.city
-            });
-        }
-    }, [user]);
 
-    useEffect(() => {
-        socket.on('new_order_request', ({ orderDetails, order, user, restaurant }) => {
-            setIncomingOrder({ orderDetails, order, user, restaurant });
-            setRiderOrderModal(true);
-            console.log(orderDetails)
-        });
-
-        socket.on('order_already_accepted', () => {
-            console.log('order already accepted');
-            setRiderOrderModal(false);
-            toast.warn('Order already accepted');
-        })
-
-        return () => {
-            socket.off("new_order_request");
-            socket.off('order_already_accepted');
-        };
-    }, []);
 
 
 
@@ -107,28 +94,6 @@ export default function FoodDeliveryLanding() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white overflow-hidden">
-            <ToastContainer
-                position="top-right"
-                autoClose={5000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick={false}
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="light"
-            />
-            {riderOrderModal && incomingOrder && (
-                <OrderNotificationOverlay
-                    driver={user}
-                    orderDetails={incomingOrder.orderDetails}
-                    order={incomingOrder.order}
-                    user={incomingOrder.user}
-                    restaurant={incomingOrder.restaurant}
-                    onClose={() => setRiderOrderModal(false)}
-                />
-            )}
             {/* Navigation */}
             <nav className={`fixed w-full z-50 transition-all duration-300 ${scrollY > 50 ? 'bg-black/20 backdrop-blur-lg' : 'bg-transparent'}`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -209,6 +174,8 @@ export default function FoodDeliveryLanding() {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
                         <div className="relative">
                             <input
+                                onChange={(e) => {setSearchQuery(e.target.value)}}
+                                value={searchQuery}
                                 type="text"
                                 placeholder="Enter your address..."
                                 className="w-80 px-6 py-4 rounded-full bg-white/10 backdrop-blur-lg border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"

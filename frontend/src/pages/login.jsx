@@ -4,6 +4,8 @@ import axios from 'axios'
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
+import Lottie from "lottie-react";
+import loadingAnimation from '../../assets/loading-animation/purple_loading.json'
 
 
 export default function LogIn() {
@@ -26,7 +28,7 @@ export default function LogIn() {
   });
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
-
+  const [loading, setLoading] = useState(false);
 
 
   const handleInputChange = (e) => {
@@ -48,7 +50,7 @@ export default function LogIn() {
   const validateForm = async () => {
     const newErrors = {};
     console.log('hello')
-
+    setLoading(true);
     if (!isLogin) {
       if (!formData.name.trim()) newErrors.name = 'First name is required';
       if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
@@ -96,14 +98,25 @@ export default function LogIn() {
             password: formData.password,
           }
         });
+        console.log(response.data)
 
         if (response.status === 200 && response.data.success) {
           toast.success('Logged in successfully!');
           localStorage.setItem('token', response.data.msg);
           // Add a small delay before navigation to show the toast
           setTimeout(() => {
-            navigate('/');
+            if (response.data.user.role === 'CUSTOMER') {
+              navigate('/');
+            }
+            if (response.data.user.role === 'RESTAURANT_OWNER') {
+              navigate('/delivery-pofile');
+            }
+            if (response.data.user.role === 'DELIVERY_AGENT') {
+              navigate('/delivery-pofile');
+            }
+
           }, 1000);
+          setLoading(false);
         } else {
           toast.error('Invalid Credentials!');
         }
@@ -129,6 +142,7 @@ export default function LogIn() {
         }
 
         console.log(response.data);
+        setLoading(false)
       }
     } catch (error) {
       console.error('API Error:', error);
@@ -137,6 +151,7 @@ export default function LogIn() {
       } else {
         toast.error('Signup failed. Please try again.');
       }
+      setLoading(false);
     }
 
     return true;
@@ -151,23 +166,34 @@ export default function LogIn() {
     setIsLogin(!isLogin);
     setFormData({
       name: '',
-      //lastName: '',
       email: '',
       phone: '',
       password: '',
       confirmPassword: '',
-      //birthDate: '',
       agreeToTerms: false,
       subscribeNewsletter: false
     });
     setErrors({});
   };
 
+  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white overflow-hidden relative">
+      {
+        loading &&
+        <div className="flex flex-col justify-center items-center  h-screen bg-transparent">
+          <Lottie
+            animationData={loadingAnimation}
+            loop={true}
+            style={{ width: 200, height: 200 }}
+          />
+          <h1 className='text-xl font-semibold'>Loading </h1>
+        </div>
+      }
       <ToastContainer
         position="top-center"
-        autoClose={500}
+        autoClose={2000}
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick={false}
