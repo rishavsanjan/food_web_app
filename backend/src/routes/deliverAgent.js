@@ -103,10 +103,29 @@ agentRoute.patch('/change-order-status', authMid, agentAuthMid, async (req, res)
                     where: { order_id: p.data.order_id },
                     data: { status: 'Delivered' }
                 })
+                const py=await tx.payments.findFirst({
+                    where:{
+                        order_id:p.data.order_id,
+                        payment_status:'completed'
+                    }
+                })
+                const earn=py.price*0.1
+                await tx.delivery_agent.update({
+                    where:{agent_id:agent.agent_id},
+                    data:{
+                        earning:{
+                            increment:earn
+                        },
+                        total_deliveries:{
+                            increment:1
+                        }
+                    }
+                })
             }
         })
         return res.json({ msg: "status updated", success: true })
     } catch (error) {
+        // console.log(error)
         res.status(500).json({ msg: "Internal server error", success: false });
     }
 })
