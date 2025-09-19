@@ -84,8 +84,16 @@ agentRoute.patch('/change-order-status', authMid, agentAuthMid, async (req, res)
         if (p.data.status === 'picked_up') {
             updateData['picked_up_at'] = new Date();
         }
+        let py;
         if (p.data.status === 'delivered') {
             updateData['delivered_at'] = new Date();
+            py=await prisma.payments.findFirst({
+                where:{
+                    order_id:p.data.order_id,
+                    payment_status:'completed'
+                }
+            })
+            
         }
         await prisma.$transaction(async (tx) => {
             const deliveryst = await tx.deliveries.update({
@@ -103,12 +111,7 @@ agentRoute.patch('/change-order-status', authMid, agentAuthMid, async (req, res)
                     where: { order_id: p.data.order_id },
                     data: { status: 'Delivered' }
                 })
-                const py=await tx.payments.findFirst({
-                    where:{
-                        order_id:p.data.order_id,
-                        payment_status:'completed'
-                    }
-                })
+                
                 const earn=py.price*0.1
                 await tx.delivery_agent.update({
                     where:{agent_id:agent.agent_id},
@@ -125,7 +128,7 @@ agentRoute.patch('/change-order-status', authMid, agentAuthMid, async (req, res)
         })
         return res.json({ msg: "status updated", success: true })
     } catch (error) {
-        // console.log(error)
+        console.log(error)
         res.status(500).json({ msg: "Internal server error", success: false });
     }
 })
