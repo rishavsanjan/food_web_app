@@ -8,8 +8,13 @@ import loadingAnimation from '../../assets/loading-animation/pac_buffer.json'
 import { ToastContainer, toast } from 'react-toastify';
 import RestaurantReviews from './restaurant_reviews';
 import config from '../config/config';
+import { useCart } from '../contexts/cartContext';
+import Header from './header';
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 export default function RestaurantLanding() {
+  const { cartItems, setCartItems } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState('appetizers');
   const [scrollY, setScrollY] = useState(0);
@@ -18,11 +23,18 @@ export default function RestaurantLanding() {
   const { id } = useParams();
   const [vegMenu, setVegMenu] = useState([]);
   const [nonVegMenu, setNonVegMenu] = useState([]);
-  const [cart, setCart] = useState([]);
   const [cartClearModel, setCartClearModel] = useState(false);
   const [loading, setLoading] = useState(true);
   const [fullMenu, setFullMenu] = useState([]);
   const [activeMenu, setActiveMenu] = useState([]);
+
+  useEffect(() => {
+    AOS.init({
+      duration: 500,  
+      easing: "ease-in-out",
+      once: false,    
+    });
+  }, []);
 
 
   console.log(config.apiUrl)
@@ -41,14 +53,14 @@ export default function RestaurantLanding() {
       localStorage.setItem("cart", "[]");
     }
     const localCart = JSON.parse(localStorage.getItem("cart") || []);
-    setCart(JSON.parse(localStorage.getItem("cart") || []));
+    setCartItems(JSON.parse(localStorage.getItem("cart") || []));
 
     const merged = response.data.menus.map((dish) => {
-      const cartItem = localCart.find(item => item.menu_id === dish.menu_id);
-      console.log(cartItem)
+      const cartItems = localCart.find(item => item.menu_id === dish.menu_id);
+      console.log(cartItems)
       return {
         ...dish,
-        quantity: cartItem?.quantity || 0
+        quantity: cartItems?.quantity || 0
       }
     })
     setMenu(merged);
@@ -67,12 +79,14 @@ export default function RestaurantLanding() {
 
 
   const addToCart = async (newItem) => {
-    if (cart?.length === 0) {
+    if (cartItems?.length === 0) {
       localStorage.setItem('cart_restaurant', "{}");
       localStorage.setItem('cart_restaurant', JSON.stringify(restaurant));
     }
-    if (cart?.length > 0) {
-      const is_true = cart[0].id_restaurant !== newItem.id_restaurant;
+    console.log(cartItems?.length)
+    if (cartItems?.length > 0) {
+      console.log('hello')
+      const is_true = cartItems[0].id_restaurant !== newItem.id_restaurant;
       if (is_true) {
         setCartClearModel(true);
         return;
@@ -80,7 +94,7 @@ export default function RestaurantLanding() {
 
     }
 
-    setCart(prev => {
+    setCartItems(prev => {
       const existingDishIndex = prev.findIndex(item => item.menu_id === newItem.menu_id);
 
       let updatedCart;
@@ -136,7 +150,7 @@ export default function RestaurantLanding() {
 
 
   const removeQuantity = (updateItem) => {
-    setCart(prev => {
+    setCartItems(prev => {
       const existingDishIndex = prev.findIndex(item => item.menu_id === updateItem.menu_id);
       const updatedCart = prev.map((dish) => {
         if (dish.menu_id === updateItem.menu_id) {
@@ -178,7 +192,6 @@ export default function RestaurantLanding() {
   }
 
 
-  console.log(cart);
   console.log(menu);
 
   const removeItem = (id) => {
@@ -206,7 +219,7 @@ export default function RestaurantLanding() {
       })
     )
 
-    setCart(prev => {
+    setCartItems(prev => {
       const updatedCart = prev.filter(item => item.menu_id !== id);
       localStorage.setItem("cart", JSON.stringify(updatedCart));
       return updatedCart;
@@ -273,38 +286,7 @@ export default function RestaurantLanding() {
 
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white overflow-hidden">
         {/* Navigation */}
-        <nav className={`fixed w-full z-50 transition-all duration-300 ${scrollY > 50 ? 'bg-black/20 backdrop-blur-lg' : 'bg-transparent'}`}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center py-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
-                  <ChefHat className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">{restaurant?.restaurant_name || 'N/A'}</h1>
-                  <p className="text-xs text-gray-300">Fine Dining Experience</p>
-                </div>
-              </div>
-
-              <div className="hidden md:flex items-center space-x-8">
-                <a href="#menu" className="hover:text-orange-400 transition-colors">Menu</a>
-                <a href="#about" className="hover:text-orange-400 transition-colors">About</a>
-                <a href="#reservations" className="hover:text-orange-400 transition-colors">Reservations</a>
-                <a href="#contact" className="hover:text-orange-400 transition-colors">Contact</a>
-                <Link to={'/cart'}>
-                  <button className="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-2 rounded-full hover:shadow-lg hover:shadow-orange-500/25 transition-all transform hover:scale-105">
-                    Cart({cart?.length || 0})
-                  </button>
-                </Link>
-
-              </div>
-
-              <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
-            </div>
-          </div>
-        </nav>
+        <Header />
 
         {/* Hero Section */}
         <section className="relative min-h-screen flex items-center justify-center px-4 pt-20">
@@ -380,7 +362,7 @@ export default function RestaurantLanding() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
 
               {activeMenu?.map((dish) => (
-                <div key={dish?.menu_id} className="group bg-white/10 backdrop-blur-lg rounded-3xl z-40 p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/20">
+                <div data-aos="fade-up" key={dish?.menu_id} className="group bg-white/10 backdrop-blur-lg rounded-3xl z-40 p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/20">
                   <div className="flex items-start justify-between mb-4">
                     <div className="text-5xl group-hover:scale-110 transition-transform duration-300">
                       <img src={`${dish?.image}`} alt="" />
@@ -536,12 +518,21 @@ export default function RestaurantLanding() {
                     </div>
                     {
                       dish?.quantity === 0 &&
-                      <button
-                        onClick={() => { addToCart(dish) }}
-                        className="bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-2 rounded-full font-semibold hover:shadow-lg transition-all opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 flex items-center gap-2 hover:from-orange-400 hover:to-pink-400"
-                      >
-                        Add to Cart <ArrowRight className="w-4 h-4" />
-                      </button>
+                      <>
+                        <button
+                          onClick={() => { addToCart(dish) }}
+                          className="hidden sm:flex justify-center  items-center w-60 mt-4 bg-gradient-to-r from-orange-500 to-pink-500 py-3 rounded-full  font-semibold hover:shadow-lg transition-all opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0"
+                        >
+                          Add to Cart <ArrowRight className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => { addToCart(dish) }}
+                          className="sm:hidden flex justify-center items-center w-40  mt-4 bg-gradient-to-r from-orange-500 to-pink-500 py-3 rounded-full font-semibold  transition-all "                        >
+                          Add to Cart <ArrowRight className="w-4 h-4" />
+                        </button>
+                      </>
+
+
                     }
 
                     {
@@ -642,7 +633,7 @@ export default function RestaurantLanding() {
       </div>
       {
         cartClearModel &&
-        <CartClearModel setCartClearModel={setCartClearModel} addToCart={addToCart} setCart={setCart} />
+        <CartClearModel setCartClearModel={setCartClearModel} addToCart={addToCart} setCart={setCartItems} />
       }
     </>
 

@@ -81,7 +81,7 @@ userRoute.post('/login', async (req, res) => {
             return res.status(401).json({ msg: "mismatch password", success: false })
         }
         const token = jwt.sign({ user_id: user.user_id, role: user.role, iat: Math.floor(Date.now() / 1000) }, process.env.JWT_SECRET, { expiresIn: "7d" })
-        return res.json({ msg: token, success: true})
+        return res.json({ msg: token, success: true, user:user})
     } catch (error) {
         console.log(error)
         return res.status(403).json({ msg: "there is a server problem", success: false })

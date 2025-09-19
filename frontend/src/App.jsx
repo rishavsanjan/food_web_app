@@ -10,18 +10,19 @@ import Cart from './pages/cart'
 import UserProfile from './pages/profile'
 import RestaurantAdminDashboard from './pages/restaurantadmin'
 import DeliveryDriverPanel from './pages/deliverydriverpanel'
+import { CartProvider } from './contexts/cartContext'
 
 
 function AppContent() {
   return (
     <Routes>
       <Route path="/" element={<FoodDeliveryLanding />} />
-      <Route path="/restraunt/:id" element={<RestaurantLanding/>}/>
-      <Route path='/login' element={<LogIn/>}/>
-      <Route path='/cart' element={<Cart/>}/>
-      <Route path='/profile' element={<UserProfile/>}/>
-      <Route path='/restaurant-admin' element={<RestaurantAdminDashboard/>}/>
-      <Route path='/delivery-pofile' element={<DeliveryDriverPanel/>}/>
+      <Route path="/restraunt/:id" element={<RestaurantLanding />} />
+      <Route path='/login' element={<LogIn />} />
+      <Route path='/cart' element={<Cart />} />
+      <Route path='/profile' element={<UserProfile />} />
+      <Route path='/restaurant-admin' element={<RestaurantAdminDashboard />} />
+      <Route path='/delivery-pofile' element={<DeliveryDriverPanel />} />
     </Routes>
   )
 }
@@ -32,9 +33,11 @@ function App() {
 
   return (
     <>
-      <Router>
-        <AppContent />
-      </Router>
+      <CartProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </CartProvider>
     </>
   )
 }

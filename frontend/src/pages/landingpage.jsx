@@ -6,6 +6,7 @@ import OurInfo from './usernotlogged';
 import Lottie from "lottie-react";
 import loadingAnimation from '../../assets/loading-animation/pac_buffer.json';
 import config from '../config/config';
+import Header from './header';
 
 export default function FoodDeliveryLanding() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -112,63 +113,7 @@ export default function FoodDeliveryLanding() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white overflow-hidden">
             {/* Navigation */}
-            <nav className={`fixed w-full z-50 transition-all duration-300 ${scrollY > 50 ? 'bg-black/20 backdrop-blur-lg' : 'bg-transparent'}`}>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center py-4">
-                        <div className="flex items-center space-x-2">
-                            <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-xl flex items-center justify-center">
-                                <span className="text-xl font-bold">🍽️</span>
-                            </div>
-                            <span className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">FitEats</span>
-                        </div>
-
-                        <div className="hidden md:flex items-center space-x-8">
-                            <a href="#home" className="hover:text-orange-400 transition-colors">Home</a>
-                            <a href="#restaurants" className="hover:text-orange-400 transition-colors">Restaurants</a>
-                            <a href="#features" className="hover:text-orange-400 transition-colors">Features</a>
-                            <a href="#contact" className="hover:text-orange-400 transition-colors">Contact</a>
-                            {
-                                !isLogin ?
-                                    <Link to={'/login'}>
-                                        <h1 className="hover:text-orange-400 transition-colors">Login / Sign Up</h1>
-                                    </Link>
-                                    :
-                                    <Link to={`${user.role === 'RESTAURANT_OWNER' ? '/restaurant-admin' : `${user.role === 'CUSTOMER' ? '/profile' : '/delivery-pofile'}`} `}>
-                                        <h1 className="hover:text-orange-400 transition-colors"> {user.name}</h1>
-                                    </Link>
-
-                            }
-
-                            {
-                                isLogin &&
-                                <Link to={'/cart'}>
-                                    <h1 className="hover:text-orange-400 transition-colors">Cart</h1>
-                                </Link>
-                            }
-
-                        </div>
-
-                        <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                        </button>
-                    </div>
-                </div>
-
-                {/* Mobile Menu */}
-                {isMenuOpen && (
-                    <div className="md:hidden bg-black/90 backdrop-blur-lg">
-                        <div className="px-4 py-6 space-y-4">
-                            <a href="#home" className="block hover:text-orange-400 transition-colors">Home</a>
-                            <a href="#restaurants" className="block hover:text-orange-400 transition-colors">Restaurants</a>
-                            <a href="#features" className="block hover:text-orange-400 transition-colors">Features</a>
-                            <a href="#contact" className="block hover:text-orange-400 transition-colors">Contact</a>
-                            <button className="w-full bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-3 rounded-full">
-                                Download App
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </nav>
+            <Header/>
 
             {/* Hero Section */}
             <section id="home" className="relative min-h-screen flex items-center justify-center px-4">
@@ -180,11 +125,11 @@ export default function FoodDeliveryLanding() {
                 <div className="absolute bottom-40 left-20 text-4xl animate-bounce delay-1000">🍜</div>
                 <div className="absolute bottom-20 right-10 text-5xl animate-pulse delay-500">🌮</div>
 
-                <div className="relative z-10 text-center max-w-4xl mx-auto">
+                <div className="relative z-10 text-center max-w-4xl mx-auto sm:py-0 py-32">
                     <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 bg-clip-text text-transparent animate-pulse">
                         Craving Something?
                     </h1>
-                    <p className="text-xl md:text-2xl mb-8 text-gray-200 max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-xl md:text-2xl mb-8 text-gray-200 max-w-2xl mx-auto leading-relaxed ">
                         Get your favorite meals delivered hot and fresh in 30 minutes or less. From local gems to popular chains.
                     </p>
                     <div className="relative w-full max-w-4xl mx-auto" id="search-container">
@@ -223,8 +168,8 @@ export default function FoodDeliveryLanding() {
                                     {/* Results List */}
                                     <div className="max-h-64 overflow-y-auto">
                                         {searchResult.map((rest) => (
-                                            <Link 
-                                                key={rest.id_restaurant} 
+                                            <Link
+                                                key={rest.id_restaurant}
                                                 to={`/restraunt/${rest.id_restaurant}`}
                                                 onClick={() => {
                                                     setSearchResultModal(false);
@@ -285,10 +230,6 @@ export default function FoodDeliveryLanding() {
                             <div className="text-3xl font-bold text-pink-400">50k+</div>
                             <div className="text-sm text-gray-300">Happy Users</div>
                         </div>
-                        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20">
-                            <div className="text-3xl font-bold text-purple-400">4.9⭐</div>
-                            <div className="text-sm text-gray-300">App Rating</div>
-                        </div>
                     </div>
                 </div>
 
@@ -338,19 +279,20 @@ export default function FoodDeliveryLanding() {
                                                         <img src={`${restaurant?.image || 'https://cdn.pixabay.com/photo/2015/02/23/21/10/restaurant-646687_1280.jpg'}`} alt="" />
                                                     </div>
                                                     <h3 className="text-2xl font-bold mb-2">{restaurant?.restaurant_name || 'N/A'}</h3>
-                                                    <p className="text-gray-400 mb-4">{restaurant?.cuisine || 'N/A'}</p>
+                                                    <p className="text-gray-400 mb-4">30-35 mins</p>
                                                     <div className="flex justify-between items-center">
                                                         <div className="flex items-center gap-1">
-                                                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                                                            <span className="text-sm font-semibold">{restaurant?.rating || 'N/A'}</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-1 text-sm text-gray-400">
-                                                            <Clock className="w-4 h-4" />
-                                                            {restaurant?.time || 'N/A'}
+                                                            <Star className="w-6 h-6 text-yellow-400 fill-current" />
+                                                            <span className="text-lg font-semibold">{restaurant?.rating || 'N/A'}</span>
                                                         </div>
                                                     </div>
                                                     <Link to={`/restraunt/${restaurant.id_restaurant}`}>
-                                                        <button className="w-full mt-4 bg-gradient-to-r from-orange-500 to-pink-500 py-3 rounded-full font-semibold hover:shadow-lg transition-all opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0">
+                                                        <button
+                                                            className="hidden sm:flex justify-center w-full mt-4 bg-gradient-to-r from-orange-500 to-pink-500 py-3 rounded-full  font-semibold hover:shadow-lg transition-all opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0"
+                                                        >
+                                                            Order Now
+                                                        </button>
+                                                        <button className="sm:hidden flex justify-center w-full  mt-4 bg-gradient-to-r from-orange-500 to-pink-500 py-3 rounded-full font-semibold  transition-all ">
                                                             Order Now
                                                         </button>
                                                     </Link>
