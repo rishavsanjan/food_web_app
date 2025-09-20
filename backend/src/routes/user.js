@@ -81,7 +81,7 @@ userRoute.post('/login', async (req, res) => {
             return res.status(401).json({ msg: "mismatch password", success: false })
         }
         const token = jwt.sign({ user_id: user.user_id, role: user.role, iat: Math.floor(Date.now() / 1000) }, process.env.JWT_SECRET, { expiresIn: "7d" })
-        return res.json({ msg: token, success: true, user:user})
+        return res.json({ msg: token, success: true,role:user.role})
     } catch (error) {
         console.log(error)
         return res.status(403).json({ msg: "there is a server problem", success: false })
@@ -155,9 +155,18 @@ userRoute.get('/rest/menus/:id',authMid,userAuthMid,async(req,res)=>{
                 rating:true,
                 image:true,
                 restaurant_address:true,
-                menu:true
+                menu:true,
+                review:true
+            },
+            
+        })
+        const userReview=await prisma.review.findFirst({
+            where:{
+                user_id:req.user.user_id,
+                id_restaurant:rest.id_restaurant
             }
         })
+        // console.log(userReview)
         const restaurant={
             id_restaurant:rest.id_restaurant,
             restaurant_name:rest.restaurant_name,
@@ -168,7 +177,7 @@ userRoute.get('/rest/menus/:id',authMid,userAuthMid,async(req,res)=>{
         // const vegMenus = rest.menu.filter(menu => menu.category === 'veg');
         // const nonVegMenus =rest.menu.filter(menu => menu.category === 'non_veg');
         // console.log(vegMenus)
-        return res.json({success:true,restaurant,menus:rest.menu})
+        return res.json({success:true,restaurant,menus:rest.menu,reviews:rest.review,userReview})
     } catch (error) {
         console.log(error)
         res.status(500).json({ msg: "Internal server error", success: false });
