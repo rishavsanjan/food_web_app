@@ -27,17 +27,18 @@ export default function RestaurantLanding() {
   const [loading, setLoading] = useState(true);
   const [fullMenu, setFullMenu] = useState([]);
   const [activeMenu, setActiveMenu] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [selfReview, setSelfReview] = useState();
 
   useEffect(() => {
     AOS.init({
-      duration: 500,  
+      duration: 500,
       easing: "ease-in-out",
-      once: false,    
+      once: false,
     });
   }, []);
 
 
-  console.log(config.apiUrl)
   const getMenu = async () => {
     const token = localStorage.getItem('token');
     const response = await axios({
@@ -46,18 +47,22 @@ export default function RestaurantLanding() {
       headers: {
         'Authorization': 'Bearer ' + token
       }
-    })
+    });
+
     setMenu(response.data.menus);
+    setReviews(response.data.reviews);
+    setSelfReview(response.data.userReview);
     setRestaurant(response.data.restaurant);
     if (!localStorage.getItem("cart")) {
       localStorage.setItem("cart", "[]");
     }
+
+    console.log(response.data)
     const localCart = JSON.parse(localStorage.getItem("cart") || []);
     setCartItems(JSON.parse(localStorage.getItem("cart") || []));
 
     const merged = response.data.menus.map((dish) => {
       const cartItems = localCart.find(item => item.menu_id === dish.menu_id);
-      console.log(cartItems)
       return {
         ...dish,
         quantity: cartItems?.quantity || 0
@@ -83,9 +88,7 @@ export default function RestaurantLanding() {
       localStorage.setItem('cart_restaurant', "{}");
       localStorage.setItem('cart_restaurant', JSON.stringify(restaurant));
     }
-    console.log(cartItems?.length)
     if (cartItems?.length > 0) {
-      console.log('hello')
       const is_true = cartItems[0].id_restaurant !== newItem.id_restaurant;
       if (is_true) {
         setCartClearModel(true);
@@ -191,11 +194,13 @@ export default function RestaurantLanding() {
 
   }
 
+  const reviewsFomatted = async () => {
+    
+  }
 
-  console.log(menu);
+
 
   const removeItem = (id) => {
-    console.log('removed')
     setFullMenu(prev =>
       prev.map((dish) => {
         if (dish.menu_id === id) {
@@ -356,7 +361,7 @@ export default function RestaurantLanding() {
             {
               activeCategory === 'reviews' &&
               <>
-                <RestaurantReviews />
+                <RestaurantReviews reviews={reviews} setReviews={setReviews} restaurantId={restaurant.id_restaurant} selfReview={selfReview} setSelfReview={setSelfReview}/>
               </>
             }
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -521,7 +526,7 @@ export default function RestaurantLanding() {
                       <>
                         <button
                           onClick={() => { addToCart(dish) }}
-                          className="hidden sm:flex justify-center  items-center w-60 mt-4 bg-gradient-to-r from-orange-500 to-pink-500 py-3 rounded-full  font-semibold hover:shadow-lg transition-all opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0"
+                          className="hidden sm:flex justify-center  items-center w-40 mt-4 bg-gradient-to-r from-orange-500 to-pink-500 py-3 rounded-full  font-semibold hover:shadow-lg transition-all opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0"
                         >
                           Add to Cart <ArrowRight className="w-4 h-4" />
                         </button>

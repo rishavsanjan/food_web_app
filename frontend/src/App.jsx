@@ -10,7 +10,8 @@ import Cart from './pages/cart'
 import UserProfile from './pages/profile'
 import RestaurantAdminDashboard from './pages/restaurantadmin'
 import DeliveryDriverPanel from './pages/deliverydriverpanel'
-import { CartProvider } from './contexts/cartContext'
+import { CartProvider } from './contexts/cartContext';
+import { UserProvider } from './contexts/userContext'
 
 
 function AppContent() {
@@ -33,11 +34,14 @@ function App() {
 
   return (
     <>
-      <CartProvider>
-        <Router>
-          <AppContent />
-        </Router>
-      </CartProvider>
+      <UserProvider>
+        <CartProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </CartProvider>
+      </UserProvider>
+
     </>
   )
 }

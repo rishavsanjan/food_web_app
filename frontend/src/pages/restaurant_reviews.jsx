@@ -2,234 +2,91 @@ import { useState, useEffect } from 'react';
 import { Star, ThumbsUp, ThumbsDown, Filter, Plus, X, User, Calendar, MapPin, CheckCircle, AlertCircle, Clock, Search, TrendingUp, Award, Heart } from 'lucide-react';
 import axios from 'axios';
 import config from '../config/config';
+import { ToastContainer, toast } from 'react-toastify';
+import { useUser } from '../contexts/userContext';
+import Lottie from "lottie-react";
+import loadingAnimation from '../../assets/loading-animation/purple_loading.json'
 
-// Mock reviews data
-const mockReviews = [
-    {
-        id: 1,
-        name: "Priya Sharma",
-        avatar: "👩‍💼",
-        rating: 5,
-        date: "2024-03-15",
-        title: "Absolutely Amazing Experience!",
-        review: "The food was exceptional and the service was outstanding. The truffle risotto was perfectly cooked and the ambiance was romantic. Will definitely come back for our anniversary!",
-        helpful: 24,
-        notHelpful: 2,
-        verified: true,
-        category: "Food Quality",
-        visitType: "Date Night",
-        photos: ["🍝", "🍷"]
-    },
-    {
-        id: 2,
-        name: "Rajesh Kumar",
-        avatar: "👨‍💻",
-        rating: 4,
-        date: "2024-03-12",
-        title: "Great food, but service could be better",
-        review: "The dishes were delicious, especially the grilled salmon. However, we had to wait quite a bit for our order. The atmosphere is nice though, perfect for business meetings.",
-        helpful: 18,
-        notHelpful: 5,
-        verified: true,
-        category: "Service",
-        visitType: "Business Meeting",
-        photos: ["🐟"]
-    },
-    {
-        id: 3,
-        name: "Sneha Patel",
-        avatar: "👩‍🎨",
-        rating: 5,
-        date: "2024-03-10",
-        title: "Perfect venue for celebrations!",
-        review: "We celebrated my birthday here and it was fantastic! The staff was so accommodating, the food was fresh and flavorful. The birthday dessert surprise was a lovely touch!",
-        helpful: 31,
-        notHelpful: 1,
-        verified: true,
-        category: "Ambiance",
-        visitType: "Celebration",
-        photos: ["🎂", "🥂", "🎉"]
-    },
-    {
-        id: 4,
-        name: "Arjun Singh",
-        avatar: "👨‍🍳",
-        rating: 3,
-        date: "2024-03-08",
-        title: "Average experience",
-        review: "The food was okay but nothing extraordinary. The prices are quite high for what you get. The location is convenient though, and parking was easy.",
-        helpful: 12,
-        notHelpful: 8,
-        verified: false,
-        category: "Value",
-        visitType: "Casual Dining",
-        photos: []
-    },
-    {
-        id: 5,
-        name: "Kavya Reddy",
-        avatar: "👩‍🎓",
-        rating: 4,
-        date: "2024-03-05",
-        title: "Lovely place for family dinner",
-        review: "Brought my parents here for their wedding anniversary. The vegetarian options were excellent, and the staff was very patient with our elderly parents. Highly recommend the margherita pizza!",
-        helpful: 27,
-        notHelpful: 3,
-        verified: true,
-        category: "Family Friendly",
-        visitType: "Family Dinner",
-        photos: ["🍕", "👨‍👩‍👧‍👦"]
-    }
-];
-
-// Mock restaurant stats
-const restaurantStats = {
-    overallRating: 4.2,
-    totalReviews: 248,
-    ratingBreakdown: {
-        5: 112,
-        4: 89,
-        3: 32,
-        2: 11,
-        1: 4
-    },
-    categories: {
-        "Food Quality": 4.5,
-        "Service": 4.0,
-        "Ambiance": 4.3,
-        "Value": 3.8,
-        "Family Friendly": 4.4
-    }
-};
-
-export default function RestaurantReviews() {
-    const [reviews, setReviews] = useState(mockReviews);
-    const [filteredReviews, setFilteredReviews] = useState(mockReviews);
+export default function RestaurantReviews({ reviews, setReviews, restaurantId, selfReview, setSelfReview }) {
     const [showAddReview, setShowAddReview] = useState(false);
-    const [filterRating, setFilterRating] = useState('all');
-    const [filterCategory, setFilterCategory] = useState('all');
-    const [sortBy, setSortBy] = useState('newest');
-    const [searchTerm, setSearchTerm] = useState('');
+    const { user } = useUser();
     const [newReview, setNewReview] = useState({
-        name: '',
         rating: 0,
-        title: '',
         review: '',
-        category: 'Food Quality',
-        visitType: 'Casual Dining'
     });
+    const [loading, setLoading] = useState(false);
+
 
     const getReviews = async () => {
         const token = localStorage.getItem('token');
-        const response = await axios({
-            url: '',
-            method: 'get',
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        })
-
-        console.log(response.data);
-    }
-
-    const addReview = async () => {
-        const response = await axios({
-            url: '',
-            method: 'post',
-            headers: {
-                'Authorization': 'Bearer ' + token
-            },
-            data: {
-
-            }
-        })
-        console.log(response.data);
+        try {
+            const response = await axios({
+                url: `${config.apiUrl}/api/restaurant/${restaurantId}/reviews`, // Add proper URL
+                method: 'get',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+            setReviews(response.data);
+        } catch (error) {
+            console.error('Error fetching reviews:', error);
+        }
     }
 
     useEffect(() => {
-        getReviews();
-    }, [])
-
-    // Filter and sort reviews
-    useEffect(() => {
-        let filtered = reviews;
-
-        // Filter by rating
-        if (filterRating !== 'all') {
-            filtered = filtered.filter(review => review.rating === parseInt(filterRating));
+        if (restaurantId) {
+            getReviews();
         }
+    }, [restaurantId])
 
-        // Filter by category
-        if (filterCategory !== 'all') {
-            filtered = filtered.filter(review => review.category === filterCategory);
+    const handleAddReview = async () => {
+        if (newReview.rating === 0 || newReview.review.trim() === '') {
+            toast.error('Please provide both rating and review text');
+            return;
         }
+        setLoading(true)
 
-        // Filter by search term
-        if (searchTerm) {
-            filtered = filtered.filter(review =>
-                review.review.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                review.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                review.name.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-        }
+        const token = localStorage.getItem('token');
+        try {
+            const response = await axios({
+                url: `${config.apiUrl}/api/users/review`,
+                method: 'post',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                data: {
+                    id_restaurant: restaurantId,
+                    rating: newReview.rating,
+                    review: newReview.review
+                }
+            });
 
-        // Sort reviews
-        filtered = [...filtered].sort((a, b) => {
-            switch (sortBy) {
-                case 'newest':
-                    return new Date(b.date) - new Date(a.date);
-                case 'oldest':
-                    return new Date(a.date) - new Date(b.date);
-                case 'highest':
-                    return b.rating - a.rating;
-                case 'lowest':
-                    return a.rating - b.rating;
-                case 'helpful':
-                    return b.helpful - a.helpful;
-                default:
-                    return 0;
-            }
-        });
+            console.log(response.data);
 
-        setFilteredReviews(filtered);
-    }, [reviews, filterRating, filterCategory, sortBy, searchTerm]);
-
-    const handleAddReview = () => {
-        if (newReview.name && newReview.rating && newReview.title && newReview.review) {
-            const review = {
-                id: reviews.length + 1,
-                ...newReview,
-                avatar: "👤",
-                date: new Date().toISOString().split('T')[0],
-                helpful: 0,
-                notHelpful: 0,
-                verified: false,
-                photos: []
+            const newReviewObj = {
+                id: Date.now(), // temporary ID
+                rating: newReview.rating,
+                review_text: newReview.review,
+                created_at: new Date().toISOString(),
+                users: {
+                    name: user.name
+                },
+                verified: false
             };
 
-            setReviews([review, ...reviews]);
+            setSelfReview(newReviewObj)
             setNewReview({
-                name: '',
                 rating: 0,
-                title: '',
                 review: '',
-                category: 'Food Quality',
-                visitType: 'Casual Dining'
             });
             setShowAddReview(false);
+            toast.success('Review added successfully!');
+            setLoading(false);
+        } catch (error) {
+            console.error('Error adding review:', error);
+            toast.error('Failed to add review');
+            setLoading(false);
         }
-    };
-
-    const handleHelpful = (reviewId, isHelpful) => {
-        setReviews(reviews.map(review =>
-            review.id === reviewId
-                ? {
-                    ...review,
-                    helpful: isHelpful ? review.helpful + 1 : review.helpful,
-                    notHelpful: !isHelpful ? review.notHelpful + 1 : review.notHelpful
-                }
-                : review
-        ));
     };
 
     const renderStars = (rating, size = 'w-4 h-4') => {
@@ -248,131 +105,124 @@ export default function RestaurantReviews() {
         );
     };
 
-    const getRatingPercentage = (rating) => {
-        return (restaurantStats.ratingBreakdown[rating] / restaurantStats.totalReviews) * 100;
+    const RenderReview = ({ review }) => {
+        return (
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300">
+
+                {/* Review Header */}
+                <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-4">
+                        <div className="text-4xl">
+                            <img className='w-10 h-10' src="https://img.icons8.com/?size=100&id=z-JBA_KtSkxG&format=png&color=000000" alt="User avatar" />
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <h4 className="font-semibold text-lg">{review.users?.name || user.name}</h4>
+                                {review.verified && (
+                                    <CheckCircle className="w-4 h-4 text-green-400" title="Verified Customer" />
+                                )}
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <Calendar className="w-4 h-4" />
+                                <span className="text-sm text-gray-300">
+                                    {new Date(review.created_at).toLocaleDateString()}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        {renderStars(review.rating)}
+                    </div>
+                </div>
+
+                {/* Review Content */}
+                <div className="mb-4">
+                    <p className="text-gray-300 leading-relaxed">
+                        {review.review_text}
+                    </p>
+                </div>
+            </div>
+        );
     };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white p-6">
+            <ToastContainer
+                position="top-center"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={true}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+                limit={3}
+            />
             <div className="max-w-6xl mx-auto">
                 {/* Header */}
                 <div className="text-center mb-12">
                     <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
                         Customer Reviews
                     </h1>
-                    <p className="text-xl text-gray-300">What our customers say about their dining experience</p>
+                    <p className="text-xl text-gray-300">What our customers say about their experience</p>
                 </div>
 
-                <div className="grid lg:grid-cols-3 gap-8">
+                <div className="grid lg:grid-cols-2 gap-8">
                     {/* Left Sidebar - Stats */}
                     <div className="lg:col-span-1">
                         {/* Overall Rating Card */}
                         <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20 mb-6">
-                            <div className="text-center mb-6">
-                                <div className="text-6xl font-bold text-orange-400 mb-2">
-                                    {restaurantStats.overallRating}
-                                </div>
-                                {renderStars(Math.round(restaurantStats.overallRating), 'w-6 h-6')}
-                                <p className="text-gray-300 mt-2">
-                                    Based on {restaurantStats.totalReviews} reviews
-                                </p>
-                            </div>
-
-                            {/* Rating Breakdown */}
-                            <div className="space-y-3 mb-6">
-                                {[5, 4, 3, 2, 1].map((rating) => (
-                                    <div key={rating} className="flex items-center gap-3">
-                                        <span className="text-sm w-4">{rating}</span>
-                                        <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                                        <div className="flex-1 bg-gray-700 rounded-full h-2">
-                                            <div
-                                                className="bg-gradient-to-r from-orange-400 to-pink-500 h-2 rounded-full transition-all duration-500"
-                                                style={{ width: `${getRatingPercentage(rating)}%` }}
-                                            ></div>
-                                        </div>
-                                        <span className="text-sm text-gray-300 w-8">
-                                            {restaurantStats.ratingBreakdown[rating]}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
+                            {/* Rating stats would go here */}
                         </div>
 
-                        {/* Add Review Button */}
-                        <button
-                            onClick={() => setShowAddReview(true)}
-                            className="w-full bg-gradient-to-r from-orange-500 to-pink-500 py-4 rounded-2xl font-semibold hover:shadow-lg hover:shadow-orange-500/25 transition-all transform hover:scale-105 flex items-center justify-center gap-3"
-                        >
-                            <Plus className="w-5 h-5" />
-                            Write a Review
-                        </button>
+                        {/* Self Review Display */}
+                        {selfReview ? (
+                            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 mb-6">
+                                <h3 className="text-lg font-semibold mb-4 text-orange-400">Your Review</h3>
+                                <RenderReview review={selfReview} />
+                            </div>
+                        )
+                            :
+                            <>
+                                {/* Add Review Button */}
+                                <button
+                                    onClick={() => setShowAddReview(true)}
+                                    className="w-full bg-gradient-to-r from-orange-500 to-pink-500 py-4 rounded-2xl font-semibold hover:shadow-lg hover:shadow-orange-500/25 transition-all transform hover:scale-105 flex items-center justify-center gap-3"
+                                >
+                                    <Plus className="w-5 h-5" />
+                                    Write a Review
+                                </button>
+                            </>
+
+
+                        }
+
+
+
                     </div>
 
-                    {/* Main Content - Reviews */}
-                    <div className="lg:col-span-2">
-                        
-
-                        {/* Reviews List */}
-                        <div className="space-y-6">
-                            {filteredReviews.length === 0 ? (
-                                <div className="text-center py-12">
-                                    <div className="text-6xl mb-4">😔</div>
-                                    <h3 className="text-2xl font-semibold mb-2">No reviews found</h3>
-                                    <p className="text-gray-400">Try adjusting your filters or search terms</p>
-                                </div>
-                            ) : (
-                                filteredReviews.map((review) => (
-                                    <div
-                                        key={review.id}
-                                        className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300"
-                                    >
-                                        {/* Review Header */}
-                                        <div className="flex items-start justify-between mb-4">
-                                            <div className="flex items-center gap-4">
-                                                <div className="text-4xl">{review.avatar}</div>
-                                                <div>
-                                                    <div className="flex items-center gap-2">
-                                                        <h4 className="font-semibold text-lg">{review.name}</h4>
-                                                        {review.verified && (
-                                                            <CheckCircle className="w-4 h-4 text-green-400" title="Verified Customer" />
-                                                        )}
-                                                    </div>
-                                                    <div className="flex items-center gap-1">
-                                                        <Calendar className="w-4 h-4" />
-                                                        {new Date(review.date).toLocaleDateString()}
-                                                    </div>
-
-                                                </div>
-                                            </div>
-
-                                            <div className="text-right">
-                                                {renderStars(review.rating)}
-                                                <div className="text-sm text-gray-400 mt-1">{review.category}</div>
-                                            </div>
-                                        </div>
-
-                                        {/* Review Content */}
-                                        <div className="mb-4">
-                                            <h5 className="font-semibold text-lg mb-2 text-orange-400">
-                                                {review.title}
-                                            </h5>
-                                            <p className="text-gray-300 leading-relaxed">
-                                                {review.review}
-                                            </p>
-                                        </div>
-
-
-
-                                    </div>
-                                ))
-                            )}
-                        </div>
+                    {/* Reviews List */}
+                    <div className="space-y-6">
+                        {reviews.length === 0 ? (
+                            <div className="text-center py-12">
+                                <div className="text-6xl mb-4">😔</div>
+                                <h3 className="text-2xl font-semibold mb-2">No reviews found</h3>
+                            </div>
+                        ) : (
+                            reviews.map((review) => (
+                                <RenderReview key={review.id} review={review} />
+                            ))
+                        )}
                     </div>
                 </div>
 
                 {/* Add Review Modal */}
                 {showAddReview && (
                     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+
+
                         <div className="bg-gradient-to-br from-purple-900/90 to-blue-900/90 backdrop-blur-lg rounded-3xl p-8 border border-white/20 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
@@ -387,20 +237,6 @@ export default function RestaurantReviews() {
                             </div>
 
                             <div className="space-y-6">
-                                {/* Name */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Your Name
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={newReview.name}
-                                        onChange={(e) => setNewReview({ ...newReview, name: e.target.value })}
-                                        className="w-full p-3 bg-black/20 rounded-xl border border-white/20 text-white focus:outline-none focus:border-orange-400 transition-colors"
-                                        placeholder="Enter your name"
-                                    />
-                                </div>
-
                                 {/* Rating */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -424,57 +260,6 @@ export default function RestaurantReviews() {
                                     </div>
                                 </div>
 
-                                {/* Category and Visit Type */}
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                                            Category
-                                        </label>
-                                        <select
-                                            value={newReview.category}
-                                            onChange={(e) => setNewReview({ ...newReview, category: e.target.value })}
-                                            className="w-full p-3 bg-black/20 rounded-xl border border-white/20 text-white focus:outline-none focus:border-orange-400"
-                                        >
-                                            <option value="Food Quality">Food Quality</option>
-                                            <option value="Service">Service</option>
-                                            <option value="Ambiance">Ambiance</option>
-                                            <option value="Value">Value</option>
-                                            <option value="Family Friendly">Family Friendly</option>
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                                            Visit Type
-                                        </label>
-                                        <select
-                                            value={newReview.visitType}
-                                            onChange={(e) => setNewReview({ ...newReview, visitType: e.target.value })}
-                                            className="w-full p-3 bg-black/20 rounded-xl border border-white/20 text-white focus:outline-none focus:border-orange-400"
-                                        >
-                                            <option value="Casual Dining">Casual Dining</option>
-                                            <option value="Date Night">Date Night</option>
-                                            <option value="Family Dinner">Family Dinner</option>
-                                            <option value="Business Meeting">Business Meeting</option>
-                                            <option value="Celebration">Celebration</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                {/* Title */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Review Title
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={newReview.title}
-                                        onChange={(e) => setNewReview({ ...newReview, title: e.target.value })}
-                                        className="w-full p-3 bg-black/20 rounded-xl border border-white/20 text-white focus:outline-none focus:border-orange-400 transition-colors"
-                                        placeholder="Summarize your experience"
-                                    />
-                                </div>
-
                                 {/* Review Text */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -492,10 +277,22 @@ export default function RestaurantReviews() {
                                 {/* Submit Button */}
                                 <button
                                     onClick={handleAddReview}
-                                    disabled={!newReview.name || !newReview.rating || !newReview.title || !newReview.review}
+                                    disabled={newReview.rating === 0 || newReview.review.length < 10}
                                     className="w-full bg-gradient-to-r from-orange-500 to-pink-500 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-orange-500/25 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                                 >
-                                    Submit Review
+                                    {
+                                        loading ?
+                                            <div className="flex flex-row justify-center items-center   bg-transparent">
+                                                <Lottie
+                                                    animationData={loadingAnimation}
+                                                    loop={true}
+                                                    style={{ width: 40, height: 40 }}
+                                                />
+                                                <h1 className='text-xl font-semibold'>Submitting </h1>
+                                            </div>
+                                            :
+                                            'Submit'
+                                    }
                                 </button>
                             </div>
                         </div>
@@ -504,14 +301,14 @@ export default function RestaurantReviews() {
             </div>
 
             <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-        }
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-      `}</style>
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px); }
+                    50% { transform: translateY(-10px); }
+                }
+                .animate-float {
+                    animation: float 3s ease-in-out infinite;
+                }
+            `}</style>
         </div>
     );
 }

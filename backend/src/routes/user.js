@@ -147,6 +147,7 @@ userRoute.post('/updateAdd',authMid,userAuthMid,async(req,res)=>{
 
 userRoute.get('/rest/menus/:id',authMid,userAuthMid,async(req,res)=>{
     try {
+        const userId = req.user.user_id;
         const rest=await prisma.restaurant.findUnique({
             where:{id_restaurant:parseInt(req.params.id)},
             select:{
@@ -156,7 +157,14 @@ userRoute.get('/rest/menus/:id',authMid,userAuthMid,async(req,res)=>{
                 image:true,
                 restaurant_address:true,
                 menu:true,
-                review:true
+                review:{
+                    where:{
+                        user_id:{not:userId}
+                    },
+                    include:{
+                        users:true
+                    }
+                }
             },
             
         })
@@ -228,6 +236,7 @@ userRoute.patch('/update-transaction/:orderId', authMid,userAuthMid, async (req,
 
 userRoute.post('/review',authMid,userAuthMid,async(req,res)=>{
     const p=reviewSchema.safeParse(req.body)
+    console.log(p)
     if (!p.success) {
         return res.status(400).json({ "msg": "Invalid format or less info", "success": false })
     }
@@ -264,6 +273,7 @@ userRoute.post('/review',authMid,userAuthMid,async(req,res)=>{
         })
         res.json({success:true,msg:"Review submitted and restaurant rating updated",new_average_rating:ratingup})
     } catch (error) {
+        console.log(error)
         res.status(500).json({ success: false, msg: 'Server error' });
     }
 })
