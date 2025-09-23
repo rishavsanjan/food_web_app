@@ -160,9 +160,6 @@ userRoute.get('/rest/menus/:id',authMid,userAuthMid,async(req,res)=>{
                 review:{
                     where:{
                         user_id:{not:userId}
-                    },
-                    include:{
-                        users:true
                     }
                 }
             },
