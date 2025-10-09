@@ -7,6 +7,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import Lottie from "lottie-react";
 import loadingAnimation from '../../assets/loading-animation/purple_loading.json'
 import config from '../config/config';
+import "../assets/loader/loader.css"
 
 
 export default function LogIn() {
@@ -25,7 +26,6 @@ export default function LogIn() {
     city: '',
     state: '',
     agreeToTerms: false,
-    subscribeNewsletter: false
   });
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
@@ -116,7 +116,7 @@ export default function LogIn() {
               navigate('/delivery-pofile');
             }
 
-          }, 1000);
+          }, 500);
           setLoading(false);
         } else {
           toast.error('Invalid Credentials!');
@@ -172,7 +172,6 @@ export default function LogIn() {
       password: '',
       confirmPassword: '',
       agreeToTerms: false,
-      subscribeNewsletter: false
     });
     setErrors({});
   };
@@ -181,17 +180,7 @@ export default function LogIn() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white overflow-hidden relative">
-      {
-        loading &&
-        <div className="flex flex-col justify-center items-center  h-screen bg-transparent">
-          <Lottie
-            animationData={loadingAnimation}
-            loop={true}
-            style={{ width: 200, height: 200 }}
-          />
-          <h1 className='text-xl font-semibold'>Loading </h1>
-        </div>
-      }
+
       <ToastContainer
         position="top-center"
         autoClose={2000}
@@ -234,7 +223,7 @@ export default function LogIn() {
                 <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
                   {isLogin ? 'Welcome Back' : 'Join Our Family'}
                 </h2>
-                <p className="text-gray-300">
+                <p className="text-gray-300 cursor-pointer">
                   {isLogin ? 'Sign in to your account' : 'Create your account to get started'}
                 </p>
               </div>
@@ -459,7 +448,7 @@ export default function LogIn() {
                         name="agreeToTerms"
                         checked={formData.agreeToTerms}
                         onChange={handleInputChange}
-                        className="mt-1 w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500 focus:ring-2"
+                        className="mt-1 w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500 focus:ring-2 cursor-pointer"
                       />
                       <label htmlFor="agreeToTerms" className="text-sm text-gray-300 leading-tight">
                         I agree to the <span className="text-orange-400 hover:text-orange-300 cursor-pointer">Terms of Service</span> and <span className="text-orange-400 hover:text-orange-300 cursor-pointer">Privacy Policy</span> *
@@ -467,19 +456,7 @@ export default function LogIn() {
                     </div>
                     {errors.agreeToTerms && <p className="text-red-400 text-xs">{errors.agreeToTerms}</p>}
 
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="checkbox"
-                        id="subscribeNewsletter"
-                        name="subscribeNewsletter"
-                        checked={formData.subscribeNewsletter}
-                        onChange={handleInputChange}
-                        className="mt-1 w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500 focus:ring-2"
-                      />
-                      <label htmlFor="subscribeNewsletter" className="text-sm text-gray-300 leading-tight">
-                        Subscribe to our newsletter for exclusive offers and culinary updates
-                      </label>
-                    </div>
+
                   </div>
                 )}
 
@@ -493,11 +470,20 @@ export default function LogIn() {
                 )}
 
                 {/* Submit Button */}
+
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-orange-500 to-pink-500 py-3 px-6 rounded-xl font-semibold text-lg hover:shadow-xl hover:shadow-orange-500/30 transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-transparent"
+                  className="w-full flex flex-row bg-gradient-to-r cursor-pointer from-orange-500 to-pink-500 py-3 px-6 rounded-xl font-semibold text-lg hover:shadow-xl hover:shadow-orange-500/30 transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-transparent items-center justify-center gap-2"
                 >
-                  {isLogin ? 'Sign In' : 'Create Account'}
+
+                  {isLogin && !loading && <p>Sign In</p>}
+                  {!isLogin && !loading && <p>Create Account</p>}
+                  {isLogin && loading && <p>Signing In...</p>}
+                  {!isLogin && loading && <p>Creating Account...</p>}
+                  {
+                    loading &&
+                    <div className="loader"></div>
+                  }
                 </button>
 
                 {/* Toggle Mode */}
@@ -507,7 +493,7 @@ export default function LogIn() {
                     <button
                       type="button"
                       onClick={toggleMode}
-                      className="ml-2 text-orange-400 hover:text-orange-300 font-semibold transition-colors"
+                      className="ml-2 text-orange-400 hover:text-orange-300 font-semibold transition-colors cursor-pointer"
                     >
                       {isLogin ? 'Sign Up' : 'Sign In'}
                     </button>
