@@ -117,7 +117,7 @@ export default function UserProfile() {
                     <div className="flex flex-col items-center mb-6">
                         {/* Profile Picture */}
                         <div className="w-24 h-24 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-4">
-                            SJ
+                            {userData.name[0].toUpperCase()}
                         </div>
 
                         <div className="text-center ">
