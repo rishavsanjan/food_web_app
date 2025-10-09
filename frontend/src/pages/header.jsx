@@ -4,34 +4,14 @@ import config from '../config/config';
 import { useCart } from '../contexts/cartContext';
 import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { useUser } from '../contexts/userContext';
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { cartItems } = useCart();
+    const { user } = useUser();
+    const isLogin = !!user;
 
-    const [isLogin, setIsLogin] = useState(false);
-
-    const [user, setUser] = useState([]);
-    const getProfile = async () => {
-        const token = localStorage.getItem('token');
-        const response = await axios({
-            url: `${config.apiUrl}/api/users/profile`,
-            method: 'GET',
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        })
-        setUser(response.data.user);
-        if (response) {
-            setIsLogin(true);
-        }
-
-    }
-
-
-    useEffect(() => {
-        getProfile();
-    }, [])
     return (
         <nav className={`fixed w-full z-50 transition-all duration-300 ${scrollY > 50 ? 'bg-purple-500/20 backdrop-blur-lg' : 'bg-transparent'}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -113,7 +113,7 @@ export default function FoodDeliveryLanding() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white overflow-hidden">
             {/* Navigation */}
-            <Header/>
+            <Header />
 
             {/* Hero Section */}
             <section id="home" className="relative min-h-screen flex items-center justify-center px-4">
@@ -238,12 +238,7 @@ export default function FoodDeliveryLanding() {
                 </div>
             </section>
 
-            {
-                !isLogin &&
-                <>
-                    <OurInfo />
-                </>
-            }
+            
 
             {/* Featured Restaurants */}
             <section id="restaurants" className={`${isLogin && 'py-20 px-4 bg-black/20'} `}>
@@ -307,28 +302,7 @@ export default function FoodDeliveryLanding() {
             </section>
 
             {/* Features Section */}
-            <section id="features" className="py-20 px-4">
-                <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-16">
-                        <h2 className="text-5xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-blue-500 bg-clip-text text-transparent">
-                            Why Choose FitEats?
-                        </h2>
-                        <p className="text-xl text-gray-300">Experience the future of food delivery</p>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {features.map((feature, index) => (
-                            <div key={index} className="group text-center bg-white/5 backdrop-blur-lg rounded-3xl p-8 border border-white/10 hover:bg-white/10 transition-all duration-300 transform hover:scale-105">
-                                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-orange-500 to-pink-500 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                                    {feature.icon}
-                                </div>
-                                <h3 className="text-2xl font-bold mb-4">{feature.title}</h3>
-                                <p className="text-gray-400">{feature.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
+            <OurInfo />
 
             {/* Footer */}
             <footer className="bg-black/40 backdrop-blur-lg py-12 px-4 border-t border-white/10">

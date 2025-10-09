@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { CheckCircle, Info, Heart, Target, Zap, ChevronDown, ChevronUp } from 'lucide-react';
 import { Link } from "react-router-dom";
 import config from '../config/config';
+import { useUser } from '../contexts/userContext';
 
 export default function OurInfo() {
     const [expandedCard, setExpandedCard] = useState(null);
-
+    const { user } = useUser();
     const toggleCard = (index) => {
         setExpandedCard(expandedCard === index ? null : index);
     };
@@ -122,24 +123,28 @@ export default function OurInfo() {
                 </div>
 
                 {/* Bottom CTA Section */}
-                <div className="bg-purple-600   backdrop-blur-lg rounded-3xl p-8 md:p-12 border border-purple-600 border-opacity-20 shadow-2xl text-center">
-                    <h3 className="text-3xl font-bold text-white mb-4">
-                        Experience the <span className="text-orange-400">FitEats Difference</span>
-                    </h3>
-                    <p className="text-xl text-purple-200 mb-8 max-w-3xl mx-auto">
-                        Make informed food choices with detailed nutritional insights, ingredient transparency,
-                        and personalized recommendations that align with your health goals.
-                    </p>
+                {
+                    !user &&
+                    <div className="bg-purple-600   backdrop-blur-lg rounded-3xl p-8 md:p-12 border border-purple-600 border-opacity-20 shadow-2xl text-center">
+                        <h3 className="text-3xl font-bold text-white mb-4">
+                            Experience the <span className="text-orange-400">FitEats Difference</span>
+                        </h3>
+                        <p className="text-xl text-purple-200 mb-8 max-w-3xl mx-auto">
+                            Make informed food choices with detailed nutritional insights, ingredient transparency,
+                            and personalized recommendations that align with your health goals.
+                        </p>
 
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link to={'/login'}>
-                            <button className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg">
-                                Try FitEats Now
-                            </button>
-                        </Link>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <Link to={'/login'}>
+                                <button className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg">
+                                    Try FitEats Now
+                                </button>
+                            </Link>
 
+                        </div>
                     </div>
-                </div>
+                }
+
 
                 {/* Floating Elements */}
                 <div className="absolute top-32 left-16 text-4xl opacity-20 animate-bounce">🥗</div>

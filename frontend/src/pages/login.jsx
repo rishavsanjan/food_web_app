@@ -106,13 +106,13 @@ export default function LogIn() {
           localStorage.setItem('token', response.data.msg);
           // Add a small delay before navigation to show the toast
           setTimeout(() => {
-            if (response.data.user.role === 'CUSTOMER') {
+            if (response.data.role === 'CUSTOMER') {
               navigate('/');
             }
-            if (response.data.user.role === 'RESTAURANT_OWNER') {
+            if (response.data.role === 'RESTAURANT_OWNER') {
               navigate('/');
             }
-            if (response.data.user.role === 'DELIVERY_AGENT') {
+            if (response.data.role === 'DELIVERY_AGENT') {
               navigate('/delivery-pofile');
             }
 
