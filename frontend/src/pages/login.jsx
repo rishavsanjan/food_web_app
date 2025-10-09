@@ -110,10 +110,8 @@ export default function LogIn() {
               navigate('/');
             }
             if (response.data.role === 'RESTAURANT_OWNER') {
-            if (response.data.role === 'RESTAURANT_OWNER') {
               navigate('/');
             }
-            if (response.data.role === 'DELIVERY_AGENT') {
             if (response.data.role === 'DELIVERY_AGENT') {
               navigate('/delivery-pofile');
             }
@@ -179,7 +177,7 @@ export default function LogIn() {
     setErrors({});
   };
 
-  
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white overflow-hidden relative">
