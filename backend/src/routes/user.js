@@ -160,6 +160,17 @@ userRoute.get('/rest/menus/:id',authMid,userAuthMid,async(req,res)=>{
                 review:{
                     where:{
                         user_id:{not:userId}
+                    },
+                    select:{
+                        rating:true,
+                        review_text:true,
+                        review_id:true,
+                        created_at:true,
+                        users:{
+                            select:{
+                                name:true
+                            }
+                        }
                     }
                 }
             },
@@ -274,6 +285,9 @@ userRoute.post('/review',authMid,userAuthMid,async(req,res)=>{
         res.status(500).json({ success: false, msg: 'Server error' });
     }
 })
+
+
+userRoute.get('/:restid/reviews',authMid,userAuthMid,async(req,res)=>{})
 
 
 userRoute.get('/getReview/:id',authMid,userAuthMid,async(req,res)=>{
