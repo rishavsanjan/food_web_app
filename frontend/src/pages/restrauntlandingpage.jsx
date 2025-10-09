@@ -582,11 +582,11 @@ export default function RestaurantLanding() {
             <div className="grid md:grid-cols-4 gap-8">
               <div>
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center">
-                    <ChefHat className="w-6 h-6 text-white" />
-                  </div>
+                  <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-xl flex items-center justify-center">
+                            <span className="text-xl font-bold">🍽️</span>
+                        </div>
                   <div>
-                    <h3 className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">Bella Vista</h3>
+                    <h3 className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">FitEats</h3>
                     <p className="text-xs text-gray-400">Fine Dining Experience</p>
                   </div>
                 </div>
@@ -625,7 +625,7 @@ export default function RestaurantLanding() {
             </div>
 
             <div className="border-t border-white/10 mt-12 pt-8 text-center text-gray-400">
-              <p>&copy; 2025 Bella Vista Restaurant. All rights reserved. Crafted with <Heart className="w-4 h-4 inline text-red-500" /> for food lovers.</p>
+              <p>&copy; 2025 FitEats Restaurant. All rights reserved. Crafted with <Heart className="w-4 h-4 inline text-red-500" /> for food lovers.</p>
             </div>
           </div>
         </footer>
