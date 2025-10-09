@@ -21,7 +21,10 @@ const Header = () => {
                         <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-xl flex items-center justify-center">
                             <span className="text-xl font-bold">🍽️</span>
                         </div>
-                        <span className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">FitEats</span>
+                        <Link to={'/'}> 
+                            <span className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">FitEats</span>
+
+                        </Link>
                     </div>
 
                     <div className="hidden md:flex  space-x-8 items-center ">
