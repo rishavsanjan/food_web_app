@@ -80,8 +80,15 @@ userRoute.post('/login', async (req, res) => {
         if (!match) {
             return res.status(401).json({ msg: "mismatch password", success: false })
         }
+        const userinfo={
+            name: user.name,
+            email: user.email,
+            phone_number: user.phone_number,
+            address: user.address,
+            city:user.city
+        }
         const token = jwt.sign({ user_id: user.user_id, role: user.role, iat: Math.floor(Date.now() / 1000) }, process.env.JWT_SECRET, { expiresIn: "7d" })
-        return res.json({ msg: token, success: true,role:user.role})
+        return res.json({ msg: token,user:userinfo, success: true,role:user.role})
     } catch (error) {
         console.log(error)
         return res.status(403).json({ msg: "there is a server problem", success: false })
