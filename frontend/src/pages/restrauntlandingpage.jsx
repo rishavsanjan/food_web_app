@@ -609,7 +609,7 @@ export default function RestaurantLanding() {
                   <div>123 Fine Dining Street</div>
                   <div>Bhopal, MP 462001</div>
                   <div>+91 98765 43210</div>
-                  <div>info@bellavista.com</div>
+                  <div>info@fiteats.com</div>
                 </div>
               </div>
 
