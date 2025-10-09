@@ -155,7 +155,7 @@ export default function UserProfile() {
                                     type="email"
                                     value={userData.email}
                                     onChange={(e) => setUserData({ ...userData, email: e.target.value })}
-                                    className="bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg px-3 py-2 text-white flex-1 placeholder-purple-200"
+                                    className="bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg px-3 py-2 text-black flex-1 placeholder-purple-200"
                                 />
                             ) : (
                                 <span className="text-purple-200">{userData.email}</span>
@@ -169,7 +169,7 @@ export default function UserProfile() {
                                     type="tel"
                                     value={userData.phone_number}
                                     onChange={(e) => setUserData({ ...userData, phone_number: e.target.value })}
-                                    className="bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg px-3 py-2 text-white flex-1 placeholder-purple-200"
+                                    className="bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg px-3 py-2 text-black flex-1 placeholder-purple-200"
                                 />
                             ) : (
                                 <span className="text-purple-200">{userData.phone_number}</span>
@@ -183,7 +183,7 @@ export default function UserProfile() {
                                     type="text"
                                     value={userData.address}
                                     onChange={(e) => setUserData({ ...userData, address: e.target.value })}
-                                    className="bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg px-3 py-2 text-white flex-1 placeholder-purple-200"
+                                    className="bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg px-3 py-2 text-black flex-1 placeholder-purple-200"
                                 />
                             ) : (
                                 <span className="text-purple-200">{userData.address}</span>
