@@ -9,7 +9,6 @@ import config from '../config/config';
 import Header from './header';
 
 export default function FoodDeliveryLanding() {
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [scrollY, setScrollY] = useState(0);
     const [isLogin, setIsLogin] = useState(false);
     const [user, setUser] = useState([]);

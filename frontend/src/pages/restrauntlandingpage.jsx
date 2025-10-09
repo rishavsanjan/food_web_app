@@ -147,7 +147,9 @@ export default function RestaurantLanding() {
     )
 
 
-    toast('Added to cart!');
+    toast('Added to cart!', {
+      position:'top-left'
+    });
 
   };
 
@@ -190,7 +192,9 @@ export default function RestaurantLanding() {
       })
     )
 
-    toast.success('Dish removed successfully!')
+    toast.success('Dish removed successfully!', {
+      position:'top-left'
+    })
 
   }
 

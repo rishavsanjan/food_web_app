@@ -7,6 +7,7 @@ import axios from 'axios';
 import { useUser } from '../contexts/userContext';
 
 const Header = () => {
+
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { cartItems } = useCart();
     const { user } = useUser();

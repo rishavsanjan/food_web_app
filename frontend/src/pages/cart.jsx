@@ -7,6 +7,7 @@ import { io } from 'socket.io-client';
 import OrderSuccess from './order_confirm_model';
 import config from '../config/config';
 
+import "../assets/loader/loader.css"
 
 
 export default function Cart() {
@@ -15,7 +16,7 @@ export default function Cart() {
   const navigate = useNavigate();
   const socket = useMemo(() => io(`${config.apiUrl}`), []);
   const [user, setUser] = useState([]);
-  const [orderSucessModel, setOrderSuccessModel] = useState(false);
+  const [orderSuccessModel, setOrderSuccessModel] = useState(false);
 
 
   const getProfile = async () => {
@@ -52,6 +53,7 @@ export default function Cart() {
   const [appliedPromo, setAppliedPromo] = useState(null);
   const [deliveryType, setDeliveryType] = useState('delivery'); // delivery or pickup
   const [specialInstructions, setSpecialInstructions] = useState('');
+  const [laoding, setLoading] = useState(false);
 
   const promoCodes = {
     'WELCOME10': { discount: 10, type: 'percentage', description: 'Welcome offer - 10% off' },
@@ -186,6 +188,7 @@ export default function Cart() {
   }
 
   const placeOrder = async () => {
+    setLoading(true)
     const items = cart.map((dish) => {
       return {
         menu_id: dish.menu_id,
@@ -206,7 +209,13 @@ export default function Cart() {
         payment_method: 'UPI'
       }
     });
+    console.log(response.data)
     localStorage.removeItem('cart');
+
+
+
+    setOrderSuccessModel(true);
+
     socket.emit('emit_order_to_riders', {
       orderDetails: response.data.orderDetails,
       user: user,
@@ -216,25 +225,22 @@ export default function Cart() {
         totalPrice: calculateTotal()
       }
     })
-    setOrderSuccessModel(true);
-    console.log(response.data)
+    setLoading(false);
+    navigate('/order-confirm', { state: { cart } });
   }
 
-  console.log(orderSucessModel)
+  console.log(orderSuccessModel)
 
 
   if (cart?.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
-        {
-          orderSucessModel && (
-            <OrderSuccess />
-          )}
+
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
-              <button onClick={() => { navigate(-1) }} className="p-2 bg-white/10 backdrop-blur-lg rounded-full border border-white/20 hover:bg-white/20 transition-colors">
+              <button onClick={() => { navigate('/') }} className="p-2 bg-white/10 backdrop-blur-lg rounded-full border border-white/20 hover:bg-white/20 transition-colors">
                 <ArrowLeft className="w-6 h-6" />
               </button>
               <div className="flex items-center gap-3">
@@ -244,6 +250,7 @@ export default function Cart() {
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
                   FitEats
                 </h1>
+                
               </div>
             </div>
           </div>
@@ -289,7 +296,7 @@ export default function Cart() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <button className="p-2 bg-white/10 backdrop-blur-lg rounded-full border border-white/20 hover:bg-white/20 transition-colors">
+            <button onClick={() => { navigate(-1) }} className="p-2 bg-white/10 backdrop-blur-lg rounded-full border border-white/20 hover:bg-white/20 transition-colors">
               <ArrowLeft className="w-6 h-6" />
             </button>
             <div className="flex items-center gap-3">
@@ -636,10 +643,17 @@ export default function Cart() {
                 </div>
 
                 <button onClick={() => { placeOrder() }} className="w-full bg-gradient-to-r from-orange-500 to-pink-500 py-4 rounded-xl font-semibold text-lg hover:shadow-xl hover:shadow-orange-500/30 transition-all transform hover:scale-105">
-                  Proceed to Checkout
+
+                  {laoding ?
+                    <div className='flex flex-row items-center justify-center gap-2'>
+                      <p>Placing order</p>
+                      <div className='loader'></div>
+                    </div>
+
+                    : 'Proceed to Checkout'}
                 </button>
 
-                <button className="w-full border-2 border-white/30 py-3 rounded-xl font-semibold hover:bg-white/10 transition-colors">
+                <button  className="w-full border-2 border-white/30 py-3 rounded-xl font-semibold hover:bg-white/10 transition-colors">
                   Continue Shopping
                 </button>
               </div>
@@ -659,6 +673,7 @@ export default function Cart() {
           animation: float 3s ease-in-out infinite;
         }
       `}</style>
+
     </div>
   );
 }

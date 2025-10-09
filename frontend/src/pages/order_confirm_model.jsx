@@ -1,18 +1,22 @@
 import { useState } from 'react';
 import { CheckCircle, ArrowLeft, Clock, MapPin } from 'lucide-react';
-import config from '../config/config';
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function OrderSuccess() {
   const [showAnimation, setShowAnimation] = useState(true);
+  const location = useLocation();
+  const navigate = useNavigate()
+  const { cart } = location.state || {};
+  console.log(cart)
 
   const handleReturnToMenu = () => {
     console.log('Returning to menu...');
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-blue-700 flex items-center justify-center p-4">
+    <div className="h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-blue-700 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white/10 backdrop-blur-lg rounded-3xl p-8 text-center border border-white/20 shadow-2xl">
-        
+
         {/* Success Animation */}
         <div className="mb-6">
           <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-500 text-white transition-all duration-1000 ${showAnimation ? 'scale-110 animate-pulse' : ''}`}>
@@ -31,12 +35,12 @@ export default function OrderSuccess() {
         </div>
 
         {/* Order Details */}
-        <div className="bg-white/5 rounded-2xl p-4 mb-6 border border-white/10">
+        {/* <div className="bg-white/5 rounded-2xl p-4 mb-6 border border-white/10">
           <div className="flex items-center justify-between mb-3">
             <span className="text-white/70 text-sm">Order ID</span>
-            <span className="text-white font-mono text-sm">#FE2024-001</span>
+            <span className="text-white font-mono text-sm">#{}</span>
           </div>
-          
+
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center text-white/70 text-sm">
               <Clock size={16} className="mr-2" />
@@ -44,7 +48,7 @@ export default function OrderSuccess() {
             </div>
             <span className="text-white text-sm font-medium">45-60 mins</span>
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div className="flex items-center text-white/70 text-sm">
               <MapPin size={16} className="mr-2" />
@@ -52,7 +56,7 @@ export default function OrderSuccess() {
             </div>
             <span className="text-green-400 font-bold">₹1,825</span>
           </div>
-        </div>
+        </div> */}
 
         {/* Status */}
         <div className="bg-orange-500/20 rounded-xl p-3 mb-6 border border-orange-400/30">
@@ -65,24 +69,20 @@ export default function OrderSuccess() {
         {/* Action Buttons */}
         <div className="space-y-3">
           <button
-            onClick={handleReturnToMenu}
-            className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold py-3 px-6 rounded-2xl hover:from-orange-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
+            onClick={() => {navigate('/')}}
+            className="w-full bg-gradient-to-r from-orange-500 to-red-500 cursor-pointer text-white font-semibold py-3 px-6 rounded-2xl hover:from-orange-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
           >
             <ArrowLeft size={18} className="inline mr-2" />
-            Return to Menu
-          </button>
-          
-          <button className="w-full bg-white/10 text-white font-medium py-3 px-6 rounded-2xl hover:bg-white/20 transition-all duration-300 border border-white/20">
-            Track Order
+            Return to Home
           </button>
         </div>
 
         {/* Additional Info */}
-        <div className="mt-6 pt-4 border-t border-white/10">
+        {/* <div className="mt-6 pt-4 border-t border-white/10">
           <p className="text-white/60 text-xs">
             You will receive SMS updates about your order status
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );

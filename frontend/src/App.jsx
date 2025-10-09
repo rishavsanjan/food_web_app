@@ -12,6 +12,7 @@ import RestaurantAdminDashboard from './pages/restaurantadmin'
 import DeliveryDriverPanel from './pages/deliverydriverpanel'
 import { CartProvider } from './contexts/cartContext';
 import { UserProvider } from './contexts/userContext'
+import OrderSuccess from './pages/order_confirm_model'
 
 
 function AppContent() {
@@ -24,6 +25,8 @@ function AppContent() {
       <Route path='/profile' element={<UserProfile />} />
       <Route path='/restaurant-admin' element={<RestaurantAdminDashboard />} />
       <Route path='/delivery-pofile' element={<DeliveryDriverPanel />} />
+      <Route path='/order-confirm' element={<OrderSuccess />} />
+
     </Routes>
   )
 }

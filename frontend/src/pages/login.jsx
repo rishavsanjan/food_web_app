@@ -8,9 +8,12 @@ import Lottie from "lottie-react";
 import loadingAnimation from '../../assets/loading-animation/purple_loading.json'
 import config from '../config/config';
 import "../assets/loader/loader.css"
+import { useUser } from '../contexts/userContext';
 
 
 export default function LogIn() {
+  const { getProfile } = useUser();
+
   const [isLogin, setIsLogin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -104,7 +107,9 @@ export default function LogIn() {
         if (response.status === 200 && response.data.success) {
           toast.success('Logged in successfully!');
           localStorage.setItem('token', response.data.msg);
-          // Add a small delay before navigation to show the toast
+          
+          await getProfile();
+
           setTimeout(() => {
             if (response.data.role === 'CUSTOMER') {
               navigate('/');
