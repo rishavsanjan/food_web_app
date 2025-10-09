@@ -125,7 +125,7 @@ export default function FoodDeliveryLanding() {
                 <div className="absolute bottom-20 right-10 text-5xl animate-pulse delay-500">🌮</div>
 
                 <div className="relative z-10 text-center max-w-4xl mx-auto sm:py-0 py-32">
-                    <h1 className="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 bg-clip-text text-transparent animate-pulse">
+                    <h1 className="text-6xl md:text-8xl font-bold  bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 bg-clip-text text-transparent animate-pulse pb-4">
                         Craving Something?
                     </h1>
                     <p className="text-xl md:text-2xl mb-8 text-gray-200 max-w-2xl mx-auto leading-relaxed ">
@@ -282,7 +282,7 @@ export default function FoodDeliveryLanding() {
                                                     </div>
                                                     <Link to={`/restraunt/${restaurant.id_restaurant}`}>
                                                         <button
-                                                            className="hidden sm:flex justify-center w-full mt-4 bg-gradient-to-r from-orange-500 to-pink-500 py-3 rounded-full  font-semibold hover:shadow-lg transition-all opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0"
+                                                            className="hidden sm:flex cursor-pointer justify-center w-full mt-4 bg-gradient-to-r from-orange-500 to-pink-500 py-3 rounded-full  font-semibold hover:shadow-lg transition-all opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0"
                                                         >
                                                             Order Now
                                                         </button>
