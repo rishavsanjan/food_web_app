@@ -17,27 +17,27 @@ export default function RestaurantReviews({ reviews, setReviews, restaurantId, s
     const [loading, setLoading] = useState(false);
 
 
-    const getReviews = async () => {
-        const token = localStorage.getItem('token');
-        try {
-            const response = await axios({
-                url: `${config.apiUrl}/api/restaurant/${restaurantId}/reviews`, // Add proper URL
-                method: 'get',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                }
-            });
-            setReviews(response.data);
-        } catch (error) {
-            console.error('Error fetching reviews:', error);
-        }
-    }
+    // const getReviews = async () => {
+    //     const token = localStorage.getItem('token');
+    //     try {
+    //         const response = await axios({
+    //             url: `${config.apiUrl}/api/restaurant/${restaurantId}/reviews`, // Add proper URL
+    //             method: 'get',
+    //             headers: {
+    //                 'Authorization': 'Bearer ' + token
+    //             }
+    //         });
+    //         setReviews(response.data);
+    //     } catch (error) {
+    //         console.error('Error fetching reviews:', error);
+    //     }
+    // }
 
-    useEffect(() => {
-        if (restaurantId) {
-            getReviews();
-        }
-    }, [restaurantId])
+    // useEffect(() => {
+    //     if (restaurantId) {
+    //         getReviews();
+    //     }
+    // }, [restaurantId])
 
     const handleAddReview = async () => {
         if (newReview.rating === 0 || newReview.review.trim() === '') {

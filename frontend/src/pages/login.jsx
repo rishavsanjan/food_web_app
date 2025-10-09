@@ -110,8 +110,10 @@ export default function LogIn() {
               navigate('/');
             }
             if (response.data.role === 'RESTAURANT_OWNER') {
+            if (response.data.role === 'RESTAURANT_OWNER') {
               navigate('/');
             }
+            if (response.data.role === 'DELIVERY_AGENT') {
             if (response.data.role === 'DELIVERY_AGENT') {
               navigate('/delivery-pofile');
             }
