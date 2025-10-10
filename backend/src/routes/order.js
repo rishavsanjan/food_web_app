@@ -94,7 +94,7 @@ orderRoute.post("/create",authMid,userAuthMid,async(req,res)=>{
                     order_id: order.order_id,
                     method: data.payment_method,
                     price: totalprice,
-                    payment_status: data.payment_method === 'Cash_on_Delivery' ? 'cod_pending' : 'pending'
+                    payment_status: 'completed'
                 }
             });
             return { order, orderDetails };
