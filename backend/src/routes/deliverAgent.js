@@ -94,7 +94,7 @@ agentRoute.patch('/change-order-status', authMid, agentAuthMid, async (req, res)
                 }
             })
             // console.log(p.data)
-            // console.log(py)
+            console.log(py)
         }
         await prisma.$transaction(async (tx) => {
             const deliveryst = await tx.deliveries.update({
