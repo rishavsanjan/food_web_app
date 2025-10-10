@@ -6,6 +6,7 @@ import OrderNotificationOverlay from './order-emit';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Make sure this CSS is imported
 import config from '../config/config';
+import { Link } from 'react-router-dom';
 
 
 const DeliveryDriverPanel = () => {
@@ -259,10 +260,23 @@ const DeliveryDriverPanel = () => {
                 <p className="text-sm text-purple-200">Welcome back, {user.name}</p>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="bg-green-500 w-3 h-3 rounded-full animate-pulse"></div>
-              <span className="text-sm text-green-400 font-medium">Online</span>
+            <div className='flex flex-row gap-4 items-center'>
+              <div className="flex items-center space-x-2">
+                <div className="bg-green-500 w-3 h-3 rounded-full animate-pulse"></div>
+                <span className="text-sm text-green-400 font-medium">Online</span>
+              </div>
+              <Link to={'/login'}>
+                <button onClick={() => {
+                  localStorage.removeItem('token');
+
+                }} className="text-purple-200 hover:text-white transition-colors duration-200">
+                  <img className='w-6 h-6 ' src="https://img.icons8.com/?size=100&id=2445&format=png&color=FFFFFF" alt="" />
+                </button>
+              </Link>
             </div>
+
+
+
           </div>
         </div>
       </div>

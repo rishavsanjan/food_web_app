@@ -27,6 +27,7 @@ import DeleteConfirmationModal from '../models/deleteConfirmationRestAdmin';
 import loadingAnimation from '../../assets/loading-animation/pac_buffer.json';
 import Lottie from "lottie-react";
 import config from '../config/config';
+import { Link, useNavigation } from 'react-router-dom';
 
 
 export default function RestaurantAdminDashboard() {
@@ -325,6 +326,7 @@ export default function RestaurantAdminDashboard() {
     return date.toLocaleString("en-US", options);
   }
 
+
   const OrderCard = ({ order }) => (
     <>
       {
@@ -404,10 +406,15 @@ export default function RestaurantAdminDashboard() {
                   <p className="text-purple-200">{restaurant.restaurant_name}</p>
                 </div>
               </div>
+              <Link to={'/login'}>
+                <button onClick={() => {
+                  localStorage.removeItem('token');
 
-              <button className="text-purple-200 hover:text-white transition-colors duration-200">
-                <Settings className="h-6 w-6" />
-              </button>
+                }} className="text-purple-200 hover:text-white transition-colors duration-200">
+                  <img className='w-6 h-6 ' src="https://img.icons8.com/?size=100&id=2445&format=png&color=FFFFFF" alt="" />
+                </button>
+              </Link>
+
             </div>
           </div>
         </div>

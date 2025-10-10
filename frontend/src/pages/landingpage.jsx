@@ -129,7 +129,7 @@ export default function FoodDeliveryLanding() {
                         Craving Something?
                     </h1>
                     <p className="text-xl md:text-2xl mb-8 text-gray-200 max-w-2xl mx-auto leading-relaxed ">
-                        Get your favorite meals delivered hot and fresh in 30 minutes or less. From local gems to popular chains.
+                        Get your healthy meals delivered +hot and fresh in 30 minutes or less. From local gems to popular chains.
                     </p>
                     <div className="relative w-full max-w-4xl mx-auto" id="search-container">
                         {/* Search Section */}
