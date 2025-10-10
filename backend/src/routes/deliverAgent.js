@@ -84,7 +84,7 @@ agentRoute.patch('/change-order-status', authMid, agentAuthMid, async (req, res)
         if (p.data.status === 'picked_up') {
             updateData['picked_up_at'] = new Date();
         }
-        let py;
+        var py;
         if (p.data.status === 'delivered') {
             updateData['delivered_at'] = new Date();
             py=await prisma.payments.findFirst({
@@ -93,7 +93,8 @@ agentRoute.patch('/change-order-status', authMid, agentAuthMid, async (req, res)
                     payment_status:'completed'
                 }
             })
-            
+            // console.log(p.data)
+            // console.log(py)
         }
         await prisma.$transaction(async (tx) => {
             const deliveryst = await tx.deliveries.update({
