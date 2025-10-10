@@ -372,9 +372,9 @@ export default function RestaurantLanding() {
 
               {activeMenu?.map((dish) => (
                 <div data-aos="fade-up" key={dish?.menu_id} className="group bg-white/10 backdrop-blur-lg rounded-3xl z-40 p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/20">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="text-5xl group-hover:scale-110 transition-transform duration-300">
-                      <img src={`${dish?.image}`} alt="" />
+                  <div className="flex justify-center mb-4 items-center">
+                    <div className="text-5xl  transition-transform duration-300 items-center justify-center">
+                      <img className='w-fit h-64' src={`${dish?.image}`} alt="" />
                     </div>
 
                   </div>
