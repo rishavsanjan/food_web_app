@@ -525,7 +525,7 @@ export default function RestaurantAdminDashboard() {
                     <div key={dish?.menu_id} className="bg-transparent bg-opacity-5 rounded-2xl p-6 border border-white border-opacity-10">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start space-x-4 flex-1">
-                          <div className="text-4xl">{dish?.image}</div>
+                          <img className='w-32 h-32' src={`${dish?.image || 'https://img.icons8.com/?size=100&id=1G2BW7-tQJJJ&format=png&color=000000'}`} alt="" />
 
                           <div className="flex-1">
                             <div className="flex items-center space-x-3 mb-2">

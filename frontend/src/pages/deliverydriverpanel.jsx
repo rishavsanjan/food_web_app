@@ -386,10 +386,6 @@ const DeliveryDriverPanel = () => {
                       <Phone className="w-4 h-4" />
                       <span>Call</span>
                     </button>
-                    <button className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
-                      <MessageCircle className="w-4 h-4" />
-                      <span>Message</span>
-                    </button>
 
                     {order.orders.status === 'Preparing' && (
                       <button
