@@ -117,8 +117,11 @@ model restaurant {
   restaurant_address String   @db.VarChar(255)
   rating             Float?
   user_id            Int      @unique
-  city               String   @db.VarChar(100)
+  city               String?  @db.VarChar(100)
   image              String?  @db.VarChar(500)
+  lat                Decimal? @db.Decimal(12, 8)
+  long               Decimal? @db.Decimal(13, 8)
+  location           String?  @db.VarChar(500)
   menu               menu[]
   offers             offers[]
   orders             orders[]
@@ -160,7 +163,10 @@ model users {
   address        String          @db.VarChar(255)
   password       String          @db.VarChar(255)
   role           user_role       @default(CUSTOMER)
-  city           String          @db.VarChar(100)
+  city           String?         @db.VarChar(100)
+  lat            Decimal?        @db.Decimal(12, 8)
+  long           Decimal?        @db.Decimal(13, 8)
+  location       String?         @db.VarChar(500)
   delivery_agent delivery_agent?
   orders         orders[]
   payments       payments[]

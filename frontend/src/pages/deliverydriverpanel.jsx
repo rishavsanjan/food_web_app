@@ -7,6 +7,19 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Make sure this CSS is imported
 import config from '../config/config';
 import { Link } from 'react-router-dom';
+import { useRef } from 'react';
+
+
+function throttle(fn, wait) {
+  let last = 0;
+  return (...args) => {
+    const now = Date.now();
+    if (now - last >= wait) {
+      last = now;
+      fn(...args);
+    }
+  };
+}
 
 
 const DeliveryDriverPanel = () => {
@@ -24,6 +37,9 @@ const DeliveryDriverPanel = () => {
   const [incomingOrder, setIncomingOrder] = useState(null);
   const [history, setHistory] = useState([]);
   const [riderOrderModal, setRiderOrderModal] = useState(false);
+  const socketRef = useRef();
+  const watchIdRef = useRef(null);
+
 
   const showOrderAlreadyAccepted = useCallback(() => {
     toast.warn('Order already accepted', {
@@ -87,14 +103,51 @@ const DeliveryDriverPanel = () => {
     getDriverProfile();
   }, []);
 
+
+  useEffect(() => {
+    socketRef.current = socket;
+
+    const sendLocationThrottled = throttle((location) => {
+      socketRef.current.emit("location:update", { driverId: user.user_id, ...location });
+    }, 5000);
+
+    const onSuccess = (position) => {
+      const { latitude, longitude, accuracy, heading, speed } = position.coords;
+      const payload = {
+        latitude,
+        longitude,
+        accuracy,
+        heading,
+        speed,
+        timestamp: position.timestamp,
+      };
+      console.log(payload)
+      sendLocationThrottled(payload);
+    };
+
+    console.log('here')
+    const onError = (err) => {
+      console.error("geolocation errorr", err);
+    };
+
+    watchIdRef.current = navigator.geolocation.watchPosition(onSuccess,onError, {
+      enableHighAccuracy: true, 
+      maximumAge: 1000,         
+      timeout: 10000,           
+    });
+
+  }, [user])
+
   useEffect(() => {
     if (user?.role === "DELIVERY_AGENT") {
       socket.emit('delivery_partner_online', {
         driverId: user.user_id,
-        driverCity: user.city
+        driverCity: user.city,
+
       });
     }
   }, [user, socket]);
+
 
   useEffect(() => {
     const handleNewOrderRequest = ({ orderDetails, order, user, restaurant }) => {

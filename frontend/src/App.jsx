@@ -13,6 +13,7 @@ import DeliveryDriverPanel from './pages/deliverydriverpanel'
 import { CartProvider } from './contexts/cartContext';
 import { UserProvider } from './contexts/userContext'
 import OrderSuccess from './pages/order_confirm_model'
+import SignUp from './pages/signup'
 
 
 function AppContent() {
@@ -21,6 +22,7 @@ function AppContent() {
       <Route path="/" element={<FoodDeliveryLanding />} />
       <Route path="/restraunt/:id" element={<RestaurantLanding />} />
       <Route path='/login' element={<LogIn />} />
+      <Route path='/signup' element={<SignUp />} />
       <Route path='/cart' element={<Cart />} />
       <Route path='/profile' element={<UserProfile />} />
       <Route path='/restaurant-admin' element={<RestaurantAdminDashboard />} />

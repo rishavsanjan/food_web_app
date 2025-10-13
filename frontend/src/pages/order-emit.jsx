@@ -25,6 +25,8 @@ const OrderNotificationOverlay = ({ driver, orderDetails, order, user, restauran
         priority: 'urgent'
     };
 
+    console.log(orderDetails)
+
     // Countdown timer effect
     useEffect(() => {
         if (showOrderNotification && acceptTimer > 0) {
@@ -37,6 +39,8 @@ const OrderNotificationOverlay = ({ driver, orderDetails, order, user, restauran
             setAcceptTimer(15);
         }
     }, [acceptTimer, showOrderNotification]);
+
+    console.log(user)
 
     const acceptOrder = async () => {
         console.log('Order accepted:', pendingOrder.id);
@@ -57,7 +61,7 @@ const OrderNotificationOverlay = ({ driver, orderDetails, order, user, restauran
         });
         console.log(response.data)
         if (response.status === 200) {
-            socket.emit('order_accepted', { driverAssignedId: driver.user_id });
+            socket.emit('order_accepted', { driverAssignedId: driver.user_id , orderId:orderDetails[0].order_id, userId:user.user_id});
         }
         setTimeout(() => {
             onClose();

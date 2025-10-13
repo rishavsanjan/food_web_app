@@ -7,16 +7,22 @@ import Lottie from "lottie-react";
 import loadingAnimation from '../../assets/loading-animation/pac_buffer.json';
 import config from '../config/config';
 import Header from './header';
+import { io } from 'socket.io-client';
 
 export default function FoodDeliveryLanding() {
-    const [scrollY, setScrollY] = useState(0);
+    const socket = useMemo(() => io(`${config.apiUrl}`), []);
+
     const [isLogin, setIsLogin] = useState(false);
-    const [user, setUser] = useState([]);
+    const [user, setUser] = useState({});
     const [restaurantss, setRestaurants] = useState();
     const [restaurantLoading, setRestaurantLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResult, setSearchResult] = useState([]);
     const [searchResultModal, setSearchResultModal] = useState(false);
+    const [userLocation, setUserLocation] = useState({
+        lat: 23,
+        long: 78
+    })
 
     const getProfile = async () => {
         const token = localStorage.getItem('token');
@@ -27,29 +33,72 @@ export default function FoodDeliveryLanding() {
                 'Authorization': 'Bearer ' + token
             }
         })
-        console.log(response.data)
+        console.log(response.data);
 
         console.log(response.data.user);
         setUser(response.data.user);
-        getRestraunts();
+        //getRestraunts();
         if (response) {
             setIsLogin(true);
         }
     }
 
-    const getRestraunts = async () => {
+    useEffect(() => {
+        if (user) {
+            socket.emit("user:join", { userId: user.user_id });
+        }
+    }, [user])
+
+
+    const fetchRestaurants = async (lat, long) => {
+        console.log(lat, long)
         const token = localStorage.getItem('token');
         const response = await axios({
-            url: `${config.apiUrl}/api/users/getRest`,
+            url: `${config.apiUrl}/api/users/nearby/${lat}/${long}`,
             method: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + token
-            }
+            },
+
         })
-        setRestaurants(response.data.data);
-        setRestaurantLoading(false);
-        console.log(response.data.data);
-    };
+        setRestaurants(response.data.restaurants)
+        setRestaurantLoading(false)
+        console.log(response.data)
+    }
+
+    console.log(restaurantss)
+
+    useEffect(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const long = position.coords.longitude;
+                    console.log("User location:", lat, long);
+                    setUserLocation({ lat, long });
+                    fetchRestaurants(lat, long);
+                },
+                (err) => console.error("Geolocation error:", err),
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        } else {
+            alert("Geolocation not supported by your browser");
+        }
+    }, []);
+
+    // const getRestraunts = async () => {
+    //     const token = localStorage.getItem('token');
+    //     const response = await axios({
+    //         url: `${config.apiUrl}/api/users/getRest`,
+    //         method: 'GET',
+    //         headers: {
+    //             'Authorization': 'Bearer ' + token
+    //         }
+    //     })
+    //     setRestaurants(response.data.data);
+    //     setRestaurantLoading(false);
+    //     console.log(response.data.data);
+    // };
 
     useEffect(() => {
         const delayDebounce = setTimeout(async () => {
@@ -78,11 +127,7 @@ export default function FoodDeliveryLanding() {
         getProfile();
     }, [])
 
-    useEffect(() => {
-        const handleScroll = () => setScrollY(window.scrollY);
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+
 
     // Handle click outside to close search modal
     useEffect(() => {
@@ -237,7 +282,7 @@ export default function FoodDeliveryLanding() {
                 </div>
             </section>
 
-            
+
 
             {/* Featured Restaurants */}
             <section id="restaurants" className={`${isLogin && 'py-20 px-4 bg-black/20'} `}>

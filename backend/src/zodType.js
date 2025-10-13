@@ -1,52 +1,55 @@
-const z=require('zod')
+const z = require('zod')
 
 const userRoles = ['CUSTOMER', 'RESTAURANT_OWNER', 'DELIVERY_AGENT', 'ADMIN']
-const paymentMethods = ["Credit_Card","Debit_Card","Netbanking","UPI","Cash_on_Delivery"] 
-const paymentStatus=['completed','failed','cod_collected','refunded']
-const vehicletype=['bike','car','cycle']
-const agentStatus=['online','offline','on_delivery']
-const orderStatus=['assigned','picked_up','on_the_way','delivered']
+const paymentMethods = ["Credit_Card", "Debit_Card", "Netbanking", "UPI", "Cash_on_Delivery"]
+const paymentStatus = ['completed', 'failed', 'cod_collected', 'refunded']
+const vehicletype = ['bike', 'car', 'cycle']
+const agentStatus = ['online', 'offline', 'on_delivery']
+const orderStatus = ['assigned', 'picked_up', 'on_the_way', 'delivered']
 
 const createUserSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
-  email: z.string().email("Invalid email format").optional(),
+  email: z.string().optional(),
   phone_number: z.string().regex(/^\+?[0-9]{10,15}$/, "Phone number must be 10-12 digits"),
   address: z.string().min(5, "Address must be at least 5 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  role:z.enum(userRoles).default('CUSTOMER'),
-  city:z.string().min(6).transform(val => val.toLowerCase()),
-  restaurant_name:z.string().optional(),
-  rating:z.number().optional(),
-  vehicle:z.enum(vehicletype).optional()
-}).refine((data)=>{
-  if(data.role==='RESTAURANT_OWNER'){
+  role: z.enum(userRoles).default('CUSTOMER'),
+  city: z.string().min(6).optional(),
+  restaurant_name: z.string().optional(),
+  rating: z.number().optional(),
+  vehicle: z.enum(vehicletype).optional(),
+  lat: z.float64(),
+  long: z.float64(),
+  location:z.string()
+}).refine((data) => {
+  if (data.role === 'RESTAURANT_OWNER') {
     return !!data.restaurant_name && !!data.city;
   }
-  if(data.role==='DELIVERY_AGENT'){
+  if (data.role === 'DELIVERY_AGENT') {
     return !!data.vehicle
   }
   return true
 });
 
-const orderStatusSchema=z.object({
-  order_id:z.number(),
-  status:z.enum(orderStatus)
+const orderStatusSchema = z.object({
+  order_id: z.number(),
+  status: z.enum(orderStatus)
 })
 
-const loginUserSchema=z.object({
-    phone_number:z.string().regex(/^\+?[0-9]{10,15}$/, "Phone number must be 10-12 digits"),
-    email: z.string().email("Invalid email format").optional(),
-    password:z.string(6,"Password must be at least 6 characters")
+const loginUserSchema = z.object({
+  phone_number: z.string().regex(/^\+?[0-9]{10,15}$/, "Phone number must be 10-12 digits"),
+  email: z.string().email("Invalid email format").optional(),
+  password: z.string(6, "Password must be at least 6 characters")
 })
 
-const orderSchema=z.object({
-  id_restaurant:z.number().int(),
-  items:z.array(z.object({
-    menu_id:z.number().int(),
-    quantity:z.number().int().positive()
+const orderSchema = z.object({
+  id_restaurant: z.number().int(),
+  items: z.array(z.object({
+    menu_id: z.number().int(),
+    quantity: z.number().int().positive()
   })).nonempty("Order must contain at least one item"),
-  instruction:z.string().optional(),
-  payment_method:z.enum(paymentMethods).default("Cash_on_Delivery")
+  instruction: z.string().optional(),
+  payment_method: z.enum(paymentMethods).default("Cash_on_Delivery")
 })
 
 
@@ -54,7 +57,7 @@ const createMenuSchema = z.object({
   menu_name: z.string().min(3),
   description: z.string().optional(),
   availability: z.boolean().optional(),
-  category: z.enum(["veg", "non_veg"]), 
+  category: z.enum(["veg", "non_veg"]),
   price: z.number().int().min(0),
   calories: z.number().min(0),
   protein: z.number().min(0),
@@ -62,15 +65,15 @@ const createMenuSchema = z.object({
   carbohydrates: z.number().min(0),
   fiber: z.number().min(0),
   cholesterol: z.number().min(0),
-  image:z.string().optional()
+  image: z.string().optional()
 });
 
 const updateMenuSchema = z.object({
-  menu_id:z.number(),
+  menu_id: z.number(),
   menu_name: z.string().min(3).optional(),
   description: z.string().optional(),
   availability: z.boolean().optional(),
-  category: z.enum(["veg", "non_veg"]).optional(), 
+  category: z.enum(["veg", "non_veg"]).optional(),
   price: z.number().int().min(0).optional(),
   calories: z.number().min(0).optional(),
   protein: z.number().min(0).optional(),
@@ -78,33 +81,33 @@ const updateMenuSchema = z.object({
   carbohydrates: z.number().min(0).optional(),
   fiber: z.number().min(0).optional(),
   cholesterol: z.number().min(0).optional(),
-  image:z.string().optional()
+  image: z.string().optional()
 });
 
 
-const updateAddress=z.object({
-  address:z.string().min(6),
-  city:z.string().min(6).transform(val => val.toLowerCase())
+const updateAddress = z.object({
+  address: z.string().min(6),
+  city: z.string().min(6).transform(val => val.toLowerCase())
 })
 
-const updateTransaction=z.object({
-  transaction_id:z.string().min(4).optional(),
-  payment_status:z.enum(paymentStatus).default('completed')
-}).refine((data)=>{
-  if(data.payment_status!='cod_collected'){
+const updateTransaction = z.object({
+  transaction_id: z.string().min(4).optional(),
+  payment_status: z.enum(paymentStatus).default('completed')
+}).refine((data) => {
+  if (data.payment_status != 'cod_collected') {
     return !!data.transaction_id
   }
   return true
 })
 
-const reviewSchema=z.object({
-  id_restaurant:z.number().int(),
-  rating:z.number().min(1).max(5),
-  review:z.string().optional()
+const reviewSchema = z.object({
+  id_restaurant: z.number().int(),
+  rating: z.number().min(1).max(5),
+  review: z.string().optional()
 })
 
-const agentStatusSchema=z.object({
-  status:z.enum(agentStatus)
+const agentStatusSchema = z.object({
+  status: z.enum(agentStatus)
 })
 
-module.exports={createUserSchema,loginUserSchema,orderSchema,createMenuSchema,updateMenuSchema,updateAddress,updateTransaction,reviewSchema,agentStatusSchema,orderStatusSchema}
+module.exports = { createUserSchema, loginUserSchema, orderSchema, createMenuSchema, updateMenuSchema, updateAddress, updateTransaction, reviewSchema, agentStatusSchema, orderStatusSchema }

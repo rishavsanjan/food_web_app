@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Star, Clock, MapPin, Phone, Heart, ChefHat, Utensils, Wine, Coffee, Menu, X, ArrowRight, Award, Activity, Zap, Feather, Shield, Leaf, } from 'lucide-react';
+import { Star, Clock, MapPin, Phone, Heart, ChefHat, Utensils, Wine, Coffee, Menu, X, ArrowRight, Award, Activity, Zap, Feather, Shield, Leaf, LocateIcon, PinIcon, Map, } from 'lucide-react';
 import axios from 'axios';
 import { Link, useParams } from 'react-router-dom';
 import CartClearModel from '../models/replaceRestaurantInCart'
@@ -12,23 +12,23 @@ import { useCart } from '../contexts/cartContext';
 import Header from './header';
 import AOS from "aos";
 import "aos/dist/aos.css";
+import { useUser } from '../contexts/userContext';
+
 
 export default function RestaurantLanding() {
   const { cartItems, setCartItems } = useCart();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState('appetizers');
-  const [scrollY, setScrollY] = useState(0);
   const [menu, setMenu] = useState([]);
   const [restaurant, setRestaurant] = useState({});
   const { id } = useParams();
-  const [vegMenu, setVegMenu] = useState([]);
-  const [nonVegMenu, setNonVegMenu] = useState([]);
   const [cartClearModel, setCartClearModel] = useState(false);
   const [loading, setLoading] = useState(true);
   const [fullMenu, setFullMenu] = useState([]);
   const [activeMenu, setActiveMenu] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [selfReview, setSelfReview] = useState();
+  const { user } = useUser();
+
 
   useEffect(() => {
     AOS.init({
@@ -75,12 +75,29 @@ export default function RestaurantLanding() {
 
   }
 
+  function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radius of the Earth in km
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c; // Distance in km
+    return distance;
+  }
+
   useEffect(() => {
     getMenu();
-  }, []);
+
+  }, [user]);
 
 
 
+  function deg2rad(deg) {
+    return deg * (Math.PI / 180);
+  }
 
 
   const addToCart = async (newItem) => {
@@ -148,7 +165,7 @@ export default function RestaurantLanding() {
 
 
     toast('Added to cart!', {
-      position:'top-left'
+      position: 'top-left'
     });
 
   };
@@ -193,13 +210,13 @@ export default function RestaurantLanding() {
     )
 
     toast.success('Dish removed successfully!', {
-      position:'top-left'
+      position: 'top-left'
     })
 
   }
 
   const reviewsFomatted = async () => {
-    
+
   }
 
 
@@ -313,6 +330,15 @@ export default function RestaurantLanding() {
             <h1 className="text-7xl md:text-9xl font-bold mb-6 bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 bg-clip-text text-transparent">
               {restaurant?.restaurant_name || 'N/A'}
             </h1>
+            <div className='flex flex-row justify-center mb-4'>
+              <MapPin color='#F8498C' />
+              <h1 className='text-[#F8498C]'>{restaurant.restaurant_address}</h1>
+            </div>
+            <div className='flex flex-row justify-center mb-4'>
+              <h1 className='text-[#F8498C]'>{getDistanceFromLatLonInKm(user.lat, user.long, restaurant.lat, restaurant.long).toFixed(1)
+              } kms away</h1>
+            </div>
+
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
               <button className="bg-gradient-to-r from-orange-500 to-pink-500 px-10 py-4 rounded-full font-semibold text-lg hover:shadow-xl hover:shadow-orange-500/30 transition-all transform hover:scale-105 flex items-center gap-3">
@@ -365,7 +391,7 @@ export default function RestaurantLanding() {
             {
               activeCategory === 'reviews' &&
               <>
-                <RestaurantReviews reviews={reviews} setReviews={setReviews} restaurantId={restaurant.id_restaurant} selfReview={selfReview} setSelfReview={setSelfReview}/>
+                <RestaurantReviews reviews={reviews} setReviews={setReviews} restaurantId={restaurant.id_restaurant} selfReview={selfReview} setSelfReview={setSelfReview} />
               </>
             }
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -583,8 +609,8 @@ export default function RestaurantLanding() {
               <div>
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-xl flex items-center justify-center">
-                            <span className="text-xl font-bold">🍽️</span>
-                        </div>
+                    <span className="text-xl font-bold">🍽️</span>
+                  </div>
                   <div>
                     <h3 className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">FitEats</h3>
                     <p className="text-xs text-gray-400">Fine Dining Experience</p>
