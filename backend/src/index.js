@@ -57,14 +57,30 @@ io.on("connection", (socket) => {
     socket.on('user:join', ({ userId }) => {
         activeUsers[userId] = { socketId: socket.id };
         console.log(`User ${userId} connected with socket ${socket.id}`);
-
+        for (const orderId in activeDeliveries) {
+            const delivery = activeDeliveries[orderId];
+            if (delivery.userSocketId && delivery.orderId && delivery.userSocketId !== socket.id) {
+                // If this delivery was for this user
+                if (userId && delivery.userSocketId !== socket.id) {
+                    delivery.userSocketId = socket.id;
+                    console.log(`Reattached user ${userId} to order ${orderId} after reconnect`);
+                }
+            }
+        }
     })
 
     socket.on('location:update', (data) => {
-        console.log(data);
         const lat = data.latitude;
         const long = data.longitude;
         drivers[data.driverId] = { lat, long, socketId: socket.id };
+        for (const orderId in activeDeliveries) {
+            const delivery = activeDeliveries[orderId];
+
+            if (delivery.driverAssignedId === data.driverId) {
+                delivery.driverSocketId = socket.id;
+                console.log(`Reattached driver ${data.driverId} to active order ${orderId}`);
+            }
+        }
     })
 
     socket.on("emit_order_to_riders", ({ orderDetails, order, user, restaurant }) => {
@@ -90,6 +106,7 @@ io.on("connection", (socket) => {
             });
         });
     })
+
     socket.on('order_accepted', ({ driverAssignedId, orderId, userId }) => {
         console.log('driver assigned : ', driverAssignedId);
         const userSocketId = activeUsers[userId]?.socketId
@@ -103,16 +120,40 @@ io.on("connection", (socket) => {
             }
         }
 
+
+
         for (const driverId in drivers) {
-            if (driverAssignedId !== Number(driverId)) {
+            if (Number(driverAssignedId) !== Number(driverId)) {
                 console.log("drivers ID :", driverId);
                 const driverSocketId = drivers[driverId];
                 io.to(driverSocketId).emit("order_already_accepted");
             }
         }
-    })
+    });
+
+    socket.on("drivers:location:update", ({ driverId, lat, long }) => {
+        if (drivers[driverId]) {
+            drivers[driverId].lat = lat;
+            drivers[driverId].long = long;
+        }
+        console.log(activeDeliveries)
+        for (const orderId in activeDeliveries) {
+            const delivery = activeDeliveries[orderId];
+            if (delivery.driverAssignedId === driverId) {
+                console.log('i m here')
+                io.to(delivery.userSocketId).emit("drivers:location:update", {
+                    orderId,
+                    lat,
+                    long,
+                });
+            }
+        }
+    });
+
+
 
     socket.on("disconnect", () => {
+        // Handle driver disconnect
         for (const driverId in drivers) {
             if (drivers[driverId].socketId === socket.id) {
                 console.log(`Driver ${driverId} went offline`);
@@ -120,17 +161,17 @@ io.on("connection", (socket) => {
                 break;
             }
         }
-    });
 
-    socket.on("disconnect", () => {
+        // Handle user disconnect
         for (const userId in activeUsers) {
             if (activeUsers[userId].socketId === socket.id) {
-                console.log('user went offline')
+                console.log(`User ${userId} went offline`);
                 delete activeUsers[userId];
                 break;
             }
         }
-    })
+    });
+
 })
 
 app.use('/api/users', userRoute)

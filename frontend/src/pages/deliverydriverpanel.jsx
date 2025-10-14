@@ -103,13 +103,34 @@ const DeliveryDriverPanel = () => {
     getDriverProfile();
   }, []);
 
+  setInterval(() => {
+    navigator.geolocation.watchPosition(
+      (position) => {
+        socket.emit("drivers:location:update", {
+          driverId: user.user_id,
+          lat: position.coords.latitude,
+          long: position.coords.longitude,
+        });
+      },
+      (err) => console.error(err),
+      { enableHighAccuracy: true, distanceFilter: 5 }
+    );
+  }, 3000);
+
+
+  useEffect(() => {
+
+  }, [user, socket])
+
+
+
 
   useEffect(() => {
     socketRef.current = socket;
 
     const sendLocationThrottled = throttle((location) => {
       socketRef.current.emit("location:update", { driverId: user.user_id, ...location });
-    }, 5000);
+    }, 3000);
 
     const onSuccess = (position) => {
       const { latitude, longitude, accuracy, heading, speed } = position.coords;
@@ -130,10 +151,10 @@ const DeliveryDriverPanel = () => {
       console.error("geolocation errorr", err);
     };
 
-    watchIdRef.current = navigator.geolocation.watchPosition(onSuccess,onError, {
-      enableHighAccuracy: true, 
-      maximumAge: 1000,         
-      timeout: 10000,           
+    watchIdRef.current = navigator.geolocation.watchPosition(onSuccess, onError, {
+      enableHighAccuracy: true,
+      maximumAge: 1000,
+      timeout: 10000,
     });
 
   }, [user])
@@ -147,6 +168,8 @@ const DeliveryDriverPanel = () => {
       });
     }
   }, [user, socket]);
+
+
 
 
   useEffect(() => {

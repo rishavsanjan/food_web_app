@@ -44,7 +44,7 @@ export default function FoodDeliveryLanding() {
     }
 
     useEffect(() => {
-        if (user) {
+        if (user.role === 'CUSTOMER') {
             socket.emit("user:join", { userId: user.user_id });
         }
     }, [user])
