@@ -4,6 +4,13 @@ const { createUserSchema, loginUserSchema, updateAddress, updateTransaction, rev
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { authMid, userAuthMid } = require('../middlewares/auth');
+const twilio = require('twilio');
+const dotenv = require('dotenv');
+const restRoute = require('./rest');
+
+
+const client = new twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
 
 
 const userRoute = express.Router();
@@ -13,6 +20,38 @@ userRoute.get('/', (req, res) => {
     return res.json({ msg: "Hello from user" })
 })
 
+userRoute.post('/signup-otp', async (req, res) => {
+    const { phone } = await req.body;
+    const user = await prisma.users.findUnique({
+        where: { phone_number: phone }
+    })
+
+    if (user) {
+        return res.status(200).json({ error: "Number already registered!", success: false })
+    }
+
+    let digits = "0123456789";
+    let OTP = "";
+
+    for (let i = 0; i < 6; i++) {
+        OTP += digits[Math.floor(Math.random() * 10)];
+    }
+    try {
+        const message = await client.messages.create({
+            body: `Your verification code is ${OTP}`,
+            messagingServiceSid: process.env.messagingServiceSid,
+            to: `+91${phone}`
+        });
+
+        console.log("OTP sent successfully:", message.sid, ` ${OTP}`);
+        return res.status(200).json({ msg: 'success', otp: OTP });
+    } catch (error) {
+        console.log("Error sending OTP:", error);
+    }
+});
+
+
+
 userRoute.post('/signup', async (req, res) => {
     const p = createUserSchema.safeParse(req.body);
     if (!p.success) {
@@ -20,7 +59,7 @@ userRoute.post('/signup', async (req, res) => {
     }
     const hpass = await bcrypt.hash(p.data.password, 10)
     try {
-        const result=await prisma.$transaction(async(tx)=>{
+        const result = await prisma.$transaction(async (tx) => {
             const user = await tx.users.create({
                 data: {
                     name: p.data.name,
@@ -29,7 +68,10 @@ userRoute.post('/signup', async (req, res) => {
                     address: p.data.address,
                     password: hpass,
                     role: p.data.role,
-                    city:p.data.city
+                    city: p.data.city,
+                    lat: p.data.lat,
+                    long: p.data.long,
+                    location: p.data.location
                 }
             })
             if (p.data.role == 'RESTAURANT_OWNER') {
@@ -44,26 +86,80 @@ userRoute.post('/signup', async (req, res) => {
                 })
                 return { success: true, restaurantCreated: true }
             }
-            if(p.data.role==='DELIVERY_AGENT'){
+            if (p.data.role === 'DELIVERY_AGENT') {
                 await tx.delivery_agent.create({
-                    data:{
-                        agent_name:p.data.name,
-                        vehicle:p.data.vehicle,
-                        rating:p.data.rating,
-                        user_id:user.user_id
+                    data: {
+                        agent_name: p.data.name,
+                        vehicle: p.data.vehicle,
+                        rating: p.data.rating,
+                        user_id: user.user_id
                     }
                 })
             }
             return { success: true, restaurantCreated: false }
+        }, {
+            timeout: 2000
         })
         return res.json({ success: true, msg: "user created" })
     } catch (error) {
-        // console.log(error)
+        console.log(error)
         return res.status(403).json({ msg: "Either user alredy exist or there is a server problem", success: false })
     }
 })
 
-userRoute.post('/login', async (req, res) => {
+
+userRoute.post('/confirm-login-otp', async (req, res) => {
+
+    try {
+        const { phonenumber } = req.body;
+        const user = await prisma.users.findUnique({
+            where: { phone_number: phonenumber }
+        })
+
+        if (!user) {
+            return res.status(200).json({ error: "Wrong phone number!", success: false })
+        }
+
+        const token = jwt.sign({ user_id: user.user_id, role: user.role, iat: Math.floor(Date.now() / 1000) }, process.env.JWT_SECRET, { expiresIn: "7d" })
+        return res.status(200).json({ msg: token, success: true, role: user.role })
+    } catch (error) {
+        console.log(error)
+        return res.status(403).json({ error: "Server Problem!", success: false })
+    }
+});
+
+userRoute.post('/login-otp', async (req, res) => {
+
+    const { phone } = await req.body;
+    const user = await prisma.users.findUnique({
+        where: { phone_number: phone }
+    })
+
+    if (!user) {
+        return res.status(200).json({ error: "Number not registered!", success: false })
+    }
+
+    let digits = "0123456789";
+    let OTP = "";
+
+    for (let i = 0; i < 6; i++) {
+        OTP += digits[Math.floor(Math.random() * 10)];
+    }
+    try {
+        const message = await client.messages.create({
+            body: `Your login OTP code is ${OTP}`,
+            messagingServiceSid: process.env.messagingServiceSid,
+            to: `+91${phone}`
+        });
+
+        console.log("OTP sent successfully:", message.sid, ` ${OTP}`);
+        return res.status(200).json({ msg: 'success', otp: OTP, success: true });
+    } catch (error) {
+        console.log("Error sending OTP:", error);
+    }
+});
+
+userRoute.post('/login-password', async (req, res) => {
     const p = loginUserSchema.safeParse(req.body)
     if (!p.success) {
         return res.status(400).json({ "msg": "Invalid format or less info", "success": false })
@@ -71,24 +167,24 @@ userRoute.post('/login', async (req, res) => {
 
     try {
         const user = await prisma.users.findUnique({
-            where: {phone_number: p.data.phone_number}
+            where: { phone_number: p.data.phone_number }
         })
         if (!user) {
-            return res.status(401).json({ msg: "user not found", success: false })
+            return res.status(201).json({ msg: "User not found", success: false })
         }
         const match = await bcrypt.compare(p.data.password, user.password)
         if (!match) {
-            return res.status(401).json({ msg: "mismatch password", success: false })
+            return res.status(200).json({ msg: "Wrong password!", success: false })
         }
-        const userinfo={
+        const userinfo = {
             name: user.name,
             email: user.email,
             phone_number: user.phone_number,
             address: user.address,
-            city:user.city
+            city: user.city
         }
         const token = jwt.sign({ user_id: user.user_id, role: user.role, iat: Math.floor(Date.now() / 1000) }, process.env.JWT_SECRET, { expiresIn: "7d" })
-        return res.json({ msg: token,user:userinfo, success: true,role:user.role})
+        return res.json({ msg: token, user: userinfo, success: true, role: user.role })
     } catch (error) {
         console.log(error)
         return res.status(403).json({ msg: "there is a server problem", success: false })
@@ -96,29 +192,76 @@ userRoute.post('/login', async (req, res) => {
 })
 
 userRoute.get('/profile', authMid, async (req, res) => {
+
     try {
         const currentUser = await prisma.users.findUnique({
             where: {
                 user_id: req.user.user_id
             },
-            select:{
-                user_id:true,
-                name:true,
-                address:true,
-                phone_number:true,
-                email:true,
-                city:true,
-                role:true
+            select: {
+                user_id: true,
+                name: true,
+                address: true,
+                phone_number: true,
+                email: true,
+                city: true,
+                role: true,
+                lat: true,
+                long: true
             }
         })
         return res.json({ success: true, user: currentUser })
     } catch (error) {
-        // console.log(error);
+        console.log(error);
         return res.status(403).json({ msg: "there is a server problem", success: false })
     }
 
 
-})
+});
+
+userRoute.get('/nearby/:lat/:long', async (req, res) => {
+    const { lat, long } = req.params; // user’s location from frontend
+    const radius = 3; // in kilometers
+
+    if (!lat || !long) {
+        return res.status(400).json({ success: false, msg: 'Missing latitude or longitude' });
+    }
+
+    try {
+        // Raw SQL query using Haversine formula
+        const restaurants = await prisma.$queryRawUnsafe(`
+              SELECT 
+                id_restaurant,
+                restaurant_name,
+                restaurant_address,
+                city,
+                rating,
+                lat,
+                long,
+                image,
+                location,
+                (6371 * acos(
+                  cos(radians(${lat})) * cos(radians(lat)) *
+                  cos(radians(long) - radians(${long})) +
+                  sin(radians(${lat})) * sin(radians(lat))
+                )) AS distance
+              FROM restaurant
+              WHERE lat IS NOT NULL AND long IS NOT NULL
+                AND (6371 * acos(
+                  cos(radians(${lat})) * cos(radians(lat)) *
+                  cos(radians(long) - radians(${long})) +
+                  sin(radians(${lat})) * sin(radians(lat))
+                )) <= 20
+              ORDER BY distance ASC;
+        `);
+
+
+        res.json({ success: true, count: restaurants.length, restaurants });
+    } catch (err) {
+        console.error('Error fetching nearby restaurants:', err);
+        res.status(500).json({ success: false, msg: 'Server error while fetching nearby restaurants' });
+    }
+});
 
 userRoute.get('/getRest', authMid, userAuthMid, async (req, res) => {
     try {
@@ -135,72 +278,77 @@ userRoute.get('/getRest', authMid, userAuthMid, async (req, res) => {
     }
 })
 
-userRoute.post('/updateAdd',authMid,userAuthMid,async(req,res)=>{
-    const p=updateAddress.safeParse(req.body)
+userRoute.post('/updateAdd', authMid, userAuthMid, async (req, res) => {
+    const p = updateAddress.safeParse(req.body)
     if (!p.success) {
         return res.status(400).json({ "msg": "Invalid format or less info", "success": false })
     }
     try {
         await prisma.users.update({
-            where:{user_id:req.user.user_id},
-            data:p.data
+            where: { user_id: req.user.user_id },
+            data: p.data
         })
-        return res.json({success:true,mag:"user address updated"})
+        return res.json({ success: true, mag: "user address updated" })
     } catch (error) {
         res.status(500).json({ msg: "Internal server error", success: false });
     }
 })
 
 
-userRoute.get('/rest/menus/:id',authMid,userAuthMid,async(req,res)=>{
+userRoute.get('/rest/menus/:id', authMid, userAuthMid, async (req, res) => {
     try {
         const userId = req.user.user_id;
-        const rest=await prisma.restaurant.findUnique({
-            where:{id_restaurant:parseInt(req.params.id)},
-            select:{
-                id_restaurant:true,
-                restaurant_name:true,
-                rating:true,
-                image:true,
-                restaurant_address:true,
-                menu:true,
-                review:{
-                    where:{
-                        user_id:{not:userId}
+        const rest = await prisma.restaurant.findUnique({
+            where: { id_restaurant: parseInt(req.params.id) },
+            select: {
+                id_restaurant: true,
+                restaurant_name: true,
+                rating: true,
+                image: true,
+                restaurant_address: true,
+                lat: true,
+                long: true,
+                menu: true,
+
+                review: {
+                    where: {
+                        user_id: { not: userId }
                     },
-                    select:{
-                        rating:true,
-                        review_text:true,
-                        review_id:true,
-                        created_at:true,
-                        users:{
-                            select:{
-                                name:true
+                    select: {
+                        rating: true,
+                        review_text: true,
+                        review_id: true,
+                        created_at: true,
+                        users: {
+                            select: {
+                                name: true
                             }
                         }
                     }
                 }
             },
-            
+
         })
-        const userReview=await prisma.review.findFirst({
-            where:{
-                user_id:req.user.user_id,
-                id_restaurant:rest.id_restaurant
+        const userReview = await prisma.review.findFirst({
+            where: {
+                user_id: req.user.user_id,
+                id_restaurant: rest.id_restaurant
             }
         })
         // console.log(userReview)
-        const restaurant={
-            id_restaurant:rest.id_restaurant,
-            restaurant_name:rest.restaurant_name,
-            rating:rest.rating,
-            image:rest.image,
-            restaurant_address:rest.restaurant_address,
+        const restaurant = {
+            id_restaurant: rest.id_restaurant,
+            restaurant_name: rest.restaurant_name,
+            rating: rest.rating,
+            image: rest.image,
+            lat:rest.lat,
+            long:rest.long,
+            restaurant_address: rest.restaurant_address,
         }
         // const vegMenus = rest.menu.filter(menu => menu.category === 'veg');
         // const nonVegMenus =rest.menu.filter(menu => menu.category === 'non_veg');
         // console.log(vegMenus)
-        return res.json({success:true,restaurant,menus:rest.menu,reviews:rest.review,userReview})
+        return res.json({ success: true, restaurant, menus: rest.menu, reviews: rest.review, userReview })
     } catch (error) {
         console.log(error)
         res.status(500).json({ msg: "Internal server error", success: false });
@@ -208,85 +356,83 @@ userRoute.get('/rest/menus/:id',authMid,userAuthMid,async(req,res)=>{
 })
 
 
-userRoute.patch('/update-transaction/:orderId', authMid,userAuthMid, async (req, res) => {
-  const { orderId } = req.params;
-  const p=updateTransaction.safeParse(req.body)
-  console.log(req.body)
-  if (!p.success) {
-      return res.status(400).json({ "msg": "Invalid format or less info", "success": false })
+userRoute.patch('/update-transaction/:orderId', authMid, userAuthMid, async (req, res) => {
+    const { orderId } = req.params;
+    const p = updateTransaction.safeParse(req.body)
+    if (!p.success) {
+        return res.status(400).json({ "msg": "Invalid format or less info", "success": false })
     }
     // const { transaction_id, payment_status } = req.body;
 
-  try {
-    // Update only the payment record for this order with status 'pending'
-    const payment = await prisma.payments.updateMany({
-      where: {
-        order_id: parseInt(orderId, 10),
-        payment_status: 'pending'||'cod_pending', // only update pending payments
-      },
-      data: {
-        transaction_id:p.data.transaction_id,
-        payment_status:p.data.payment_status,
-        payment_time: new Date(),
-      },
-    });
+    try {
+        // Update only the payment record for this order with status 'pending'
+        const payment = await prisma.payments.updateMany({
+            where: {
+                order_id: parseInt(orderId, 10),
+                payment_status: 'pending' || 'cod_pending', // only update pending payments
+            },
+            data: {
+                transaction_id: p.data.transaction_id,
+                payment_status: p.data.payment_status,
+                payment_time: new Date(),
+            },
+        });
 
-    if (payment.count === 0) {
-      return res.status(404).json({
-        success: false,
-        msg: 'No pending payment record found for this order',
-      });
+        if (payment.count === 0) {
+            return res.status(404).json({
+                success: false,
+                msg: 'No pending payment record found for this order',
+            });
+        }
+
+        return res.json({
+            success: true,
+            msg: 'Payment updated successfully',
+            updatedCount: payment.count,
+        });
+    } catch (error) {
+        console.error('Error updating payment:', error);
+        return res.status(500).json({ success: false, msg: 'Internal server error' });
     }
-
-    return res.json({
-      success: true,
-      msg: 'Payment updated successfully',
-      updatedCount: payment.count,
-    });
-  } catch (error) {
-    console.error('Error updating payment:', error);
-    return res.status(500).json({ success: false, msg: 'Internal server error' });
-  }
 });
 
-userRoute.post('/review',authMid,userAuthMid,async(req,res)=>{
-    const p=reviewSchema.safeParse(req.body)
-    console.log(p)
+userRoute.post('/review', authMid, userAuthMid, async (req, res) => {
+    const p = reviewSchema.safeParse(req.body)
     if (!p.success) {
         return res.status(400).json({ "msg": "Invalid format or less info", "success": false })
     }
     try {
-        const ratingup=await prisma.$transaction(async(tx)=>{
+        const ratingup = await prisma.$transaction(async (tx) => {
             await tx.review.upsert({
-                where:{
-                    user_id_id_restaurant:{
-                        user_id:req.user.user_id,
-                        id_restaurant:p.data.id_restaurant
+                where: {
+                    user_id_id_restaurant: {
+                        user_id: req.user.user_id,
+                        id_restaurant: p.data.id_restaurant
                     }
                 },
-                create:{
-                    user_id:req.user.user_id,
-                    id_restaurant:p.data.id_restaurant,
-                    rating:p.data.rating,
-                    review_text:p.data.review
+                create: {
+                    user_id: req.user.user_id,
+                    id_restaurant: p.data.id_restaurant,
+                    rating: p.data.rating,
+                    review_text: p.data.review
                 },
-                update:{
-                    rating:p.data.rating,
-                    review_text:p.data.review
+                update: {
+                    rating: p.data.rating,
+                    review_text: p.data.review
                 }
             })
-            const agg=await tx.review.aggregate({
-                where:{id_restaurant:p.data.id_restaurant},
-                _avg:{rating:true}
+            const agg = await tx.review.aggregate({
+                where: { id_restaurant: p.data.id_restaurant },
+                _avg: { rating: true }
             })
-            const avgRate=agg._avg.rating??0
+            const avgRate = agg._avg.rating ?? 0
             await tx.restaurant.update({
-                where:{id_restaurant:p.data.id_restaurant},
-                data:{rating:avgRate}
+                where: { id_restaurant: p.data.id_restaurant },
+                data: { rating: avgRate }
             })
             return avgRate
         })
-        res.json({success:true,msg:"Review submitted and restaurant rating updated",new_average_rating:ratingup})
+        res.json({ success: true, msg: "Review submitted and restaurant rating updated", new_average_rating: ratingup })
     } catch (error) {
         console.log(error)
         res.status(500).json({ success: false, msg: 'Server error' });
@@ -294,20 +440,20 @@ userRoute.post('/review',authMid,userAuthMid,async(req,res)=>{
 })
 
 
-userRoute.get('/:restid/reviews',authMid,userAuthMid,async(req,res)=>{})
+userRoute.get('/:restid/reviews', authMid, userAuthMid, async (req, res) => { })
 
 
-userRoute.get('/getReview/:id',authMid,userAuthMid,async(req,res)=>{
+userRoute.get('/getReview/:id', authMid, userAuthMid, async (req, res) => {
     try {
-        const review=await prisma.review.findUnique({
-            where:{
-                user_id_id_restaurant:{
-                    user_id:req.user.user_id,
-                    id_restaurant:parseInt(req.params.id)
+        const review = await prisma.review.findUnique({
+            where: {
+                user_id_id_restaurant: {
+                    user_id: req.user.user_id,
+                    id_restaurant: parseInt(req.params.id)
                 }
             }
         })
-        return res.json({success:true,review})
+        return res.json({ success: true, review })
     } catch (error) {
         console.log(error)
         res.status(500).json({ success: false, msg: 'Server error' });

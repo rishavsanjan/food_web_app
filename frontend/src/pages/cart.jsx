@@ -51,7 +51,7 @@ export default function Cart() {
 
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState(null);
-  const [deliveryType, setDeliveryType] = useState('delivery'); // delivery or pickup
+  const [deliveryType, setDeliveryType] = useState('delivery');
   const [specialInstructions, setSpecialInstructions] = useState('');
   const [laoding, setLoading] = useState(false);
 
@@ -159,6 +159,7 @@ export default function Cart() {
     toast.success('Dish removed successfully!')
 
   }
+  
   const addQuantity = (updateItem) => {
     setCart(prev => {
       const existingDishIndex = prev.findIndex(item => item.menu_id === updateItem.menu_id);

@@ -21,7 +21,7 @@ const Header = () => {
                         <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-xl flex items-center justify-center">
                             <span className="text-xl font-bold">🍽️</span>
                         </div>
-                        <Link to={'/'}> 
+                        <Link to={'/'}>
                             <span className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">FitEats</span>
 
                         </Link>
@@ -67,6 +67,17 @@ const Header = () => {
                         <a href="#home" className="block hover:text-orange-400 transition-colors">Home</a>
                         <a href="#restaurants" className="block hover:text-orange-400 transition-colors">Restaurants</a>
                         <a href="#features" className="block hover:text-orange-400 transition-colors">Features</a>
+                        {
+                            !isLogin ?
+                                <Link to={'/login'}>
+                                    <h1 className="hover:text-orange-400 transition-colors">Login / Sign Up</h1>
+                                </Link>
+                                :
+                                <Link to={`${user.role === 'RESTAURANT_OWNER' ? '/restaurant-admin' : `${user.role === 'CUSTOMER' ? '/profile' : '/delivery-pofile'}`} `}>
+                                    <h1 className="hover:text-orange-400 transition-colors"> {user.name}</h1>
+                                </Link>
+
+                        }
                         {
                             isLogin &&
                             <Link className='flex items-center justify-center mb-4' to={'/cart'}>
