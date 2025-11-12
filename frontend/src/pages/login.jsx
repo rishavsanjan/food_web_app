@@ -3,7 +3,7 @@ import { ChefHat, Eye, EyeOff, Lock, Phone, ArrowLeft, Check, AlertCircle, KeyRo
 import axios from 'axios';
 import config from '../config/config';
 import { useUser } from '../contexts/userContext';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 
 export default function Login() {
@@ -78,7 +78,6 @@ export default function Login() {
       otpInputs.current[index + 1]?.focus();
     }
 
-    // Auto-submit when all 6 digits are entered
     if (index === 5 && value) {
       const completeOtp = [...newOtp.slice(0, 5), value].join('');
       if (completeOtp.length === 6) {
@@ -605,9 +604,12 @@ export default function Login() {
           <div className="text-center mt-6">
             <p className="text-gray-400">
               Don't have an account?{' '}
-              <button className="text-orange-400 hover:text-orange-300 font-semibold transition-colors">
-                Sign Up
-              </button>
+              <Link to={'/signup'}>
+                <button className="text-orange-400 hover:text-orange-300 font-semibold transition-colors">
+                  Sign Up
+                </button>
+              </Link>
+
             </p>
           </div>
 

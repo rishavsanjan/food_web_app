@@ -351,7 +351,7 @@ export default function FoodDeliveryLanding() {
             {/* Footer */}
             <footer className="bg-black/40 backdrop-blur-lg py-12 px-4 border-t border-white/10">
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid md:grid-cols-4 gap-8">
+                    <div className="grid md:grid-cols-5 gap-8">
                         <div>
                             <div className="flex items-center gap-2 mb-4">
                                 <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-xl flex items-center justify-center">
@@ -389,6 +389,19 @@ export default function FoodDeliveryLanding() {
                                 <div>Facebook</div>
                                 <div>Twitter</div>
                                 <div>LinkedIn</div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 className="font-semibold mb-4">Work with us</h4>
+                            <div className="space-y-2 text-gray-400">
+                                <Link to={'/restaurant-signup'}>
+                                    <div>Add your restaurant</div>
+                                </Link>
+                                <Link to={'/delivery-signup'}>
+                                    <div>Works as a delivery partner</div>
+                                </Link>
+
+
                             </div>
                         </div>
                     </div>

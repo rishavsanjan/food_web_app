@@ -15,6 +15,8 @@ import { UserProvider } from './contexts/userContext'
 import OrderSuccess from './pages/order_confirm_model'
 import SignUp from './pages/signup'
 import OrderTracker from './pages/order_tracking'
+import RestaurantSignup from './pages/restaurant-signup'
+import DeliverySignup from './pages/delivery-signup'
 
 
 function AppContent() {
@@ -30,6 +32,9 @@ function AppContent() {
       <Route path='/delivery-pofile' element={<DeliveryDriverPanel />} />
       <Route path='/order-confirm' element={<OrderSuccess />} />
       <Route path='/order-details/:id' element={<OrderTracker />} />
+      <Route path='/restaurant-signup' element={<RestaurantSignup />} />
+      <Route path='/delivery-signup' element={<DeliverySignup />} />
+
 
     </Routes>
   )
