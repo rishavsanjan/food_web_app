@@ -297,6 +297,12 @@ const DeliveryDriverPanel = () => {
     return `${day} ${monthName} ${year}, ${hours}:${minutes}:${seconds}`;
   }
 
+  const openGoogleMaps = (lat, long) => {
+    console.log(lat, long)
+    const url = `https://www.google.com/maps/search/?api=1&query=${lat},${long}`;
+    window.open(url, "_blank");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900">
       <ToastContainer
@@ -429,7 +435,7 @@ const DeliveryDriverPanel = () => {
                   </div>
 
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div>
                       <p className="text-purple-200 text-sm font-medium mb-1">Restaurant</p>
                       <p className="text-white">{order?.orders.restaurant?.restaurant_name}</p>
@@ -437,6 +443,11 @@ const DeliveryDriverPanel = () => {
                     <div>
                       <p className="text-purple-200 text-sm font-medium mb-1">Customer</p>
                       <p className="text-white">{order?.orders?.users?.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-purple-200 text-sm font-medium mb-1">Phone Number</p>
+
+                      <p className="text-md  text-white">{order?.orders?.users?.phone_number}</p>
                     </div>
                   </div>
 
@@ -448,6 +459,7 @@ const DeliveryDriverPanel = () => {
                     <Clock1 className="w-4 h-4 text-purple-400" />
                     <p className="text-md  text-white">{convertToCustomDateTime(order.orders.order_time)}</p>
                   </div>
+
 
                   <div className="grid grid-cols-3 gap-4 mb-6">
                     <div className="bg-black/20 rounded-lg p-3 text-center">
@@ -468,14 +480,13 @@ const DeliveryDriverPanel = () => {
                   </div>
 
                   <div className="flex flex-wrap gap-3">
-                    <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                    <button
+                      onClick={() => { openGoogleMaps(order.orders.users.lat, order.orders.users.long) }}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
                       <Navigation className="w-4 h-4" />
                       <span>Navigate</span>
                     </button>
-                    <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
-                      <Phone className="w-4 h-4" />
-                      <span>Call</span>
-                    </button>
+
 
                     {order.orders.status === 'Preparing' && (
                       <button
